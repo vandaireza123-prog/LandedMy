@@ -16,6 +16,14 @@ Environment variables on the site:
 - `RESEND_API_KEY` and `ALERT_FROM` — optional; without them alerts are in-app only
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — optional overrides; the publishable key is compiled in by default
 
+## Public API
+
+`GET https://landedmy.netlify.app/api/calc` returns the schema; `POST` the same shape (the engine's Shipment plus optional `manual_rates`) and get `{ result }` with every rate's source. Beta: free, 60 req/min per IP (300 with an `x-api-key` header once keys are issued).
+
+## Multi-country
+
+`ratesFor(country)` serves the rate tables; only `MY` is registered. A new destination = a new `data/<country>.json`, a builder in `rates.ts`, a registry entry, and K1-equivalent fixtures before it goes live.
+
 ## Database (Supabase)
 
 Paste `supabase/setup.sql` into the SQL Editor and run it once (safe to re-run). It creates every table, RLS policies, the chapter-22 rate seed, profiles, notifications and the rate-version stamp.

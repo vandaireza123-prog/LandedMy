@@ -172,3 +172,15 @@ describe("general goods", () => {
     expect(m.duty).toBe(1120);
   });
 });
+
+describe("multi-country groundwork", () => {
+  it("MY tables are tagged and the registry serves them", async () => {
+    const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY"]);
+    expect(ratesFor("MY").country).toBe("MY");
+    expect(() => ratesFor("SG")).toThrow(/No rate tables/);
+  });
+  it("refuses a shipment whose destination does not match the tables", () => {
+    expect(() => computeShipment({ ...fixtures[0].shipment, dest_country: "SG" }, rates)).toThrow(/Rate tables are for MY/);
+  });
+});

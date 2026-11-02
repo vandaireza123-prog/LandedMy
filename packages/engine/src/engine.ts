@@ -55,6 +55,8 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
   const { date, fx_rate } = shipment;
 
   if (shipment.lines.length === 0) throw new Error("Shipment has no lines");
+  const dest = shipment.dest_country ?? "MY";
+  if (rates.country && rates.country !== dest) throw new Error(`Rate tables are for ${rates.country}, shipment is to ${dest}`);
   if (!(fx_rate > 0)) throw new Error("fx_rate must be > 0");
 
   // ---- 1. goods in RM, and allocation weights ----

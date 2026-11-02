@@ -53,7 +53,13 @@ export interface FtaRate extends RateRowBase {
   duty: Rate;
 }
 
+export type CountryCode = "MY" | "SG" | "TH" | "ID" | "VN" | "PH";
+
 export interface RateTables {
+  /** Destination country these tables price for. */
+  country?: CountryCode;
+  /** Consumption tax name for display: SST (MY), GST (SG), VAT (TH/ID/VN/PH). */
+  tax_name?: string;
   tariff_lines: TariffLine[];
   excise_lines: ExciseLine[];
   sst_rates: SstRate[];
@@ -88,6 +94,8 @@ export interface ShipmentLine {
 export interface Shipment {
   /** Date used to pick the effective rate rows. */
   date: ISODate;
+  /** Destination country; defaults to MY. Rate tables must match. */
+  dest_country?: CountryCode;
   origin_iso: string;
   /** Destination port code, informational only in Sprint 0. */
   dest_port: string;

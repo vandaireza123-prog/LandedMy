@@ -2,7 +2,7 @@
  * Builds effective-dated RateTables from data/chapter22.json.
  * Two excise versions: the 2022 Order and the +10% Budget 2026 rise from 1 Nov 2025.
  */
-import type { ExciseLine, FtaRate, ISODate, Rate, RateTables, SstRate, TariffLine } from "./types";
+import type { CountryCode, ExciseLine, FtaRate, ISODate, Rate, RateTables, SstRate, TariffLine } from "./types";
 import chapter22 from "../data/chapter22.json";
 import general from "../data/general.json";
 
@@ -88,7 +88,16 @@ export function buildRateTables(): RateTables {
     });
   }
 
-  return { tariff_lines, excise_lines, sst_rates, fta_rates };
+  return { country: "MY", tax_name: "SST", tariff_lines, excise_lines, sst_rates, fta_rates };
+}
+
+/** Rate tables by destination country. Only Malaysia is live; others are added as validated. */
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables };
+export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
+export function ratesFor(country: CountryCode = "MY"): RateTables {
+  const f = REGISTRY[country];
+  if (!f) throw new Error(`No rate tables for destination ${country} yet (supported: ${SUPPORTED_COUNTRIES.join(", ")})`);
+  return f();
 }
 
 export const GENERAL_GROUPS = general.groups as { key: string; label: string }[];
@@ -110,6 +119,7 @@ export function manualRates(hs_code: string, description: string, duty_pct: numb
     source_url: GENERAL_VERIFY_URL,
   };
   return {
+    country: "MY",
     tariff_lines: [{ ...base, unit: "u", duty: { type: "ad_valorem", value: duty_pct } }],
     excise_lines: [],
     sst_rates: [{ ...base, rate_pct: sst_pct }],
@@ -119,6 +129,8 @@ export function manualRates(hs_code: string, description: string, duty_pct: numb
 
 export function mergeRates(...tables: RateTables[]): RateTables {
   return {
+    country: tables[0]?.country,
+    tax_name: tables[0]?.tax_name,
     tariff_lines: tables.flatMap((t) => t.tariff_lines),
     excise_lines: tables.flatMap((t) => t.excise_lines),
     sst_rates: tables.flatMap((t) => t.sst_rates),

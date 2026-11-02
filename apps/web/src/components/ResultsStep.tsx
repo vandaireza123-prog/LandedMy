@@ -11,6 +11,7 @@ import type { User } from "@supabase/supabase-js";
 import { saveShipment } from "@/lib/supabase";
 import { snapshotOf } from "@/lib/state";
 import { QuoteSheet } from "./QuoteSheet";
+import { requirementsFor } from "@/lib/compliance";
 
 const rates = buildRateTables();
 
@@ -231,14 +232,20 @@ export function ResultsStep({
 
         <Card>
           <div className="mb-2 text-sm font-semibold">{t("Before you ship")}</div>
-          <div className="flex flex-col gap-2 text-[13px]">
-            {["Import licence for alcohol (RMCD)", "Customs tax stamps on every bottle", "Labels meet Food Regulations (from 1 Apr 2026)", "Sales tax registration if over threshold"].map((s) => (
-              <label key={s} className="flex items-center gap-2.5">
-                <input type="checkbox" className="h-[18px] w-[18px] accent-teal" />
-                <span>{t(s)}</span>
+          <div className="flex flex-col gap-2.5 text-[13px]">
+            {requirementsFor(state.products).map((r) => (
+              <label key={r.id} className="flex items-start gap-2.5">
+                <input type="checkbox" className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-teal" />
+                <span>
+                  {r.text}{" "}
+                  <a href={r.url} target="_blank" rel="noreferrer" className="whitespace-nowrap text-[11px] font-semibold text-teal">
+                    {r.authority} →
+                  </a>
+                </span>
               </label>
             ))}
           </div>
+          <p className="mt-2 text-[11px] text-muted">Shown for the product types in this shipment. Requirements, not costs; confirm with your customs agent.</p>
         </Card>
 
         <div className="px-0.5 text-[11px] leading-relaxed text-muted">
