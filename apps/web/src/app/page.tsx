@@ -152,7 +152,7 @@ export default function Landing() {
         <section id="guides" className="border-y border-line-2 bg-white">
           <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-16">
             <h2 className="font-display text-[32px] font-bold tracking-tight">Guides</h2>
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-3">
               <Link href="/guides/import-wine-malaysia-cost/" className="flex flex-col gap-2 rounded-2xl border border-line-2 bg-ground p-6 text-ink no-underline hover:border-teal">
                 <span className="text-xs font-semibold uppercase tracking-wider text-teal">Wine · 2026</span>
                 <span className="font-display text-xl font-semibold leading-tight">How much does it cost to import wine into Malaysia?</span>
@@ -162,6 +162,11 @@ export default function Landing() {
                 <span className="text-xs font-semibold uppercase tracking-wider text-teal">Beer · 2026</span>
                 <span className="font-display text-xl font-semibold leading-tight">Beer import duty and excise in Malaysia: a worked example</span>
                 <span className="text-sm text-muted">Why a €1 can costs about RM12 landed, and what changes with alcohol strength.</span>
+              </Link>
+              <Link href="/guides/spirits-import-duty-malaysia/" className="flex flex-col gap-2 rounded-2xl border border-line-2 bg-ground p-6 text-ink no-underline hover:border-teal">
+                <span className="text-xs font-semibold uppercase tracking-wider text-teal">Spirits · 2026</span>
+                <span className="font-display text-xl font-semibold leading-tight">Whisky, gin and spirits: what a bottle really costs</span>
+                <span className="text-sm text-muted">A €12 Scotch lands at about RM169, and a cheaper bottle barely changes that.</span>
               </Link>
             </div>
           </div>

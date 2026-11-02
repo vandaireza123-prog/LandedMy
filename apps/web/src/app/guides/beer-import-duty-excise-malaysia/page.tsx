@@ -42,7 +42,7 @@ export default function BeerGuide() {
       readTime="6 min read"
       title="Beer import duty and excise in Malaysia: a worked example"
       lede={`A €1 can of lager lands at ${rm2(b.landed)}. Half of it is tax, and most of that tax depends on alcohol strength rather than price. Here is the arithmetic Customs uses, line by line.`}
-      next={{ href: "/guides/import-wine-malaysia-cost/", label: "Also read: how much does it cost to import wine?" }}
+      next={{ href: "/guides/spirits-import-duty-malaysia/", label: "Next: whisky, gin and spirits, what a bottle really costs" }}
     >
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 

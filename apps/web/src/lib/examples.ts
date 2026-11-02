@@ -75,3 +75,13 @@ export function priceExampleOn(x: ExampleInput, date: string): LineResult {
 }
 
 export const rm2 = (n: number) => `RM${n.toLocaleString("en-MY", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+// One pallet of whisky: 100 cases × 6 = 600 bottles of 700 ml. Freight+insurance €480 (→ RM4.00/bottle), local RM1,800 (→ RM3.00/bottle).
+export const SPIRITS_BASE: ExampleInput = { name: "Scotch whisky 40%", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 100, unit_cost: 12, freight_eur: 480, local_rm: 1800 };
+export const SPIRITS_VARIANTS: { label: string; input: ExampleInput }[] = [
+  { label: "€8 whisky instead of €12", input: { ...SPIRITS_BASE, unit_cost: 8 } },
+  { label: "43% cask strength instead of 40%", input: { ...SPIRITS_BASE, abv: 43 } },
+  { label: "Gin 40% (RM55/L duty)", input: { ...SPIRITS_BASE, name: "Gin 40%", hs_code: "2208.50.00" } },
+  { label: "Liqueur 20% (duty and excise both per litre of alcohol)", input: { ...SPIRITS_BASE, name: "Liqueur 20%", hs_code: "2208.70.10", abv: 20 } },
+  { label: "1-litre bottle at 40%, €16", input: { ...SPIRITS_BASE, volume_ml: 1000, unit_cost: 16 } },
+];
