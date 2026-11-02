@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "country": "SG",
+    "currency": "SGD",
+    "tax_name": "GST",
+    "scope": "Singapore liquor duties: customs duty and excise duty, both per litre of pure alcohol, from Singapore Customs' List of Dutiable Goods. GST on CIF + duties.",
+    "notes": [
+      "Rates in force since the Budget 2014 increase (25%), unchanged through Budget 2026.",
+      "Customs duty is nil on wine, cider, spirits and liqueurs; S$16/L alc. on beer and stout; S$8/L alc. on samsu.",
+      "GST: 7% to 31 Dec 2022, 8% in 2023, 9% from 1 Jan 2024, charged on CIF value plus customs and excise duty.",
+      "No K1-equivalent (Singapore Customs permit) has been checked against this table yet — rows are labelled 'verify' until one is."
+    ],
+    "sources": {
+      "dutiable_goods": "https://www.customs.gov.sg/businesses/valuation-duties-taxes-fees/duties-and-dutiable-goods/list-of-dutiable-goods",
+      "dutiable_goods_pdf": "https://isomer-user-content.by.gov.sg/174/fcbe28a5-ec67-4fd9-85b1-e1ed4171d488/List%20Of%20Dutiable%20Goods.pdf",
+      "gst": "https://www.customs.gov.sg/businesses/valuation-duties-taxes-fees/goods-and-services-tax-gst/"
+    },
+    "effective_from": "2014-02-21",
+    "verify": true
+  },
+  "rules": [
+    { "prefix": "2203", "customs": 16, "excise": 60, "label": "Beer, stout and porter" },
+    { "prefix": "2204", "customs": 0, "excise": 88, "label": "Wine of fresh grapes" },
+    { "prefix": "2205", "customs": 0, "excise": 88, "label": "Vermouth and flavoured wine" },
+    { "prefix": "2206.00.10", "customs": 0, "excise": 60, "label": "Cider and perry" },
+    { "prefix": "2206.00.4", "customs": 0, "excise": 60, "label": "Shandy" },
+    { "prefix": "2206", "customs": 0, "excise": 88, "label": "Other fermented beverages (sake, mead, fruit wine)" },
+    { "prefix": "2208.90.1", "customs": 8, "excise": 88, "label": "Medicated samsu" },
+    { "prefix": "2208.90.2", "customs": 8, "excise": 88, "label": "Medicated samsu" },
+    { "prefix": "2208.90.3", "customs": 8, "excise": 88, "label": "Samsu" },
+    { "prefix": "2208.90.4", "customs": 8, "excise": 88, "label": "Samsu" },
+    { "prefix": "2208", "customs": 0, "excise": 88, "label": "Spirits, liqueurs and other spirituous beverages" }
+  ],
+  "gst": [
+    { "rate_pct": 7, "effective_from": "2007-07-01", "effective_to": "2022-12-31" },
+    { "rate_pct": 8, "effective_from": "2023-01-01", "effective_to": "2023-12-31" },
+    { "rate_pct": 9, "effective_from": "2024-01-01", "effective_to": null }
+  ]
+}

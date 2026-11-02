@@ -5,6 +5,7 @@
 import type { CountryCode, ExciseLine, FtaRate, ISODate, Rate, RateTables, SstRate, TariffLine } from "./types";
 import chapter22 from "../data/chapter22.json";
 import general from "../data/general.json";
+import sg from "../data/sg.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -91,8 +92,62 @@ export function buildRateTables(): RateTables {
   return { country: "MY", tax_name: "SST", tariff_lines, excise_lines, sst_rates, fta_rates };
 }
 
-/** Rate tables by destination country. Only Malaysia is live; others are added as validated. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables };
+/**
+ * Singapore: customs + excise both per litre of pure alcohol (Singapore Customs, List of Dutiable Goods),
+ * GST on CIF + duties. Same HS lines as chapter22.json so a shipment can be re-priced for either destination.
+ */
+export function buildSgRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  const from: ISODate = sg._meta.effective_from;
+  const doc = "Singapore Customs — List of Dutiable Goods (verify against permit)";
+
+  for (const l of chapter22.lines) {
+    // Longest matching prefix wins (rules are ordered specific → general, so first match is enough).
+    const rule = sg.rules.find((r) => l.hs_code.startsWith(r.prefix));
+    if (!rule) continue;
+    tariff_lines.push({
+      hs_code: l.hs_code,
+      description: l.description,
+      unit: "l",
+      duty: { type: "per_litre_pure_alcohol", value: rule.customs },
+      effective_from: from,
+      effective_to: null,
+      source_doc: doc,
+      source_url: sg._meta.sources.dutiable_goods,
+    });
+    excise_lines.push({
+      hs_code: l.hs_code,
+      description: l.description,
+      excise: { type: "per_litre_pure_alcohol", value: rule.excise },
+      effective_from: from,
+      effective_to: null,
+      source_doc: doc,
+      source_url: sg._meta.sources.dutiable_goods,
+    });
+    for (const g of sg.gst) {
+      sst_rates.push({
+        hs_code: l.hs_code,
+        description: l.description,
+        rate_pct: g.rate_pct,
+        effective_from: g.effective_from,
+        effective_to: g.effective_to,
+        source_doc: `GST ${g.rate_pct}% on CIF + duties (Singapore Customs)`,
+        source_url: sg._meta.sources.gst,
+      });
+    }
+  }
+  return { country: "SG", tax_name: "GST", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
+export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
+  MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
+  SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
+};
+
+/** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables };
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {
   const f = REGISTRY[country];

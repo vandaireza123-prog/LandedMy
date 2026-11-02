@@ -11,9 +11,7 @@
  * requests without one are accepted but rate-limited harder. Responses carry every rate's source.
  */
 import type { Config, Context } from "@netlify/functions";
-import { buildRateTables, computeShipment, manualRates, mergeRates, RateNotFoundError, type Shipment } from "../../packages/engine/src/index";
-
-const rates = buildRateTables();
+import { COUNTRY_META, computeShipment, manualRates, mergeRates, ratesFor, RateNotFoundError, SUPPORTED_COUNTRIES, type CountryCode, type Shipment } from "../../packages/engine/src/index";
 const buckets = new Map<string, { n: number; reset: number }>();
 
 function limited(ip: string, max: number): boolean {
@@ -37,14 +35,15 @@ const DOCS = {
   endpoint: "POST /api/calc",
   body: {
     date: "YYYY-MM-DD (picks the rate version in force)",
+    dest_country: "MY (default) | SG — Singapore prices in SGD with GST; from Singapore Customs' published list, not yet permit-verified",
     origin_iso: "FR",
     dest_port: "MYPKG",
     currency: "EUR",
-    fx_rate: "RM per 1 unit of currency, e.g. 5.0",
+    fx_rate: "destination currency per 1 unit of currency, e.g. 5.0 RM per EUR",
     incoterm: "EXW | FOB | CIF",
     freight: "international freight in currency (0 for CIF)",
     insurance: "{ amount: 10 } in currency, or { pct_of_goods: 0.3 }",
-    local_charges_myr: "{ 'Port and THC': 600, 'Customs agent': 400 }",
+    local_charges_myr: "{ 'Port and THC': 600, 'Customs agent': 400 } in destination currency",
     allocation: "volume | value | units",
     lines: [
       { id: "w1", name: "Still red wine 750ml", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 6, cases: 100, unit_cost: 5.0 },
@@ -53,7 +52,7 @@ const DOCS = {
   },
   response: "{ result: ShipmentResult } — per line CIF, duty, excise, SST, local charges, landed (total and per unit), rates_used with source documents; totals; warnings",
   errors: { 400: "invalid body", 422: "no rate in force for an HS code on that date (RateNotFoundError)", 429: "rate limited" },
-  rates: "Customs Duties Order 2022 (MFN); Excise Duties Order 2022 and the +10% rise from 1 Nov 2025; SST 10% on CIF + duty + excise. Verified against RMCD K1 assessments for chapter 22.",
+  rates: "MY: Customs Duties Order 2022 (MFN); Excise Duties Order 2022 and the +10% rise from 1 Nov 2025; SST 10% on CIF + duty + excise; verified against RMCD K1 assessments for chapter 22. SG: customs and excise per litre of alcohol from Singapore Customs List of Dutiable Goods; GST 9% on CIF + duties.",
   contact: "https://landedmy.netlify.app/",
 };
 
@@ -75,7 +74,11 @@ export default async (req: Request, ctx: Context) => {
   if (!body || !Array.isArray(body.lines) || body.lines.length === 0) return json(400, { error: "lines[] required; GET this endpoint for the schema" });
   if (body.lines.length > 200) return json(400, { error: "max 200 lines per call" });
 
+  const dest_country = String(body.dest_country ?? "MY").toUpperCase() as CountryCode;
+  if (!SUPPORTED_COUNTRIES.includes(dest_country)) return json(400, { error: `dest_country must be one of ${SUPPORTED_COUNTRIES.join(", ")}` });
+  const rates = ratesFor(dest_country);
   const shipment: Shipment = {
+    dest_country,
     date: body.date ?? new Date().toISOString().slice(0, 10),
     origin_iso: body.origin_iso ?? "XX",
     dest_port: body.dest_port ?? "MYPKG",
@@ -103,7 +106,7 @@ export default async (req: Request, ctx: Context) => {
   try {
     const merged = mergeRates(rates, ...(body.manual_rates ?? []).map((m) => manualRates(m.hs_code, m.name, Number(m.duty_pct), Number(m.sst_pct))));
     const result = computeShipment(shipment, merged);
-    return json(200, { result });
+    return json(200, { result, destination: { country: dest_country, ...COUNTRY_META[dest_country] } });
   } catch (e) {
     if (e instanceof RateNotFoundError) return json(422, { error: e.message, hs_code: e.hs_code, date: e.date });
     return json(400, { error: (e as Error).message });

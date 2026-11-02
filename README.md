@@ -22,7 +22,7 @@ Environment variables on the site:
 
 ## Multi-country
 
-`ratesFor(country)` serves the rate tables; only `MY` is registered. A new destination = a new `data/<country>.json`, a builder in `rates.ts`, a registry entry, and K1-equivalent fixtures before it goes live.
+`ratesFor(country)` serves the rate tables. `MY` is K1-verified. `SG` (`data/sg.json`, Singapore Customs List of Dutiable Goods: customs + excise per litre of alcohol, GST 9% on CIF + duties) is registered and available through the API (`dest_country: "SG"`), but labelled unverified until a Singapore Customs permit is checked against it. The web UI still prices Malaysia only; the country switch is pending design approval.
 
 ## Database (Supabase)
 

@@ -176,9 +176,35 @@ describe("general goods", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG"]);
     expect(ratesFor("MY").country).toBe("MY");
-    expect(() => ratesFor("SG")).toThrow(/No rate tables/);
+    expect(ratesFor("SG").country).toBe("SG");
+    expect(() => ratesFor("TH")).toThrow(/No rate tables/);
+  });
+  it("Singapore: beer pays S$16 + S$60 per litre of alcohol, wine nil + S$88, GST 9% on CIF + duties", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const sgRates = ratesFor("SG");
+    // 100 cases × 24 × 330 ml lager 5% at S$1.00, fx 1 (already SGD), S$300 freight, no local
+    const beer: Shipment = {
+      date: "2026-01-15", dest_country: "SG", origin_iso: "BE", dest_port: "SGSIN", currency: "SGD", fx_rate: 1,
+      incoterm: "EXW", freight: 300, insurance: { amount: 0 }, local_charges_myr: {}, allocation: "volume",
+      lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 1 }],
+    };
+    const r = computeShipment(beer, sgRates).lines[0];
+    const litresAlc = 0.33 * 24 * 100 * 0.05; // 39.6
+    expect(r.duty).toBeCloseTo(litresAlc * 16, 2);
+    expect(r.excise).toBeCloseTo(litresAlc * 60, 2);
+    expect(r.sst).toBeCloseTo((2400 + 300 + r.duty + r.excise) * 0.09, 2);
+    expect(r.rates_used.sst_pct).toBe(9);
+
+    const wine = computeShipment({ ...beer, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 5 }] }, sgRates).lines[0];
+    expect(wine.duty).toBe(0);
+    expect(wine.excise).toBeCloseTo(0.75 * 12 * 60 * 0.13 * 88, 2);
+    // GST was 8% in 2023
+    expect(computeShipment({ ...beer, date: "2023-06-01" }, sgRates).lines[0].rates_used.sst_pct).toBe(8);
+    // every chapter-22 alcohol line has an SG row
+    for (const hs of new Set(sgRates.tariff_lines.map((t) => t.hs_code))) expect(sgRates.excise_lines.some((e) => e.hs_code === hs)).toBe(true);
+    expect(sgRates.tariff_lines.length).toBe(28);
   });
   it("refuses a shipment whose destination does not match the tables", () => {
     expect(() => computeShipment({ ...fixtures[0].shipment, dest_country: "SG" }, rates)).toThrow(/Rate tables are for MY/);
