@@ -7,6 +7,10 @@ import { QuoteGap } from "./QuoteGap";
 import { ReverseCalc } from "./ReverseCalc";
 import { Scenarios } from "./Scenarios";
 import { useT } from "@/lib/i18n";
+import type { User } from "@supabase/supabase-js";
+import { saveShipment } from "@/lib/supabase";
+import { snapshotOf } from "@/lib/state";
+import { QuoteSheet } from "./QuoteSheet";
 
 const rates = buildRateTables();
 
@@ -80,6 +84,8 @@ export function ResultsStep({
   shipment,
   shareUrl,
   manualRateLines,
+  user,
+  onAccount,
 }: {
   state: AppState;
   update: (p: Partial<AppState>) => void;
@@ -87,9 +93,13 @@ export function ResultsStep({
   shipment: Shipment;
   shareUrl: string;
   manualRateLines: { hs_code: string; name: string; duty_pct: number; sst_pct: number }[];
+  user: User | null;
+  onAccount: () => void;
 }) {
   const t = useT();
   const [copied, setCopied] = useState(false);
+  const [saving, setSaving] = useState<"idle" | "saving" | "saved" | "fail">("idle");
+  const [quote, setQuote] = useState(false);
   const result = useMemo<ShipmentResult | { error: string }>(() => {
     try {
       const merged = mergeRates(rates, ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
@@ -136,6 +146,20 @@ export function ResultsStep({
       setTimeout(() => setCopied(false), 1500);
     } catch {
       prompt("Copy this link", shareUrl);
+    }
+  };
+  const saveToAccount = async () => {
+    if (!user) return onAccount();
+    if ("error" in result) return;
+    setSaving("saving");
+    try {
+      const name = state.saved_name || prompt("Name this shipment", `${state.origin_label.split(",")[0]} ${result.date}`) || `Shipment ${result.date}`;
+      const id = await saveShipment({ id: state.saved_id, name, snapshot: snapshotOf(state) as unknown as Record<string, unknown>, result, landed_total: result.totals.landed, alert: true, rate_version: "2025-11-01-budget2026" });
+      update({ saved_id: id, saved_name: name });
+      setSaving("saved");
+      setTimeout(() => setSaving("idle"), 1500);
+    } catch {
+      setSaving("fail");
     }
   };
   const exportCsv = () => {
@@ -221,17 +245,21 @@ export function ResultsStep({
           Rates: Customs Duties Order 2022 · Excise Duties Order 2022 as raised 1 Nov 2025 (Budget 2026) · SST 10% on CIF + duty + excise. Customs FX RM {state.fx_rate}/{state.currency}. Calculation verified against RMCD K1 assessments. Estimate only; final assessment by RMCD.
         </div>
 
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
+          <button type="button" onClick={saveToAccount} className="h-11 rounded-[10px] bg-teal text-[13px] font-semibold text-white">
+            {saving === "saving" ? "Saving…" : saving === "saved" ? "Saved" : saving === "fail" ? "Failed, retry" : user ? (state.saved_id ? "Update in account" : "Save to account") : "Sign in to save"}
+          </button>
+          <button type="button" onClick={() => setQuote(true)} className="h-11 rounded-[10px] border border-teal bg-teal-tint text-[13px] font-semibold text-teal">
+            {t("PDF / print")} quote
+          </button>
           <button type="button" onClick={copy} className="h-11 rounded-[10px] border border-line bg-white text-[13px] font-semibold">
             {copied ? t("Copied") : t("Share link")}
           </button>
           <button type="button" onClick={exportCsv} className="h-11 rounded-[10px] border border-line bg-white text-[13px] font-semibold">
             CSV
           </button>
-          <button type="button" onClick={() => window.print()} className="h-11 rounded-[10px] border border-line bg-white text-[13px] font-semibold">
-            {t("PDF / print")}
-          </button>
         </div>
+        {quote && <QuoteSheet state={state} result={result} user={user} onClose={() => setQuote(false)} />}
       </div>
 
       <Footer>

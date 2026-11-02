@@ -21,3 +21,12 @@ body { color: var(--color-ink); font-family: var(--font-sans); -webkit-font-smoo
 input, button, select { font-family: inherit; }
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
 input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+
+/* Branded quote: when printing from the quote sheet, show only the document. */
+@media print {
+  html, body { background: #fff !important; }
+  body.print-quote * { visibility: hidden; }
+  body.print-quote #quote-doc, body.print-quote #quote-doc * { visibility: visible; }
+  body.print-quote #quote-doc { display: block !important; position: absolute; top: 0; left: 0; width: 100%; }
+  @page { size: A4; margin: 16mm; }
+}

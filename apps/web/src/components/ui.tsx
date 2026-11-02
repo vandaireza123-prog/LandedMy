@@ -2,7 +2,7 @@
 import type { ReactNode } from "react";
 import { useT } from "@/lib/i18n";
 
-export function Shell({ children, right, onLang, lang }: { children: ReactNode; right?: ReactNode; onLang?: () => void; lang?: string }) {
+export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { children: ReactNode; right?: ReactNode; onLang?: () => void; lang?: string; onAccount?: () => void; signedIn?: boolean }) {
   const t = useT();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground">
@@ -12,6 +12,11 @@ export function Shell({ children, right, onLang, lang }: { children: ReactNode; 
         </div>
         <div className="flex items-center gap-2 text-xs font-medium text-muted">
           <span>{right ?? t("Free · no login")}</span>
+          {onAccount && (
+            <button type="button" onClick={onAccount} aria-label="Account" className={`flex h-6 w-6 items-center justify-center rounded-full border ${signedIn ? "border-teal bg-teal-tint text-teal" : "border-line bg-white text-muted"}`}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>
+            </button>
+          )}
           {onLang && (
             <button type="button" onClick={onLang} className="rounded-md border border-line bg-white px-1.5 py-0.5 text-[11px] font-semibold text-ink" aria-label="Switch language">
               {lang === "ms" ? "EN" : "BM"}

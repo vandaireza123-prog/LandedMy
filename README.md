@@ -12,6 +12,14 @@ Option B — CLI: `npx netlify-cli deploy --prod --dir=apps/web/out --functions=
 Environment variables on the site:
 - `ANTHROPIC_API_KEY` — required for the invoice/photo reader and customs-code suggestions
 - `LANDEDMY_MODEL` — optional, defaults to `claude-sonnet-5-5`
+- `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` — server-side only, for the daily rate-change alerts function
+- `RESEND_API_KEY` and `ALERT_FROM` — optional; without them alerts are in-app only
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — optional overrides; the publishable key is compiled in by default
+
+## Database (Supabase)
+
+Paste `supabase/setup.sql` into the SQL Editor and run it once (safe to re-run). It creates every table, RLS policies, the chapter-22 rate seed, profiles, notifications and the rate-version stamp.
+In Authentication → URL Configuration set Site URL to the deployed site and add it to Redirect URLs, so magic links return to the app.
 
 Leads from "Get quotes" land in Netlify → Forms → `quote-request`; turn on email notifications there.
 
