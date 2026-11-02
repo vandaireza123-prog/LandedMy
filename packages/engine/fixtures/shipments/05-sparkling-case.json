@@ -1,0 +1,22 @@
+{
+  "name": "Sparkling wine: 12% 750ml, high duty + RM495 excise",
+  "shipment": {
+    "date": "2026-11-02",
+    "origin_iso": "FR",
+    "dest_port": "MYPKG",
+    "currency": "EUR",
+    "fx_rate": 5.0,
+    "incoterm": "EXW",
+    "freight": 100,
+    "insurance": { "amount": 0 },
+    "local_charges_myr": { "all_in": 300 },
+    "allocation": "volume",
+    "lines": [
+      { "id": "s1", "name": "Crémant 750ml 12%", "hs_code": "2204.10.00", "volume_ml": 750, "abv": 12, "units_per_case": 6, "cases": 10, "unit_cost": 8.0 }
+    ]
+  },
+  "expect": {
+    "per_unit": { "duty": 17.25, "excise": 44.55 },
+    "_note": "duty 0.75×23 = 17.25; excise 0.75×0.12×495 = 44.55"
+  }
+}

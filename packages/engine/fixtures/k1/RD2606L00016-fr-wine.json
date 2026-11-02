@@ -1,0 +1,571 @@
+{
+  "name": "K1 B3S106001874 — French wine, 37 lines, Port Klang FZ, 15 Jun 2026 (RM25,668.20)",
+  "source": "K1 form RD2606L00016 pages 1-7",
+  "shipment": {
+    "date": "2026-06-15",
+    "origin_iso": "FR",
+    "dest_port": "MYPKG",
+    "currency": "MYR",
+    "fx_rate": 1,
+    "incoterm": "CIF",
+    "freight": 0,
+    "insurance": {
+      "amount": 0
+    },
+    "local_charges_myr": {},
+    "allocation": "volume",
+    "lines": [
+      {
+        "id": "1",
+        "name": "Ch. Lartigue Castillon 14.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14.5,
+        "units_per_case": 6,
+        "cases": 28,
+        "unit_cost": 0,
+        "declared_value": 2313.01476
+      },
+      {
+        "id": "2",
+        "name": "Ch. Amandine Puisseguin 13.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 6,
+        "cases": 10,
+        "unit_cost": 0,
+        "declared_value": 882.0819
+      },
+      {
+        "id": "3",
+        "name": "Sensation Ch. GB Bourdieu Rouge 13.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 6,
+        "cases": 10,
+        "unit_cost": 0,
+        "declared_value": 1985.38425
+      },
+      {
+        "id": "4",
+        "name": "Ch. Lestage Chevillon Médoc 13%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 6,
+        "cases": 12,
+        "unit_cost": 0,
+        "declared_value": 1713.75912
+      },
+      {
+        "id": "5",
+        "name": "Ch. La Croix de Pez 13.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 6,
+        "cases": 7,
+        "unit_cost": 0,
+        "declared_value": 1950.38109
+      },
+      {
+        "id": "6",
+        "name": "Esprit de Chevalier Rouge 13.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 6,
+        "cases": 7,
+        "unit_cost": 0,
+        "declared_value": 3430.3185
+      },
+      {
+        "id": "7",
+        "name": "Roches Roses Provence Rosé 12.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 6,
+        "cases": 28,
+        "unit_cost": 0,
+        "declared_value": 3253.90212
+      },
+      {
+        "id": "8",
+        "name": "L'Esquirre Entre-Deux-Mers 12.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 6,
+        "cases": 26,
+        "unit_cost": 0,
+        "declared_value": 2104.11513
+      },
+      {
+        "id": "9",
+        "name": "Blanc d'Arguin Bordeaux Blanc 12%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12,
+        "units_per_case": 6,
+        "cases": 12,
+        "unit_cost": 0,
+        "declared_value": 971.13006
+      },
+      {
+        "id": "10",
+        "name": "Sensation Ch. GB Bourdieu Blanc 13%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 6,
+        "cases": 11,
+        "unit_cost": 0,
+        "declared_value": 1928.259135
+      },
+      {
+        "id": "11",
+        "name": "Esprit de Chevalier Blanc 13%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 6,
+        "cases": 8,
+        "unit_cost": 0,
+        "declared_value": 4144.3848
+      },
+      {
+        "id": "12",
+        "name": "Ch. Lestage Chevillon Médoc 13.5% (2 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 2,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 4.6671
+      },
+      {
+        "id": "13",
+        "name": "Ch. Amandine 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "14",
+        "name": "Blanc d'Arguin 12% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "15",
+        "name": "Roches Roses 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "16",
+        "name": "Ch. Lartigue 14.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "17",
+        "name": "Esprit de Bacchus Rouge 13% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "18",
+        "name": "Esprit de Bacchus Graves 13% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "19",
+        "name": "Esprit de Bacchus St Emilion 14% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "20",
+        "name": "Esprit de Bacchus Médoc 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "21",
+        "name": "Baumard Cabernet 14% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "22",
+        "name": "Baumard Merlot 13% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "23",
+        "name": "Baumard Côtes du Rhône 14% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "24",
+        "name": "Baumard Pinot Noir 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "25",
+        "name": "Ch. Puy Favereau 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "26",
+        "name": "Ch. Vieux Verdot 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "27",
+        "name": "Ch. du Monastère 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "28",
+        "name": "Le Sacristain 13% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "29",
+        "name": "Ch. Trois Moulins 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "30",
+        "name": "Collection Seignouret 12% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "31",
+        "name": "Ch. Huradin Blanc 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "32",
+        "name": "Notre Dame de la Solitude 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "33",
+        "name": "Dame de Couhins Blanc 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "34",
+        "name": "Baumard Chardonnay 13.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "35",
+        "name": "Rosé d'Arguin 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "36",
+        "name": "Elixir des Anges Rosé 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      },
+      {
+        "id": "37",
+        "name": "Ch. des Chênes Rosé 12.5% (1 btl)",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 1,
+        "unit_cost": 0,
+        "declared_value": 2.33355
+      }
+    ]
+  },
+  "k1_lines": [
+    {
+      "id": "1",
+      "litres": 126,
+      "duty": 882,
+      "excise": 3014.55,
+      "sst": 620.96
+    },
+    {
+      "id": "2",
+      "litres": 45,
+      "duty": 315,
+      "excise": 1002.38,
+      "sst": 219.95
+    },
+    {
+      "id": "3",
+      "litres": 45,
+      "duty": 315,
+      "excise": 1002.38,
+      "sst": 330.28
+    },
+    {
+      "id": "4",
+      "litres": 54,
+      "duty": 378,
+      "excise": 1158.3,
+      "sst": 325.01
+    },
+    {
+      "id": "5",
+      "litres": 31.5,
+      "duty": 220.5,
+      "excise": 701.66,
+      "sst": 287.25
+    },
+    {
+      "id": "6",
+      "litres": 31.5,
+      "duty": 220.5,
+      "excise": 701.66,
+      "sst": 435.25
+    },
+    {
+      "id": "7",
+      "litres": 126,
+      "duty": 882,
+      "excise": 2598.75,
+      "sst": 673.47
+    },
+    {
+      "id": "8",
+      "litres": 117,
+      "duty": 819,
+      "excise": 2413.13,
+      "sst": 533.62
+    },
+    {
+      "id": "9",
+      "litres": 54,
+      "duty": 378,
+      "excise": 1069.2,
+      "sst": 241.83
+    },
+    {
+      "id": "10",
+      "litres": 49.5,
+      "duty": 346.5,
+      "excise": 1061.78,
+      "sst": 333.65
+    },
+    {
+      "id": "11",
+      "litres": 36,
+      "duty": 252,
+      "excise": 772.2,
+      "sst": 516.86
+    },
+    {
+      "id": "12",
+      "litres": 1.5,
+      "duty": 10.5,
+      "excise": 33.41,
+      "sst": 4.86
+    },
+    {
+      "id": "13",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 15.47,
+      "sst": 2.31
+    },
+    {
+      "id": "14",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 14.85,
+      "sst": 2.24
+    },
+    {
+      "id": "16",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 17.94,
+      "sst": 2.55
+    },
+    {
+      "id": "17",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 16.09,
+      "sst": 2.37
+    },
+    {
+      "id": "19",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 17.33,
+      "sst": 2.49
+    },
+    {
+      "id": "20",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 16.71,
+      "sst": 2.43
+    },
+    {
+      "id": "37",
+      "litres": 0.75,
+      "duty": 5.25,
+      "excise": 15.47,
+      "sst": 2.31
+    }
+  ],
+  "k1_totals": {
+    "litres": 735.75,
+    "cif": 24739.74,
+    "duty": 5150.25,
+    "excise": 15935.36,
+    "sst": 4582.58,
+    "total_payable": 25668.2
+  },
+  "_note": "Single-bottle line values are shown rounded to RM2.33 on the K1 (true unit price RM3.1114/L); CIF total therefore reconciles to within RM0.10. declared_value = litres × RM/litre as printed in K1 column 38 (unrounded)."
+}

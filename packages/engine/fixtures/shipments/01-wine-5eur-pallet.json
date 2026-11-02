@@ -1,0 +1,22 @@
+{
+  "name": "Plan worked example: €5 still wine, one pallet, LCL Antwerp → Port Klang",
+  "shipment": {
+    "date": "2026-11-02",
+    "origin_iso": "FR",
+    "dest_port": "MYPKG",
+    "currency": "EUR",
+    "fx_rate": 5.0,
+    "incoterm": "EXW",
+    "freight": 480,
+    "insurance": { "amount": 0 },
+    "local_charges_myr": { "port_and_thc": 600, "customs_agent": 400, "haulage_kl": 400, "unstuffing": 100 },
+    "allocation": "volume",
+    "lines": [
+      { "id": "w1", "name": "Still red wine 750ml 13%", "hs_code": "2204.21.11", "volume_ml": 750, "abv": 13, "units_per_case": 6, "cases": 100, "cases_per_pallet": 100, "unit_cost": 5.0 }
+    ]
+  },
+  "expect": {
+    "per_unit": { "cif": 29.00, "duty": 5.25, "excise": 16.09, "sst": 5.03, "landed": 57.87 },
+    "totals": { "landed": 34722.75 }
+  }
+}

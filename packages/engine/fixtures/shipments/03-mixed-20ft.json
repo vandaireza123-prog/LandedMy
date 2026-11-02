@@ -1,0 +1,25 @@
+{
+  "name": "Mixed 20' dry: beer, wine, cider, gin — allocation by volume",
+  "shipment": {
+    "date": "2026-11-02",
+    "origin_iso": "BE",
+    "dest_port": "MYPKG",
+    "currency": "EUR",
+    "fx_rate": 5.0,
+    "incoterm": "FOB",
+    "freight": 2400,
+    "insurance": { "pct_of_goods": 0.3 },
+    "local_charges_myr": { "port_and_thc": 1200, "customs_agent": 600, "haulage_kl": 900, "unstuffing": 300 },
+    "allocation": "volume",
+    "lines": [
+      { "id": "b1", "name": "La Chouffe 330ml 8%", "hs_code": "2203.00.99", "volume_ml": 330, "abv": 8, "units_per_case": 24, "cases": 300, "unit_cost": 1.1 },
+      { "id": "w1", "name": "Côtes du Rhône 750ml 14%", "hs_code": "2204.21.11", "volume_ml": 750, "abv": 14, "units_per_case": 6, "cases": 200, "unit_cost": 4.2 },
+      { "id": "c1", "name": "Belgian cider 330ml 4.5%", "hs_code": "2206.00.10", "volume_ml": 330, "abv": 4.5, "units_per_case": 24, "cases": 100, "unit_cost": 0.9 },
+      { "id": "g1", "name": "London dry gin 700ml 40%", "hs_code": "2208.50.00", "volume_ml": 700, "abv": 40, "units_per_case": 6, "cases": 50, "unit_cost": 9.0 }
+    ]
+  },
+  "expect": {
+    "per_unit": {},
+    "_note": "no hand-checked totals yet; the test asserts internal consistency and that the shares sum to the shipment inputs"
+  }
+}

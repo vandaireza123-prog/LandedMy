@@ -1,0 +1,22 @@
+{
+  "name": "Same €5 wine shipped before 1 Nov 2025 → old excise RM150",
+  "shipment": {
+    "date": "2025-10-15",
+    "origin_iso": "FR",
+    "dest_port": "MYPKG",
+    "currency": "EUR",
+    "fx_rate": 5.0,
+    "incoterm": "EXW",
+    "freight": 480,
+    "insurance": { "amount": 0 },
+    "local_charges_myr": { "all_in": 1500 },
+    "allocation": "volume",
+    "lines": [
+      { "id": "w1", "name": "Still red wine 750ml 13%", "hs_code": "2204.21.11", "volume_ml": 750, "abv": 13, "units_per_case": 6, "cases": 100, "unit_cost": 5.0 }
+    ]
+  },
+  "expect": {
+    "per_unit": { "excise": 14.63, "sst": 4.89, "landed": 56.26 },
+    "_note": "excise 0.75×0.13×150 = 14.625 → 14.63 (line total rounds first); SST 0.1×(29+5.25+14.625)=4.8875"
+  }
+}

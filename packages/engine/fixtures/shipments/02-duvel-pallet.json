@@ -1,0 +1,22 @@
+{
+  "name": "Belgian beer: Duvel 330ml 8.5%, one pallet, 1 Nov 2025 excise",
+  "shipment": {
+    "date": "2026-11-02",
+    "origin_iso": "BE",
+    "dest_port": "MYPKG",
+    "currency": "EUR",
+    "fx_rate": 5.0,
+    "incoterm": "EXW",
+    "freight": 480,
+    "insurance": { "pct_of_goods": 0.3 },
+    "local_charges_myr": { "port_and_thc": 600, "customs_agent": 400, "haulage_kl": 400, "unstuffing": 100 },
+    "allocation": "volume",
+    "lines": [
+      { "id": "b1", "name": "Duvel 330ml 8.5%", "hs_code": "2203.00.99", "volume_ml": 330, "abv": 8.5, "units_per_case": 24, "cases": 60, "cases_per_pallet": 60, "unit_cost": 1.0 }
+    ]
+  },
+  "expect": {
+    "per_unit": { "duty": 1.65, "excise": 5.40 },
+    "_note": "duty 0.33×5 = 1.65; excise 0.33×0.085×192.50 = 5.3996 → 5.40"
+  }
+}

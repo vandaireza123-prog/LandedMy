@@ -1,0 +1,265 @@
+{
+  "name": "K1 B3S110000837 — Australian wine, 13 lines, Port Klang FZ, 10 Oct 2026 (receipt EFT-AR 038596IM, RM40,543.35)",
+  "source": "K1 form RD2609L00119 pages 1-3 + official receipt 20-10-2026",
+  "shipment": {
+    "date": "2026-10-10",
+    "origin_iso": "AU",
+    "dest_port": "MYPKG",
+    "currency": "MYR",
+    "fx_rate": 1,
+    "incoterm": "CIF",
+    "freight": 0,
+    "insurance": {
+      "amount": 0
+    },
+    "local_charges_myr": {},
+    "allocation": "volume",
+    "lines": [
+      {
+        "id": "1",
+        "name": "River Retreat Merlot 13.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 12,
+        "cases": 9,
+        "unit_cost": 0,
+        "declared_value": 1571.03064
+      },
+      {
+        "id": "2",
+        "name": "River Retreat Pinot Noir 13.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13.5,
+        "units_per_case": 12,
+        "cases": 11,
+        "unit_cost": 0,
+        "declared_value": 1920.14856
+      },
+      {
+        "id": "3",
+        "name": "River Retreat Cabernet Sauvignon 14.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14.5,
+        "units_per_case": 12,
+        "cases": 13,
+        "unit_cost": 0,
+        "declared_value": 2269.26648
+      },
+      {
+        "id": "4",
+        "name": "River Retreat Shiraz 14.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14.5,
+        "units_per_case": 12,
+        "cases": 15,
+        "unit_cost": 0,
+        "declared_value": 2618.3844
+      },
+      {
+        "id": "5",
+        "name": "River Retreat Sauvignon Blanc 12.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 12,
+        "cases": 15,
+        "unit_cost": 0,
+        "declared_value": 2618.3844
+      },
+      {
+        "id": "6",
+        "name": "River Retreat Pinot Grigio 12.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 12,
+        "cases": 9,
+        "unit_cost": 0,
+        "declared_value": 1571.03064
+      },
+      {
+        "id": "7",
+        "name": "River Retreat Chardonnay 13%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 12,
+        "cases": 12,
+        "unit_cost": 0,
+        "declared_value": 2094.70752
+      },
+      {
+        "id": "8",
+        "name": "Ziegler Riesling 12%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12,
+        "units_per_case": 6,
+        "cases": 8,
+        "unit_cost": 0,
+        "declared_value": 1889.91
+      },
+      {
+        "id": "9",
+        "name": "Ziegler GSM 14%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14,
+        "units_per_case": 6,
+        "cases": 10,
+        "unit_cost": 0,
+        "declared_value": 2362.3875
+      },
+      {
+        "id": "10",
+        "name": "Ziegler Shiraz 14%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 14,
+        "units_per_case": 6,
+        "cases": 10,
+        "unit_cost": 0,
+        "declared_value": 2362.3875
+      },
+      {
+        "id": "11",
+        "name": "Sparrow & Barrow Sauvignon Blanc 12.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 1,
+        "cases": 190,
+        "unit_cost": 0,
+        "declared_value": 4298.1135
+      },
+      {
+        "id": "12",
+        "name": "Sparrow & Barrow Pinot Gris 13%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 13,
+        "units_per_case": 6,
+        "cases": 10,
+        "unit_cost": 0,
+        "declared_value": 1357.299
+      },
+      {
+        "id": "13",
+        "name": "Sparrow & Barrow Pinot Noir 12.5%",
+        "hs_code": "2204.21.11",
+        "volume_ml": 750,
+        "abv": 12.5,
+        "units_per_case": 6,
+        "cases": 25,
+        "unit_cost": 0,
+        "declared_value": 3393.2475
+      }
+    ]
+  },
+  "k1_lines": [
+    {
+      "id": "1",
+      "litres": 81,
+      "duty": 567,
+      "excise": 1804.28,
+      "sst": 394.23
+    },
+    {
+      "id": "2",
+      "litres": 99,
+      "duty": 693,
+      "excise": 2205.23,
+      "sst": 481.84
+    },
+    {
+      "id": "3",
+      "litres": 117,
+      "duty": 819,
+      "excise": 2799.23,
+      "sst": 588.75
+    },
+    {
+      "id": "4",
+      "litres": 135,
+      "duty": 945,
+      "excise": 3229.88,
+      "sst": 679.33
+    },
+    {
+      "id": "5",
+      "litres": 135,
+      "duty": 945,
+      "excise": 2784.38,
+      "sst": 634.78
+    },
+    {
+      "id": "6",
+      "litres": 81,
+      "duty": 567,
+      "excise": 1670.63,
+      "sst": 380.87
+    },
+    {
+      "id": "7",
+      "litres": 108,
+      "duty": 756,
+      "excise": 2316.6,
+      "sst": 516.73
+    },
+    {
+      "id": "8",
+      "litres": 36,
+      "duty": 252,
+      "excise": 712.8,
+      "sst": 285.47
+    },
+    {
+      "id": "9",
+      "litres": 45,
+      "duty": 315,
+      "excise": 1039.5,
+      "sst": 371.69
+    },
+    {
+      "id": "10",
+      "litres": 45,
+      "duty": 315,
+      "excise": 1039.5,
+      "sst": 371.69
+    },
+    {
+      "id": "11",
+      "litres": 142.5,
+      "duty": 997.5,
+      "excise": 2939.06,
+      "sst": 823.47
+    },
+    {
+      "id": "12",
+      "litres": 45,
+      "duty": 315,
+      "excise": 965.25,
+      "sst": 263.75
+    },
+    {
+      "id": "13",
+      "litres": 112.5,
+      "duty": 787.5,
+      "excise": 2320.31,
+      "sst": 650.11
+    }
+  ],
+  "k1_totals": {
+    "litres": 1182,
+    "cif": 30326.3,
+    "duty": 8274,
+    "excise": 25826.65,
+    "sst": 6442.71,
+    "total_payable": 40543.35
+  },
+  "_note": "declared_value = litres × RM/litre as printed in K1 column 38 (unrounded)."
+}

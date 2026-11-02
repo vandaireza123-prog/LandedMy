@@ -1,0 +1,147 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { buildRateTables, computeShipment, RateNotFoundError, type RateTables, type Shipment } from "../src/index.js";
+
+const TOLERANCE = 0.05; // RM per unit, the Sprint 0 gate
+
+interface Fixture {
+  name: string;
+  shipment: Shipment;
+  expect: { per_unit?: Record<string, number>; totals?: Record<string, number> };
+}
+
+const fixturesDir = join(__dirname, "..", "fixtures", "shipments");
+const fixtures: Fixture[] = readdirSync(fixturesDir)
+  .filter((f) => f.endsWith(".json"))
+  .sort()
+  .map((f) => JSON.parse(readFileSync(join(fixturesDir, f), "utf8")));
+
+const rates: RateTables = buildRateTables();
+
+describe("rate tables", () => {
+  it("every HS line has a tariff, an SST rate and two excise versions", () => {
+    const codes = new Set(rates.tariff_lines.map((r) => r.hs_code));
+    for (const hs of codes) {
+      expect(rates.sst_rates.filter((r) => r.hs_code === hs)).toHaveLength(1);
+      expect(rates.excise_lines.filter((r) => r.hs_code === hs)).toHaveLength(2);
+    }
+    expect(codes.size).toBeGreaterThanOrEqual(28);
+  });
+
+  it("every row carries a source URL and effective date", () => {
+    for (const r of [...rates.tariff_lines, ...rates.excise_lines, ...rates.sst_rates]) {
+      expect(r.source_url).toMatch(/^https?:\/\//);
+      expect(r.effective_from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    }
+  });
+
+  it("beer excise is RM175 before and RM192.50 from 1 Nov 2025", () => {
+    const beer = rates.excise_lines.filter((r) => r.hs_code === "2203.00.99");
+    expect(beer.find((r) => r.effective_from === "2022-06-01")!.excise.value).toBe(175);
+    expect(beer.find((r) => r.effective_from === "2025-11-01")!.excise.value).toBe(192.5);
+  });
+});
+
+describe("fixtures", () => {
+  for (const fx of fixtures) {
+    describe(fx.name, () => {
+      const result = computeShipment(fx.shipment, rates);
+
+      for (const [k, v] of Object.entries(fx.expect.per_unit ?? {})) {
+        it(`per-unit ${k} ≈ ${v}`, () => {
+          const got = (result.lines[0].per_unit as Record<string, number>)[k];
+          expect(Math.abs(got - v)).toBeLessThanOrEqual(TOLERANCE);
+        });
+      }
+      for (const [k, v] of Object.entries(fx.expect.totals ?? {})) {
+        it(`total ${k} ≈ ${v}`, () => {
+          const got = (result.totals as Record<string, number>)[k];
+          expect(Math.abs(got - v)).toBeLessThanOrEqual(TOLERANCE * result.lines[0].units);
+        });
+      }
+
+      it("line totals reconcile to shipment inputs", () => {
+        const s = fx.shipment;
+        const goods = s.lines.reduce((a, l) => a + l.unit_cost * l.units_per_case * l.cases, 0) * s.fx_rate;
+        const freight = s.incoterm === "CIF" ? 0 : s.freight * s.fx_rate;
+        const local = Object.values(s.local_charges_myr).reduce((a, b) => a + b, 0);
+        expect(Math.abs(result.totals.goods - goods)).toBeLessThan(0.05 * s.lines.length);
+        expect(Math.abs(result.totals.freight - freight)).toBeLessThan(0.05 * s.lines.length);
+        expect(Math.abs(result.totals.local_charges - local)).toBeLessThan(0.05 * s.lines.length);
+        for (const l of result.lines) {
+          expect(Math.abs(l.cif + l.duty + l.excise + l.sst + l.local_charges - l.landed)).toBeLessThan(0.05);
+          expect(Math.abs(l.sst - 0.1 * (l.cif + l.duty + l.excise))).toBeLessThan(0.05);
+        }
+      });
+
+      it("every line reports the rate it used, with its source", () => {
+        for (const l of result.lines) {
+          expect(l.rates_used.duty.source_url).toMatch(/^https?:\/\//);
+          expect(l.rates_used.sst_pct).toBe(10);
+          if (fx.shipment.lines.find((x) => x.id === l.id)!.abv > 0) {
+            expect(l.rates_used.excise).not.toBeNull();
+          }
+        }
+      });
+    });
+  }
+});
+
+describe("guards", () => {
+  const base: Shipment = fixtures[0].shipment;
+
+  it("refuses to price a line whose HS code has no rate row", () => {
+    const s: Shipment = { ...base, lines: [{ ...base.lines[0], hs_code: "9999.99.99" }] };
+    expect(() => computeShipment(s, rates)).toThrow(RateNotFoundError);
+  });
+
+  it("refuses a shipment dated before any rate was in force", () => {
+    const s: Shipment = { ...base, date: "2021-01-01" };
+    expect(() => computeShipment(s, rates)).toThrow(RateNotFoundError);
+  });
+
+  it("refuses alcohol with no excise row even if tariff exists", () => {
+    const noExcise: RateTables = { ...rates, excise_lines: [] };
+    expect(() => computeShipment(base, noExcise)).toThrow(/excise/i);
+  });
+
+  it("picks the newer excise version on and after 1 Nov 2025", () => {
+    const oct = computeShipment({ ...base, date: "2025-10-31" }, rates).lines[0];
+    const nov = computeShipment({ ...base, date: "2025-11-01" }, rates).lines[0];
+    expect(oct.rates_used.excise!.value).toBe(150);
+    expect(nov.rates_used.excise!.value).toBe(165);
+    expect(nov.per_unit.excise).toBeGreaterThan(oct.per_unit.excise);
+  });
+
+  it("applies an FTA override when origin and agreement match", () => {
+    const withFta: RateTables = {
+      ...rates,
+      fta_rates: [
+        {
+          hs_code: "2204.21.11",
+          description: "Still wine, MAFTA",
+          origin_iso: "AU",
+          agreement: "MAFTA",
+          duty: { type: "per_litre", value: 0 },
+          effective_from: "2013-01-01",
+          effective_to: null,
+          source_doc: "test",
+          source_url: "https://example.test/mafta",
+        },
+      ],
+    };
+    const au = computeShipment({ ...base, origin_iso: "AU" }, withFta).lines[0];
+    const fr = computeShipment({ ...base, origin_iso: "FR" }, withFta).lines[0];
+    expect(au.duty).toBe(0);
+    expect(au.rates_used.fta_agreement).toBe("MAFTA");
+    expect(fr.duty).toBeGreaterThan(0);
+    expect(fr.rates_used.fta_agreement).toBeNull();
+  });
+
+  it("CIF incoterm ignores freight and warns", () => {
+    const r = computeShipment({ ...base, incoterm: "CIF" }, rates);
+    expect(r.totals.freight).toBe(0);
+    expect(r.warnings.length).toBe(1);
+  });
+});
