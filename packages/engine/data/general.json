@@ -1,0 +1,59 @@
+{
+  "_meta": {
+    "scope": "Common consumer-goods imports outside chapter 22. MFN duty as % of CIF (ad valorem). Rates are from the Customs Duties Order 2022 tariff schedule as we read it and the July 2025 SST expansion; every line is labelled 'verify' until checked against a K1. The app always lets the user overwrite duty % and SST %.",
+    "verify_url": "https://ezhs.customs.gov.my/",
+    "sources": {
+      "customs": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/1729676/P.U.%20(A)%20114_2022%20(DUTI%20KASTAM).pdf",
+      "sst": "https://www.dhl.com/discover/en-my/logistics-advice/essential-guides/import-sales-tax-malaysia.html"
+    }
+  },
+  "groups": [
+    { "key": "food", "label": "Food and drink (non-alcoholic)" },
+    { "key": "beauty", "label": "Cosmetics and personal care" },
+    { "key": "kitchen", "label": "Kitchen and restaurant equipment" },
+    { "key": "electronics", "label": "Electronics and appliances" },
+    { "key": "furniture", "label": "Furniture and homeware" },
+    { "key": "apparel", "label": "Clothing, footwear, bags" },
+    { "key": "other", "label": "Other / enter duty manually" }
+  ],
+  "lines": [
+    { "group": "food", "hs_code": "0406.90.00", "description": "Cheese, other (hard and semi-hard)", "duty_pct": 0, "sst_pct": 5, "confidence": "verify" },
+    { "group": "food", "hs_code": "1509.10.00", "description": "Olive oil, virgin", "duty_pct": 0, "sst_pct": 5, "confidence": "verify" },
+    { "group": "food", "hs_code": "1806.90.00", "description": "Chocolate and cocoa preparations, other", "duty_pct": 15, "sst_pct": 10, "confidence": "verify" },
+    { "group": "food", "hs_code": "1905.31.00", "description": "Sweet biscuits", "duty_pct": 15, "sst_pct": 10, "confidence": "verify" },
+    { "group": "food", "hs_code": "1902.19.00", "description": "Pasta, uncooked, other", "duty_pct": 8, "sst_pct": 5, "confidence": "verify" },
+    { "group": "food", "hs_code": "0901.21.00", "description": "Coffee, roasted, not decaffeinated", "duty_pct": 0, "sst_pct": 5, "confidence": "verify" },
+    { "group": "food", "hs_code": "0902.30.00", "description": "Black tea in packages ≤3 kg", "duty_pct": 0, "sst_pct": 5, "confidence": "verify" },
+    { "group": "food", "hs_code": "2103.90.00", "description": "Sauces and condiments, other", "duty_pct": 10, "sst_pct": 10, "confidence": "verify" },
+    { "group": "food", "hs_code": "2202.99.00", "description": "Non-alcoholic beverages, other (excise RM0.40/L on sugared drinks not included)", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "food", "hs_code": "0304.41.00", "description": "Salmon fillets, fresh or chilled", "duty_pct": 0, "sst_pct": 5, "confidence": "verify" },
+    { "group": "food", "hs_code": "0202.30.00", "description": "Beef, frozen, boneless", "duty_pct": 0, "sst_pct": 0, "confidence": "verify" },
+
+    { "group": "beauty", "hs_code": "3304.99.00", "description": "Skincare preparations, other", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "beauty", "hs_code": "3303.00.00", "description": "Perfumes and toilet waters", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "beauty", "hs_code": "3305.10.00", "description": "Shampoos", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "beauty", "hs_code": "3401.11.00", "description": "Toilet soap", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+
+    { "group": "kitchen", "hs_code": "8419.81.00", "description": "Commercial cooking equipment (ovens, coffee machines, fryers)", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "kitchen", "hs_code": "8418.50.00", "description": "Commercial refrigerated display cabinets and chillers", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "kitchen", "hs_code": "7323.93.00", "description": "Stainless-steel kitchenware and tableware", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "kitchen", "hs_code": "7013.28.00", "description": "Glassware, drinking glasses, other", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "kitchen", "hs_code": "6911.10.00", "description": "Porcelain tableware and kitchenware", "duty_pct": 25, "sst_pct": 10, "confidence": "verify" },
+
+    { "group": "electronics", "hs_code": "8471.30.00", "description": "Laptops and tablets", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "electronics", "hs_code": "8517.13.00", "description": "Smartphones", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "electronics", "hs_code": "8528.72.00", "description": "Televisions, colour", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "electronics", "hs_code": "8516.60.00", "description": "Domestic ovens, cookers, hobs", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "electronics", "hs_code": "8508.11.00", "description": "Vacuum cleaners, domestic", "duty_pct": 30, "sst_pct": 10, "confidence": "verify" },
+
+    { "group": "furniture", "hs_code": "9403.60.00", "description": "Wooden furniture, other", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "furniture", "hs_code": "9401.61.00", "description": "Upholstered seats with wooden frames", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "furniture", "hs_code": "9404.21.00", "description": "Mattresses, foam or rubber", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+    { "group": "furniture", "hs_code": "9405.11.00", "description": "Chandeliers and ceiling lights, LED", "duty_pct": 20, "sst_pct": 10, "confidence": "verify" },
+
+    { "group": "apparel", "hs_code": "6109.10.00", "description": "T-shirts, cotton", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "apparel", "hs_code": "6203.42.00", "description": "Men's trousers, cotton", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "apparel", "hs_code": "6403.99.00", "description": "Footwear with leather uppers, other", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" },
+    { "group": "apparel", "hs_code": "4202.21.00", "description": "Handbags, leather", "duty_pct": 0, "sst_pct": 10, "confidence": "verify" }
+  ]
+}

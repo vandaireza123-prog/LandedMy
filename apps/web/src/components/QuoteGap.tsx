@@ -5,8 +5,10 @@ import { benchmarkFor, EQUIPMENT_LABEL } from "@/lib/lanes";
 import { DEST_PORTS } from "@/lib/ports";
 import { submitLead } from "@/lib/api";
 import { Card, rm, smallInputCls } from "./ui";
+import { useT } from "@/lib/i18n";
 
 export function QuoteGap({ state, shareUrl, landedTotal }: { state: AppState; shareUrl: string; landedTotal: number }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [sent, setSent] = useState<"idle" | "sending" | "ok" | "fail">("idle");
   const [f, setF] = useState({ name: "", company: "", email: "", phone: "" });
@@ -34,7 +36,7 @@ export function QuoteGap({ state, shareUrl, landedTotal }: { state: AppState; sh
 
   return (
     <Card>
-      <div className="text-sm font-semibold">Freight check</div>
+      <div className="text-sm font-semibold">{t("Freight check")}</div>
       {state.incoterm === "CIF" ? (
         <p className="mt-1 text-[13px] text-muted">Your price is CIF, so freight is inside the supplier price. Ask them to split it out and you'll know whether their shipping line is fair.</p>
       ) : quote > 0 && bench ? (
@@ -67,7 +69,7 @@ export function QuoteGap({ state, shareUrl, landedTotal }: { state: AppState; sh
 
       {!open ? (
         <button type="button" onClick={() => setOpen(true)} className="mt-3 h-11 w-full rounded-[10px] border border-teal text-[13px] font-semibold text-teal hover:bg-teal-tint">
-          Get quotes from forwarders and customs agents
+          {t("Get quotes from forwarders and customs agents")}
         </button>
       ) : sent === "ok" ? (
         <p className="mt-3 rounded-lg bg-teal-tint px-3 py-2 text-[13px] text-teal">Sent. You'll hear back within one working day.</p>

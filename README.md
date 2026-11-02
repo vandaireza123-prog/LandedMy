@@ -1,6 +1,8 @@
 # LandedMY
 
-Malaysian landed-cost calculator: verified engine (Sprint 0), phone-first app (Sprint 1), invoice reader + live FX + forwarder-quote check (Sprint 2).
+Malaysian landed-cost calculator: verified engine (Sprint 0), phone-first app (Sprint 1), invoice reader + live FX + forwarder-quote check (Sprint 2), general goods + reverse calculator + scenarios + Bahasa Malaysia (Sprint 3).
+
+General-goods duty rates in `packages/engine/data/general.json` are indicative (labelled "verify") until checked against a K1; the UI always allows manual duty % and SST %, and links to JKDM's tariff tool.
 
 ## Deploying (Sprint 2 onward needs functions, so drag-and-drop of `out/` is no longer enough)
 

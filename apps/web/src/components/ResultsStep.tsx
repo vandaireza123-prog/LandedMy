@@ -1,22 +1,27 @@
 "use client";
 import { useMemo, useState } from "react";
-import { buildRateTables, computeShipment, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
+import { buildRateTables, computeShipment, manualRates, mergeRates, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
 import type { AppState } from "@/lib/state";
 import { Card, Footer, Progress, SecondaryButton, rm, smallInputCls } from "./ui";
 import { QuoteGap } from "./QuoteGap";
+import { ReverseCalc } from "./ReverseCalc";
+import { Scenarios } from "./Scenarios";
+import { useT } from "@/lib/i18n";
 
 const rates = buildRateTables();
 
 function Row({ k, v }: { k: string; v: number }) {
+  const t = useT();
   return (
     <div className="flex justify-between">
-      <span className="text-muted">{k}</span>
+      <span className="text-muted">{t(k)}</span>
       <span>{rm(v)}</span>
     </div>
   );
 }
 
 function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: string; fx: number; unitCost: number }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ex = l.rates_used.excise;
   return (
@@ -25,7 +30,7 @@ function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: stri
         <div className="min-w-0 truncate text-[15px] font-semibold">{l.name}</div>
         <div className="shrink-0 font-display text-[22px] font-bold text-teal">
           RM {rm(l.per_unit.landed)}
-          <span className="text-xs font-medium text-muted"> / unit</span>
+          <span className="text-xs font-medium text-muted"> {t("/ unit")}</span>
         </div>
       </div>
       <div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
@@ -42,12 +47,12 @@ function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: stri
           {l.per_pallet ? ` · Pallet RM ${rm(l.per_pallet, 0)}` : ""} · line RM {rm(l.landed, 0)}
         </span>
         <button type="button" onClick={() => setOpen(!open)} className="font-semibold text-teal">
-          {open ? "Hide formula" : "Show formula"}
+          {open ? t("Hide formula") : t("Show formula")}
         </button>
       </div>
       {open && (
         <div className="mt-2 rounded-lg bg-ground p-2.5 font-mono text-[11px] leading-relaxed text-ink-2">
-          <div>litres = {l.litres} L for {l.units} units</div>
+          {l.litres > 0 && <div>litres = {l.litres} L for {l.units} units</div>}
           <div>
             duty = {l.rates_used.duty.type === "per_litre" ? `${l.litres} L × RM${l.rates_used.duty.value}` : l.rates_used.duty.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × RM${l.rates_used.duty.value}` : `CIF × ${l.rates_used.duty.value}%`} = {rm(l.duty)}
           </div>
@@ -74,21 +79,25 @@ export function ResultsStep({
   reset,
   shipment,
   shareUrl,
+  manualRateLines,
 }: {
   state: AppState;
   update: (p: Partial<AppState>) => void;
   reset: () => void;
   shipment: Shipment;
   shareUrl: string;
+  manualRateLines: { hs_code: string; name: string; duty_pct: number; sst_pct: number }[];
 }) {
+  const t = useT();
   const [copied, setCopied] = useState(false);
   const result = useMemo<ShipmentResult | { error: string }>(() => {
     try {
-      return computeShipment(shipment, rates);
+      const merged = mergeRates(rates, ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+      return computeShipment(shipment, merged);
     } catch (e) {
       return { error: (e as Error).message };
     }
-  }, [shipment]);
+  }, [shipment, manualRateLines]);
 
   if ("error" in result) {
     return (
@@ -107,15 +116,15 @@ export function ResultsStep({
     );
   }
 
-  const t = result.totals;
+  const tot = result.totals;
   const units = result.lines.reduce((a, l) => a + l.units, 0);
-  const pct = (n: number) => (t.landed > 0 ? (n / t.landed) * 100 : 0);
+  const pct = (n: number) => (tot.landed > 0 ? (n / tot.landed) * 100 : 0);
   const segs = [
-    { k: "Goods", v: pct(t.goods), c: "#FFFFFF" },
-    { k: "Duty", v: pct(t.duty), c: "#9ED3CE" },
-    { k: "Excise", v: pct(t.excise), c: "#5FB5AE" },
-    { k: "SST", v: pct(t.sst), c: "#2E8A84" },
-    { k: "Freight & local", v: pct(t.freight + t.insurance + t.local_charges), c: "#CFE9E6" },
+    { k: t("Goods"), v: pct(tot.goods), c: "#FFFFFF" },
+    { k: t("Duty"), v: pct(tot.duty), c: "#9ED3CE" },
+    { k: t("Excise"), v: pct(tot.excise), c: "#5FB5AE" },
+    { k: t("SST"), v: pct(tot.sst), c: "#2E8A84" },
+    { k: t("Freight & local"), v: pct(tot.freight + tot.insurance + tot.local_charges), c: "#CFE9E6" },
   ];
   const first = result.lines[0];
   const margin = state.sell_price > 0 && first ? state.sell_price - first.per_unit.landed : 0;
@@ -143,10 +152,10 @@ export function ResultsStep({
     <>
       <Progress step={4} />
       <div className="mx-5 mt-3 rounded-2xl bg-teal p-5 text-white">
-        <div className="text-xs font-semibold uppercase tracking-wider opacity-85">Shipment landed at your warehouse</div>
-        <div className="mt-1.5 font-display text-[40px] font-bold leading-[1.05] tracking-tight">RM {rm(t.landed, 0)}</div>
+        <div className="text-xs font-semibold uppercase tracking-wider opacity-85">{t("Shipment landed at your warehouse")}</div>
+        <div className="mt-1.5 font-display text-[40px] font-bold leading-[1.05] tracking-tight">RM {rm(tot.landed, 0)}</div>
         <div className="mt-1 text-[13px] opacity-85">
-          {result.lines.length} product{result.lines.length === 1 ? "" : "s"} · {units.toLocaleString()} units · tax is {Math.round(t.tax_share_pct)}% of it
+          {result.lines.length} product{result.lines.length === 1 ? "" : "s"} · {units.toLocaleString()} units · {t("tax is {n}% of it", { n: Math.round(tot.tax_share_pct) })}
         </div>
         <div className="mt-3.5 flex h-2.5 overflow-hidden rounded-full bg-white/20">
           {segs.map((s) => (
@@ -173,7 +182,7 @@ export function ResultsStep({
         ))}
 
         <Card>
-          <div className="mb-2 text-sm font-semibold">Margin check</div>
+          <div className="mb-2 text-sm font-semibold">{t("Margin check")}</div>
           <div className="flex items-center justify-between gap-2">
             <label htmlFor="sell" className="text-[13px] text-muted">
               Sell {first?.name ?? "it"} at (RM / unit)
@@ -182,7 +191,7 @@ export function ResultsStep({
           </div>
           {state.sell_price > 0 && first && (
             <div className="mt-2 flex justify-between text-sm">
-              <span className="text-muted">Gross margin</span>
+              <span className="text-muted">{t("Gross margin")}</span>
               <span className={`font-semibold ${margin >= 0 ? "text-teal" : "text-red-700"}`}>
                 RM {rm(margin)} · {Math.round((margin / state.sell_price) * 100)}%
               </span>
@@ -190,15 +199,19 @@ export function ResultsStep({
           )}
         </Card>
 
-        <QuoteGap state={state} shareUrl={shareUrl} landedTotal={t.landed} />
+        {first && <ReverseCalc line={first} currency={state.currency} fx={state.fx_rate} unitCost={state.products.find((p) => p.id === first.id)?.unit_cost ?? 0} />}
+
+        <Scenarios state={state} update={update} current={result} />
+
+        <QuoteGap state={state} shareUrl={shareUrl} landedTotal={tot.landed} />
 
         <Card>
-          <div className="mb-2 text-sm font-semibold">Before you ship</div>
+          <div className="mb-2 text-sm font-semibold">{t("Before you ship")}</div>
           <div className="flex flex-col gap-2 text-[13px]">
             {["Import licence for alcohol (RMCD)", "Customs tax stamps on every bottle", "Labels meet Food Regulations (from 1 Apr 2026)", "Sales tax registration if over threshold"].map((s) => (
               <label key={s} className="flex items-center gap-2.5">
                 <input type="checkbox" className="h-[18px] w-[18px] accent-teal" />
-                <span>{s}</span>
+                <span>{t(s)}</span>
               </label>
             ))}
           </div>
@@ -210,21 +223,21 @@ export function ResultsStep({
 
         <div className="grid grid-cols-3 gap-2">
           <button type="button" onClick={copy} className="h-11 rounded-[10px] border border-line bg-white text-[13px] font-semibold">
-            {copied ? "Copied" : "Share link"}
+            {copied ? t("Copied") : t("Share link")}
           </button>
           <button type="button" onClick={exportCsv} className="h-11 rounded-[10px] border border-line bg-white text-[13px] font-semibold">
             CSV
           </button>
           <button type="button" onClick={() => window.print()} className="h-11 rounded-[10px] border border-line bg-white text-[13px] font-semibold">
-            PDF / print
+            {t("PDF / print")}
           </button>
         </div>
       </div>
 
       <Footer>
         <div className="grid grid-cols-2 gap-2.5">
-          <SecondaryButton onClick={() => update({ step: 3 })}>Edit</SecondaryButton>
-          <SecondaryButton onClick={reset}>New shipment</SecondaryButton>
+          <SecondaryButton onClick={() => update({ step: 3 })}>{t("Edit")}</SecondaryButton>
+          <SecondaryButton onClick={reset}>{t("New shipment")}</SecondaryButton>
         </div>
       </Footer>
     </>

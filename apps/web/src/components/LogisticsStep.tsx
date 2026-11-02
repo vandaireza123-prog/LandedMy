@@ -2,9 +2,11 @@
 import type { AppState } from "@/lib/state";
 import { BENCHMARK_AS_OF, EQUIPMENT_LABEL, benchmarkFor } from "@/lib/lanes";
 import { DEST_PORTS } from "@/lib/ports";
+import { useT } from "@/lib/i18n";
 import { Card, Footer, PrimaryButton, Progress, Title, rm, smallInputCls } from "./ui";
 
 export function LogisticsStep({ state, update }: { state: AppState; update: (p: Partial<AppState>) => void }) {
+  const t = useT();
   const bench = benchmarkFor(state.origin_port, state.equipment);
   const units = state.equipment === "pallet" ? state.pallets : 1;
   const benchMid = bench ? Math.round(((bench.low + bench.high) / 2) * units) : 0;
@@ -26,7 +28,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
             </div>
             {!cif && bench && (
               <button type="button" onClick={() => update({ freight: benchMid })} className="text-xs font-semibold text-teal">
-                Use benchmark
+                {t("Use benchmark")}
               </button>
             )}
           </div>
@@ -58,7 +60,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
         </Card>
 
         <Card>
-          <div className="mb-2.5 text-sm font-semibold">Local charges, {destLabel} (RM)</div>
+          <div className="mb-2.5 text-sm font-semibold">{t("Local charges")}, {destLabel} (RM)</div>
           <div className="flex flex-col gap-2">
             {Object.entries(state.local_charges).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between gap-2">
@@ -86,9 +88,9 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
       <Footer>
         <div className="grid grid-cols-[auto_1fr] gap-2">
           <button type="button" onClick={() => update({ step: 2 })} className="h-[54px] rounded-xl border border-line bg-white px-5 text-[15px] font-semibold">
-            Back
+            {t("Back")}
           </button>
-          <PrimaryButton onClick={() => update({ step: 4 })}>Calculate landed cost</PrimaryButton>
+          <PrimaryButton onClick={() => update({ step: 4 })}>{t("Calculate landed cost")}</PrimaryButton>
         </div>
       </Footer>
     </>

@@ -61,8 +61,13 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
   const goodsRm = shipment.lines.map((l) => (l.declared_value ?? l.unit_cost * lineUnits(l)) * fx_rate);
   const totalGoods = goodsRm.reduce((a, b) => a + b, 0);
 
+  let allocation = shipment.allocation;
+  if (allocation === "volume" && shipment.lines.some((l) => lineLitres(l) <= 0)) {
+    allocation = "value";
+    warnings.push("Some lines have no volume (non-beverage goods), so freight and local charges were split by value instead of volume.");
+  }
   const weights = shipment.lines.map((l, i) => {
-    switch (shipment.allocation) {
+    switch (allocation) {
       case "value":
         return goodsRm[i];
       case "units":

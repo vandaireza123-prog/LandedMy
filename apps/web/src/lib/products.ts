@@ -1,5 +1,5 @@
 /** Seed product library. Typing a name pre-fills size, ABV and HS code. */
-export type Category = "beer" | "still_wine" | "sparkling" | "cider" | "spirits" | "other";
+export type Category = "beer" | "still_wine" | "sparkling" | "cider" | "spirits" | "other" | "general";
 
 export interface LibraryProduct {
   name: string;
@@ -17,7 +17,8 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   sparkling: "Sparkling wine",
   cider: "Cider / perry",
   spirits: "Spirits",
-  other: "Other",
+  other: "Other alcohol",
+  general: "Non-alcohol goods",
 };
 
 /** Default HS line per category; the engine's rate tables key off these. */
@@ -49,9 +50,11 @@ export const CATEGORY_HS: Record<Category, { hs_code: string; label: string }[]>
     { hs_code: "2208.70.10", label: "Liqueur ≤ 57%" },
   ],
   other: [{ hs_code: "2208.90.99", label: "Other spirituous beverage" }],
+  general: [],
 };
 
 export function hsForCategory(c: Category, abv: number): string {
+  if (c === "general") return "";
   if (c === "beer") return abv > 5.8 ? "2203.00.99" : "2203.00.91";
   if (c === "still_wine") return abv > 15 ? "2204.21.13" : "2204.21.11";
   return CATEGORY_HS[c][0].hs_code;

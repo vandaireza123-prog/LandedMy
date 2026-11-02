@@ -5,6 +5,7 @@ import type { AppState } from "@/lib/state";
 import { EQUIPMENT_LABEL, FX_AS_OF, FX_DEFAULT, defaultLocalCharges, type Equipment } from "@/lib/lanes";
 import { DEST_PORTS, type Port } from "@/lib/ports";
 import { PortPicker } from "./PortPicker";
+import { useT } from "@/lib/i18n";
 import { Field, Footer, PrimaryButton, Progress, Title, inputCls } from "./ui";
 
 const INCOTERMS: { v: AppState["incoterm"]; label: string }[] = [
@@ -14,6 +15,7 @@ const INCOTERMS: { v: AppState["incoterm"]; label: string }[] = [
 ];
 
 export function SetupStep({ state, update }: { state: AppState; update: (p: Partial<AppState>) => void }) {
+  const t = useT();
   const [fx, setFx] = useState<FxResponse | null>(null);
   useEffect(() => {
     fetchFx().then((r) => {
@@ -37,10 +39,10 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
       <Title step={1} title="Where is it coming from?" sub="Set the lane once. Every product you add next shares it." />
       <div className="flex flex-1 flex-col gap-3 p-5">
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-ink-2">From port</span>
+          <span className="text-xs font-semibold text-ink-2">{t("From port")}</span>
           <PortPicker value={state.origin_port} label={state.origin_label} onPick={onPort} onCustom={onCustomPort} />
         </div>
-        <Field label="To port">
+        <Field label={t("To port")}>
           <select className={inputCls} value={state.dest_port} onChange={(e) => update({ dest_port: e.target.value })}>
             {DEST_PORTS.map((p) => (
               <option key={p.code} value={p.code}>
@@ -51,7 +53,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
         </Field>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-ink-2">Shipment type</span>
+          <span className="text-xs font-semibold text-ink-2">{t("Shipment type")}</span>
           <div className="grid grid-cols-4 gap-2">
             {(Object.keys(EQUIPMENT_LABEL) as Equipment[]).map((e) => {
               const on = state.equipment === e;
@@ -70,7 +72,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
         </div>
 
         {state.equipment === "pallet" && (
-          <Field label="Number of pallets">
+          <Field label={t("Number of pallets")}>
             <input
               type="number"
               min={1}
@@ -85,7 +87,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
         )}
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Price basis">
+          <Field label={t("Price basis")}>
             <select className={inputCls} value={state.incoterm} onChange={(e) => update({ incoterm: e.target.value as AppState["incoterm"] })}>
               {INCOTERMS.map((i) => (
                 <option key={i.v} value={i.v}>
@@ -94,7 +96,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
               ))}
             </select>
           </Field>
-          <Field label="Currency">
+          <Field label={t("Currency")}>
             <select
               className={inputCls}
               value={state.currency}
@@ -111,7 +113,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
 
         <div className="mt-1 flex items-center justify-between rounded-[10px] border border-line bg-white px-3.5 py-3">
           <div>
-            <div className="text-xs text-muted">Customs exchange rate</div>
+            <div className="text-xs text-muted">{t("Customs exchange rate")}</div>
             <div className="flex items-baseline gap-1 text-[15px] font-semibold">
               1 {state.currency} = RM
               <input
@@ -135,7 +137,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
       </div>
       <Footer>
         <PrimaryButton onClick={() => update({ step: 2 })} disabled={!(state.fx_rate > 0)}>
-          Add products
+          {t("Add products")}
         </PrimaryButton>
       </Footer>
     </>

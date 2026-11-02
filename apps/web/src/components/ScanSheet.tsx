@@ -7,8 +7,8 @@ import { smallInputCls } from "./ui";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
-const DEFAULT_ML: Record<Category, number> = { beer: 330, still_wine: 750, sparkling: 750, cider: 330, spirits: 700, other: 700 };
-const DEFAULT_CASE: Record<Category, number> = { beer: 24, still_wine: 6, sparkling: 6, cider: 24, spirits: 6, other: 6 };
+const DEFAULT_ML: Record<Category, number> = { beer: 330, still_wine: 750, sparkling: 750, cider: 330, spirits: 700, other: 700, general: 0 };
+const DEFAULT_CASE: Record<Category, number> = { beer: 24, still_wine: 6, sparkling: 6, cider: 24, spirits: 6, other: 6, general: 1 };
 
 export function toRows(lines: ExtractedLine[]): ProductRow[] {
   return lines.map((l) => {

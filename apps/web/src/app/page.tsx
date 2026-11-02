@@ -6,11 +6,14 @@ import { ProductsStep } from "@/components/ProductsStep";
 import { LogisticsStep } from "@/components/LogisticsStep";
 import { ResultsStep } from "@/components/ResultsStep";
 import { DEST_PORTS } from "@/lib/ports";
+import { LangProvider } from "@/lib/i18n";
 
 export default function Page() {
-  const { state, update, reset, hydrated, shareUrl, shipment } = useAppState();
+  const { state, update, reset, hydrated, shareUrl, shipment, manualRateLines } = useAppState();
   const dest = DEST_PORTS.find((p) => p.code === state.dest_port);
   const right = state.step === 1 ? undefined : `${state.origin_label.split(",")[0]} → ${dest?.label.split(" (")[0] ?? ""}`;
+
+  const toggleLang = () => update({ lang: state.lang === "ms" ? "en" : "ms" });
 
   if (!hydrated) {
     return (
@@ -21,11 +24,13 @@ export default function Page() {
   }
 
   return (
-    <Shell right={right}>
+    <LangProvider lang={state.lang}>
+    <Shell right={right} onLang={toggleLang} lang={state.lang}>
       {state.step === 1 && <SetupStep state={state} update={update} />}
       {state.step === 2 && <ProductsStep state={state} update={update} />}
       {state.step === 3 && <LogisticsStep state={state} update={update} />}
-      {state.step === 4 && <ResultsStep state={state} update={update} reset={reset} shipment={shipment} shareUrl={shareUrl} />}
+      {state.step === 4 && <ResultsStep state={state} update={update} reset={reset} shipment={shipment} shareUrl={shareUrl} manualRateLines={manualRateLines} />}
     </Shell>
+    </LangProvider>
   );
 }

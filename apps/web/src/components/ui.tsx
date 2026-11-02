@@ -1,14 +1,23 @@
 "use client";
 import type { ReactNode } from "react";
+import { useT } from "@/lib/i18n";
 
-export function Shell({ children, right }: { children: ReactNode; right?: ReactNode }) {
+export function Shell({ children, right, onLang, lang }: { children: ReactNode; right?: ReactNode; onLang?: () => void; lang?: string }) {
+  const t = useT();
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground">
       <header className="flex items-center justify-between px-5 pb-3 pt-12">
         <div className="font-display text-lg font-bold tracking-tight">
           Landed<span className="text-teal">MY</span>
         </div>
-        <div className="text-xs font-medium text-muted">{right ?? "Free · no login"}</div>
+        <div className="flex items-center gap-2 text-xs font-medium text-muted">
+          <span>{right ?? t("Free · no login")}</span>
+          {onLang && (
+            <button type="button" onClick={onLang} className="rounded-md border border-line bg-white px-1.5 py-0.5 text-[11px] font-semibold text-ink" aria-label="Switch language">
+              {lang === "ms" ? "EN" : "BM"}
+            </button>
+          )}
+        </div>
       </header>
       {children}
     </div>
@@ -26,11 +35,12 @@ export function Progress({ step }: { step: number }) {
 }
 
 export function Title({ step, title, sub }: { step: number; title: string; sub: string }) {
+  const t = useT();
   return (
     <div className="px-5 pt-3">
-      <div className="text-xs font-semibold uppercase tracking-wider text-teal">Step {step} of 4</div>
-      <h1 className="mt-1.5 font-display text-[28px] font-bold leading-[1.1] tracking-tight">{title}</h1>
-      <p className="mt-1 text-sm leading-snug text-muted">{sub}</p>
+      <div className="text-xs font-semibold uppercase tracking-wider text-teal">{t("Step {n} of 4", { n: step })}</div>
+      <h1 className="mt-1.5 font-display text-[28px] font-bold leading-[1.1] tracking-tight">{t(title)}</h1>
+      <p className="mt-1 text-sm leading-snug text-muted">{t(sub)}</p>
     </div>
   );
 }

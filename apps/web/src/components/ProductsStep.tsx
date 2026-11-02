@@ -5,6 +5,8 @@ import { CATEGORY_HS, CATEGORY_LABEL, hsForCategory, searchLibrary, type Categor
 import { Card, Footer, PrimaryButton, Progress, Title, smallInputCls } from "./ui";
 import { ScanSheet } from "./ScanSheet";
 import { FX_DEFAULT } from "@/lib/lanes";
+import { GENERAL_GROUPS, GENERAL_LINES, GENERAL_VERIFY_URL } from "@landedmy/engine";
+import { useT } from "@/lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -39,6 +41,7 @@ function fromLibrary(p: LibraryProduct): ProductRow {
 }
 
 export function ProductsStep({ state, update }: { state: AppState; update: (p: Partial<AppState>) => void }) {
+  const t = useT();
   const [q, setQ] = useState("");
   const [scan, setScan] = useState(false);
   const hits = searchLibrary(q);
@@ -50,6 +53,22 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
       rows.map((r) => {
         if (r.id !== id) return r;
         const n = { ...r, ...patch };
+        if (patch.category === "general") {
+          n.abv = 0;
+          n.volume_ml = 0;
+          n.hs_code = "MANUAL";
+          n.manual_sst_pct = n.manual_sst_pct ?? 10;
+          n.manual_duty_pct = n.manual_duty_pct ?? 0;
+          n.hs_confirmed = false;
+          return n;
+        }
+        if (patch.category !== undefined && r.category === "general") {
+          n.volume_ml = 750;
+          n.abv = 13;
+          n.hs_code = hsForCategory(n.category, n.abv);
+          n.hs_confirmed = false;
+          return n;
+        }
         if ((patch.category !== undefined || patch.abv !== undefined) && !patch.hs_code) {
           const auto = hsForCategory(n.category, n.abv);
           if (auto !== r.hs_code) {
@@ -68,7 +87,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
 
   const units = rows.reduce((a, r) => a + r.units_per_case * r.cases, 0);
   const goods = rows.reduce((a, r) => a + r.units_per_case * r.cases * r.unit_cost, 0);
-  const ready = rows.length > 0 && rows.every((r) => r.name && r.unit_cost > 0 && r.cases > 0 && r.volume_ml > 0);
+  const ready = rows.length > 0 && rows.every((r) => r.name && r.unit_cost > 0 && r.cases > 0 && (r.category === "general" || r.volume_ml > 0));
 
   return (
     <>
@@ -83,7 +102,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
           </svg>
           <input
             className="flex-1 bg-transparent text-[15px] outline-none"
-            placeholder="Search product, e.g. Duvel 330ml"
+            placeholder={t("Search product, e.g. Duvel 330ml")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
@@ -116,7 +135,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
       <div className="px-5 pt-2.5">
         <button type="button" onClick={() => setScan(true)} className="flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-teal bg-teal-tint text-sm font-semibold text-teal">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16"/></svg>
-          Scan invoice, price list or photo
+          {t("Scan invoice, price list or photo")}
         </button>
       </div>
       {scan && (
@@ -134,7 +153,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
             <div className="flex items-start justify-between gap-2">
               <input
                 className="min-w-0 flex-1 border-b border-transparent bg-transparent text-[15px] font-semibold outline-none focus:border-teal"
-                placeholder="Product name"
+                placeholder={t("Product name")}
                 value={r.name}
                 onChange={(e) => patchRow(r.id, { name: e.target.value })}
               />
@@ -147,7 +166,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
 
             <div className="mt-2 grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">Type</span>
+                <span className="text-[11px] text-muted">{t("Type")}</span>
                 <select className={smallInputCls} value={r.category} onChange={(e) => patchRow(r.id, { category: e.target.value as Category })}>
                   {(Object.keys(CATEGORY_LABEL) as Category[]).map((c) => (
                     <option key={c} value={c}>
@@ -156,50 +175,112 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                   ))}
                 </select>
               </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">Customs code</span>
-                <select className={smallInputCls} value={r.hs_code} onChange={(e) => patchRow(r.id, { hs_code: e.target.value, hs_confirmed: true })}>
-                  {CATEGORY_HS[r.category].map((h) => (
-                    <option key={h.hs_code} value={h.hs_code}>
-                      {h.hs_code} · {h.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              {r.category !== "general" ? (
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted">{t("Customs code")}</span>
+                  <select className={smallInputCls} value={r.hs_code} onChange={(e) => patchRow(r.id, { hs_code: e.target.value, hs_confirmed: true })}>
+                    {CATEGORY_HS[r.category].map((h) => (
+                      <option key={h.hs_code} value={h.hs_code}>
+                        {h.hs_code} · {h.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ) : (
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted">{t("Group")}</span>
+                  <select className={smallInputCls} value={r.general_group ?? "other"} onChange={(e) => patchRow(r.id, { general_group: e.target.value, hs_code: "MANUAL", hs_confirmed: false })}>
+                    {GENERAL_GROUPS.map((g) => (
+                      <option key={g.key} value={g.key}>
+                        {g.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </div>
 
-            <div className="mt-2 grid grid-cols-5 gap-2">
+            {r.category === "general" && (
+              <div className="mt-2 flex flex-col gap-2">
+                <label className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted">Tariff line (pick one, or enter rates yourself)</span>
+                  <select
+                    className={smallInputCls}
+                    value={r.hs_code}
+                    onChange={(e) => {
+                      const code = e.target.value;
+                      const line = GENERAL_LINES.find((g) => g.hs_code === code);
+                      patchRow(r.id, { hs_code: code, hs_confirmed: !!line, manual_duty_pct: line ? line.duty_pct : r.manual_duty_pct, manual_sst_pct: line ? line.sst_pct : r.manual_sst_pct });
+                    }}
+                  >
+                    <option value="MANUAL">Enter duty % and SST % myself</option>
+                    {GENERAL_LINES.filter((g) => g.group === (r.general_group ?? "other")).map((g) => (
+                      <option key={g.hs_code} value={g.hs_code}>
+                        {g.hs_code} · {g.description} · duty {g.duty_pct}% · SST {g.sst_pct}%
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {r.hs_code === "MANUAL" && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted">Import duty % of CIF</span>
+                      <input type="number" step="0.5" className={smallInputCls} value={r.manual_duty_pct ?? 0} onChange={(e) => patchRow(r.id, { manual_duty_pct: Number(e.target.value) || 0 })} />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted">SST %</span>
+                      <select className={smallInputCls} value={r.manual_sst_pct ?? 10} onChange={(e) => patchRow(r.id, { manual_sst_pct: Number(e.target.value) })}>
+                        <option value={0}>0% (exempt)</option>
+                        <option value={5}>5%</option>
+                        <option value={10}>10%</option>
+                      </select>
+                    </label>
+                  </div>
+                )}
+                <a href={GENERAL_VERIFY_URL} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-teal">
+                  Look up the official rate on JKDM's tariff tool →
+                </a>
+              </div>
+            )}
+
+            <div className={`mt-2 grid gap-2 ${r.category === "general" ? "grid-cols-3" : "grid-cols-5"}`}>
+              {r.category !== "general" && (
+                <>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[11px] text-muted">ml</span>
+                    <input type="number" className={smallInputCls} value={r.volume_ml} onChange={(e) => patchRow(r.id, { volume_ml: Number(e.target.value) || 0 })} />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[11px] text-muted">ABV %</span>
+                    <input type="number" step="0.1" className={smallInputCls} value={r.abv} onChange={(e) => patchRow(r.id, { abv: Number(e.target.value) || 0 })} />
+                  </label>
+                </>
+              )}
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">ml</span>
-                <input type="number" className={smallInputCls} value={r.volume_ml} onChange={(e) => patchRow(r.id, { volume_ml: Number(e.target.value) || 0 })} />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">ABV %</span>
-                <input type="number" step="0.1" className={smallInputCls} value={r.abv} onChange={(e) => patchRow(r.id, { abv: Number(e.target.value) || 0 })} />
-              </label>
-              <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">Cost / unit</span>
+                <span className="text-[11px] text-muted">{t("Cost / unit")}</span>
                 <input type="number" step="0.01" className={smallInputCls} placeholder={state.currency} value={r.unit_cost || ""} onChange={(e) => patchRow(r.id, { unit_cost: Number(e.target.value) || 0 })} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">Per case</span>
+                <span className="text-[11px] text-muted">{t("Per case")}</span>
                 <input type="number" className={smallInputCls} value={r.units_per_case} onChange={(e) => patchRow(r.id, { units_per_case: Number(e.target.value) || 0 })} />
               </label>
               <label className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">Cases</span>
+                <span className="text-[11px] text-muted">{t("Cases")}</span>
                 <input type="number" className={smallInputCls} value={r.cases} onChange={(e) => patchRow(r.id, { cases: Number(e.target.value) || 0 })} />
               </label>
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted">
-              <span>{r.units_per_case * r.cases} units · {((r.volume_ml / 1000) * r.units_per_case * r.cases).toFixed(1)} L</span>
+              <span>
+                {r.units_per_case * r.cases} units{r.category !== "general" ? ` · ${((r.volume_ml / 1000) * r.units_per_case * r.cases).toFixed(1)} L` : ""}
+              </span>
               <span className={`rounded-md px-2 py-0.5 font-semibold ${r.hs_confirmed ? "bg-teal-tint text-teal" : "bg-amber-tint text-amber"}`}>
-                {r.hs_confirmed ? "Code confirmed" : "Check customs code"}
+                {r.hs_confirmed ? t("Code confirmed") : r.hs_code === "MANUAL" ? t("Your rates, verify") : t("Check customs code")}
               </span>
             </div>
           </Card>
         ))}
         <button type="button" onClick={() => add()} className="h-12 rounded-xl border border-dashed border-[#B8BAB2] text-sm font-semibold text-teal hover:bg-teal-tint">
-          + Add another product
+          {t("+ Add another product")}
         </button>
       </div>
 
@@ -214,10 +295,10 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
         </div>
         <div className="grid grid-cols-[auto_1fr] gap-2">
           <button type="button" onClick={() => update({ step: 1 })} className="h-[54px] rounded-xl border border-line bg-white px-5 text-[15px] font-semibold">
-            Back
+            {t("Back")}
           </button>
           <PrimaryButton onClick={() => update({ step: 3 })} disabled={!ready}>
-            Next: freight and charges
+            {t("Next: freight and charges")}
           </PrimaryButton>
         </div>
       </Footer>

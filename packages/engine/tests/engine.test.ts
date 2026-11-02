@@ -21,7 +21,7 @@ const rates: RateTables = buildRateTables();
 
 describe("rate tables", () => {
   it("every HS line has a tariff, an SST rate and two excise versions", () => {
-    const codes = new Set(rates.tariff_lines.map((r) => r.hs_code));
+    const codes = new Set(rates.tariff_lines.filter((r) => r.hs_code.startsWith("22") && !r.hs_code.startsWith("2202")).map((r) => r.hs_code));
     for (const hs of codes) {
       expect(rates.sst_rates.filter((r) => r.hs_code === hs)).toHaveLength(1);
       expect(rates.excise_lines.filter((r) => r.hs_code === hs)).toHaveLength(2);
@@ -143,5 +143,32 @@ describe("guards", () => {
     const r = computeShipment({ ...base, incoterm: "CIF" }, rates);
     expect(r.totals.freight).toBe(0);
     expect(r.warnings.length).toBe(1);
+  });
+});
+
+describe("general goods", () => {
+  it("prices an ad valorem line with SST on CIF + duty and no excise", async () => {
+    const { manualRates, mergeRates } = await import("../src/index.js");
+    const s: Shipment = {
+      ...fixtures[0].shipment,
+      lines: [{ id: "g1", name: "Wooden chairs", hs_code: "9403.60.00", volume_ml: 0, abv: 0, units_per_case: 1, cases: 100, unit_cost: 40 }],
+    };
+    const r = computeShipment(s, rates).lines[0];
+    // goods 100 × 40 × 5 = 20,000; freight 480×5 = 2,400 → CIF 22,400; duty 20% = 4,480; SST 10% × 26,880 = 2,688
+    expect(r.cif).toBe(22400);
+    expect(r.duty).toBe(4480);
+    expect(r.excise).toBe(0);
+    expect(r.sst).toBe(2688);
+    expect(r.rates_used.excise).toBeNull();
+
+    // mixed shipment: a zero-volume line forces value allocation so it still carries freight
+    const mixed = computeShipment({ ...s, lines: [fixtures[0].shipment.lines[0], s.lines[0]] }, rates);
+    expect(mixed.warnings.some((w) => w.includes("split by value"))).toBe(true);
+    expect(mixed.lines[1].freight).toBeGreaterThan(0);
+    expect(Math.abs(mixed.totals.freight - 2400)).toBeLessThan(0.05);
+
+    const manual = mergeRates(rates, manualRates("MANUAL-x", "Widgets", 5, 10));
+    const m = computeShipment({ ...s, lines: [{ ...s.lines[0], hs_code: "MANUAL-x" }] }, manual).lines[0];
+    expect(m.duty).toBe(1120);
   });
 });
