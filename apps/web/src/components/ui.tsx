@@ -7,9 +7,9 @@ export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground">
       <header className="flex items-center justify-between px-5 pb-3 pt-12">
-        <div className="font-display text-lg font-bold tracking-tight">
+        <a href="/" className="font-display text-lg font-bold tracking-tight text-ink no-underline" aria-label="LandedMY home">
           Landed<span className="text-teal">MY</span>
-        </div>
+        </a>
         <div className="flex items-center gap-2 text-xs font-medium text-muted">
           <span>{right ?? t("Free · no login")}</span>
           {onAccount && (

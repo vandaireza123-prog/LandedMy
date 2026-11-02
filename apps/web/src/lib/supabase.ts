@@ -28,7 +28,7 @@ export function useUser() {
 }
 
 export async function sendMagicLink(email: string): Promise<string | null> {
-  const { error } = await supabase().auth.signInWithOtp({ email, options: { emailRedirectTo: typeof window !== "undefined" ? window.location.origin + "/" : undefined } });
+  const { error } = await supabase().auth.signInWithOtp({ email, options: { emailRedirectTo: typeof window !== "undefined" ? window.location.origin + "/calc/" : undefined } });
   return error ? error.message : null;
 }
 
