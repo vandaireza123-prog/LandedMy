@@ -6,48 +6,466 @@
       "Import duty from Customs Duties Order 2022 P.U.(A) 114/2022 (MFN column). Per-litre rates are per litre of beverage.",
       "Excise v1 from Excise Duties Order 2022 P.U.(A) 163/2022, in force 1 June 2022 to 31 Oct 2025.",
       "Excise v2 = v1 + 10% from 1 Nov 2025 per Budget 2026 (tabled 10 Oct 2025). Beer RM192.50 confirmed by Confederation of Malaysian Brewers. REPLACE with gazetted Excise Duties (Amendment) Order figures before launch.",
-      "SST 10% on (CIF + duty + excise) for all chapter 22 alcohol lines."
+      "SST 10% on (CIF + duty + excise) for all chapter 22 alcohol lines.",
+      "Excise Duties Order 2025, P.U.(A) 389/2025, gazetted 31 Oct 2025, in force 1 Nov 2025, revokes P.U.(A) 163/2022. Every chapter-22 line checked against the gazette on 3 Nov 2026: all 28 equal the 2022 rate × 1.10."
     ],
     "sources": {
       "customs": "https://lom.agc.gov.my/ilims/upload/portal/akta/outputp/1729676/P.U.%20(A)%20114_2022%20(DUTI%20KASTAM).pdf",
       "customs_lines": "https://treayo.com/en/hs/malaysia/ch/22",
       "excise_2022": "https://afcwp.asean.org/wp-content/uploads/2023/08/Malaysia_Excise-Duties-Order-2022.pdf",
       "budget_2026": "https://www.thestar.com.my/news/nation/2025/10/11/budget-2026-alcohol-excise-duty-hike-will-fuel-illicit-beer-growth-says-brewers",
-      "sst": "https://www.dhl.com/discover/en-my/logistics-advice/essential-guides/import-sales-tax-malaysia.html"
+      "sst": "https://www.dhl.com/discover/en-my/logistics-advice/essential-guides/import-sales-tax-malaysia.html",
+      "excise_2025": "https://www.customs.gov.my/images/06-prosedur/eksais/perintah/PUA389_2025.pdf"
     }
   },
   "lines": [
-    { "hs_code": "2203.00.11", "description": "Stout and porter, not exceeding 5.8% vol", "duty": { "type": "per_litre", "value": 5.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 175.00 } },
-    { "hs_code": "2203.00.19", "description": "Stout and porter, other", "duty": { "type": "per_litre", "value": 5.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 175.00 } },
-    { "hs_code": "2203.00.91", "description": "Beer (incl. ale), not exceeding 5.8% vol", "duty": { "type": "per_litre", "value": 5.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 175.00 } },
-    { "hs_code": "2203.00.99", "description": "Beer (incl. ale), other", "duty": { "type": "per_litre", "value": 5.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 175.00 } },
-
-    { "hs_code": "2204.10.00", "description": "Sparkling wine", "duty": { "type": "per_litre", "value": 23.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 450.00 } },
-    { "hs_code": "2204.21.11", "description": "Still wine in containers ≤2L, not exceeding 15% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2204.21.13", "description": "Still wine in containers ≤2L, >15% to 23% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2204.21.14", "description": "Still wine in containers ≤2L, exceeding 23% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2204.22.11", "description": "Still wine in containers >2L to 10L, not exceeding 15% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2204.22.12", "description": "Still wine in containers >2L to 10L, >15% to 23% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2204.29.11", "description": "Wine, other containers, not exceeding 15% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2204.29.12", "description": "Wine, other containers, exceeding 15% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-
-    { "hs_code": "2205.10.10", "description": "Vermouth in containers ≤2L, not exceeding 15% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2205.10.20", "description": "Vermouth in containers ≤2L, exceeding 15% vol", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-
-    { "hs_code": "2206.00.10", "description": "Cider and perry", "duty": { "type": "per_litre", "value": 7.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 60.00 } },
-    { "hs_code": "2206.00.20", "description": "Saké", "duty": { "type": "per_litre_pure_alcohol", "value": 25.50 }, "excise": { "type": "per_litre_pure_alcohol", "value": 60.00 } },
-    { "hs_code": "2206.00.50", "description": "Mead", "duty": { "type": "per_litre", "value": 23.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 40.00 } },
-    { "hs_code": "2206.00.60", "description": "Fruit wine (non-grape)", "duty": { "type": "per_litre_pure_alcohol", "value": 108.50 }, "excise": { "type": "per_litre_pure_alcohol", "value": 60.00 } },
-
-    { "hs_code": "2208.20.50", "description": "Brandy", "duty": { "type": "per_litre", "value": 58.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.20.90", "description": "Other grape spirits", "duty": { "type": "per_litre", "value": 58.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.30.10", "description": "Whisky in containers >5L", "duty": { "type": "per_litre", "value": 58.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.30.90", "description": "Whisky, other", "duty": { "type": "per_litre", "value": 58.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.40.00", "description": "Rum and sugar-cane spirits", "duty": { "type": "per_litre", "value": 55.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.50.00", "description": "Gin and Geneva", "duty": { "type": "per_litre", "value": 55.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.60.00", "description": "Vodka", "duty": { "type": "per_litre", "value": 55.00 }, "excise": { "type": "per_litre_pure_alcohol", "value": 150.00 } },
-    { "hs_code": "2208.70.10", "description": "Liqueurs and cordials, not exceeding 57% vol", "duty": { "type": "per_litre_pure_alcohol", "value": 93.50 }, "excise": { "type": "per_litre_pure_alcohol", "value": 60.00 } },
-    { "hs_code": "2208.70.90", "description": "Liqueurs and cordials, other", "duty": { "type": "per_litre_pure_alcohol", "value": 64.50 }, "excise": { "type": "per_litre_pure_alcohol", "value": 60.00 } },
-    { "hs_code": "2208.90.99", "description": "Other spirituous beverages", "duty": { "type": "per_litre_pure_alcohol", "value": 64.50 }, "excise": { "type": "per_litre_pure_alcohol", "value": 60.00 } }
+    {
+      "hs_code": "2203.00.11",
+      "description": "Stout and porter, not exceeding 5.8% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 175
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 192.5
+      }
+    },
+    {
+      "hs_code": "2203.00.19",
+      "description": "Stout and porter, other",
+      "duty": {
+        "type": "per_litre",
+        "value": 5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 175
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 192.5
+      }
+    },
+    {
+      "hs_code": "2203.00.91",
+      "description": "Beer (incl. ale), not exceeding 5.8% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 175
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 192.5
+      }
+    },
+    {
+      "hs_code": "2203.00.99",
+      "description": "Beer (incl. ale), other",
+      "duty": {
+        "type": "per_litre",
+        "value": 5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 175
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 192.5
+      }
+    },
+    {
+      "hs_code": "2204.10.00",
+      "description": "Sparkling wine",
+      "duty": {
+        "type": "per_litre",
+        "value": 23
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 450
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 495
+      }
+    },
+    {
+      "hs_code": "2204.21.11",
+      "description": "Still wine in containers ≤2L, not exceeding 15% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2204.21.13",
+      "description": "Still wine in containers ≤2L, >15% to 23% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2204.21.14",
+      "description": "Still wine in containers ≤2L, exceeding 23% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2204.22.11",
+      "description": "Still wine in containers >2L to 10L, not exceeding 15% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2204.22.12",
+      "description": "Still wine in containers >2L to 10L, >15% to 23% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2204.29.11",
+      "description": "Wine, other containers, not exceeding 15% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2204.29.12",
+      "description": "Wine, other containers, exceeding 15% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2205.10.10",
+      "description": "Vermouth in containers ≤2L, not exceeding 15% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2205.10.20",
+      "description": "Vermouth in containers ≤2L, exceeding 15% vol",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2206.00.10",
+      "description": "Cider and perry",
+      "duty": {
+        "type": "per_litre",
+        "value": 7
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 60
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 66
+      }
+    },
+    {
+      "hs_code": "2206.00.20",
+      "description": "Saké",
+      "duty": {
+        "type": "per_litre_pure_alcohol",
+        "value": 25.5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 60
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 66
+      }
+    },
+    {
+      "hs_code": "2206.00.50",
+      "description": "Mead",
+      "duty": {
+        "type": "per_litre",
+        "value": 23
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 40
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 44
+      }
+    },
+    {
+      "hs_code": "2206.00.60",
+      "description": "Fruit wine (non-grape)",
+      "duty": {
+        "type": "per_litre_pure_alcohol",
+        "value": 108.5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 60
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 66
+      }
+    },
+    {
+      "hs_code": "2208.20.50",
+      "description": "Brandy",
+      "duty": {
+        "type": "per_litre",
+        "value": 58
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.20.90",
+      "description": "Other grape spirits",
+      "duty": {
+        "type": "per_litre",
+        "value": 58
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.30.10",
+      "description": "Whisky in containers >5L",
+      "duty": {
+        "type": "per_litre",
+        "value": 58
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.30.90",
+      "description": "Whisky, other",
+      "duty": {
+        "type": "per_litre",
+        "value": 58
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.40.00",
+      "description": "Rum and sugar-cane spirits",
+      "duty": {
+        "type": "per_litre",
+        "value": 55
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.50.00",
+      "description": "Gin and Geneva",
+      "duty": {
+        "type": "per_litre",
+        "value": 55
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.60.00",
+      "description": "Vodka",
+      "duty": {
+        "type": "per_litre",
+        "value": 55
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 150
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 165
+      }
+    },
+    {
+      "hs_code": "2208.70.10",
+      "description": "Liqueurs and cordials, not exceeding 57% vol",
+      "duty": {
+        "type": "per_litre_pure_alcohol",
+        "value": 93.5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 60
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 66
+      }
+    },
+    {
+      "hs_code": "2208.70.90",
+      "description": "Liqueurs and cordials, other",
+      "duty": {
+        "type": "per_litre_pure_alcohol",
+        "value": 64.5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 60
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 66
+      }
+    },
+    {
+      "hs_code": "2208.90.99",
+      "description": "Other spirituous beverages",
+      "duty": {
+        "type": "per_litre_pure_alcohol",
+        "value": 64.5
+      },
+      "excise": {
+        "type": "per_litre_pure_alcohol",
+        "value": 60
+      },
+      "excise_2025": {
+        "type": "per_litre_pure_alcohol",
+        "value": 66
+      }
+    }
   ]
 }

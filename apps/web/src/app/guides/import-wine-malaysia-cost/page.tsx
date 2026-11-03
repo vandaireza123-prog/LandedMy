@@ -104,7 +104,7 @@ export default function WineGuide() {
         <li>
           <a href="https://ezhs.customs.gov.my/" rel="noopener">Customs Duties Order 2022, P.U.(A) 114/2022</a>, Chapter 22
         </li>
-        <li>Excise Duties Order 2022, P.U.(A) 163/2022, and the Budget 2026 alcohol excise increase effective 1 November 2025</li>
+        <li><a href="https://www.customs.gov.my/images/06-prosedur/eksais/perintah/PUA389_2025.pdf" rel="noopener">Excise Duties Order 2025, P.U.(A) 389/2025</a>, in force 1 November 2025 (replacing P.U.(A) 163/2022)</li>
         <li>Sales Tax Act 2018, 10% standard rate on imports</li>
         <li>Two Royal Malaysian Customs K1 declarations (Australian and French still wine, 2026), used to verify the engine line by line</li>
       </ul>

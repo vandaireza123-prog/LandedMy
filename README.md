@@ -58,7 +58,7 @@ npm run seed:sql          # regenerates supabase/seed/0001_chapter22.sql from th
 
 - SST = 10% × (CIF + duty + excise). Never on CIF alone.
 - Specific rates: per litre of beverage, or per litre of 100% alcohol × ABV.
-- Excise rows switch on 1 Nov 2025 (+10%, Budget 2026).
+- Excise rows switch on 1 Nov 2025 to the Excise Duties Order 2025, P.U.(A) 389/2025 (every chapter-22 line = 2022 rate × 1.10, checked against the gazette).
 - A line with no effective tariff or SST row for the shipment date is refused, not guessed.
 - Alcohol with no excise row is refused.
 - FTA rows override MFN duty when origin matches.
@@ -66,6 +66,5 @@ npm run seed:sql          # regenerates supabase/seed/0001_chapter22.sql from th
 
 ## Before launch
 
-- Replace the +10% excise rows with the gazetted Excise Duties (Amendment) Order figures line by line.
 - Add ATIGA / MAFTA / MNZFTA schedules to `fta_rates`.
 - Add more real K1 declarations as fixtures (beer, cider, spirits — the two we have are both still wine).

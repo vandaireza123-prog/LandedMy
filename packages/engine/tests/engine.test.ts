@@ -36,6 +36,14 @@ describe("rate tables", () => {
     }
   });
 
+  it("2025 Order rows equal the gazetted figures (each line is 2022 × 1.10)", () => {
+    for (const r of rates.excise_lines.filter((r) => r.effective_from === "2025-11-01")) {
+      const v1 = rates.excise_lines.find((x) => x.hs_code === r.hs_code && x.effective_from === "2022-06-01")!;
+      expect(r.excise.value).toBe(Math.round(v1.excise.value * 110) / 100);
+      expect(r.source_doc).toMatch(/389\/2025/);
+    }
+  });
+
   it("beer excise is RM175 before and RM192.50 from 1 Nov 2025", () => {
     const beer = rates.excise_lines.filter((r) => r.hs_code === "2203.00.99");
     expect(beer.find((r) => r.effective_from === "2022-06-01")!.excise.value).toBe(175);

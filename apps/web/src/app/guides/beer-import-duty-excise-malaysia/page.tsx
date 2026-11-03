@@ -103,7 +103,7 @@ export default function BeerGuide() {
         <li>
           <a href="https://ezhs.customs.gov.my/" rel="noopener">Customs Duties Order 2022, P.U.(A) 114/2022</a>, headings 2203 and 2206
         </li>
-        <li>Excise Duties Order 2022, P.U.(A) 163/2022, and the Budget 2026 alcohol excise increase effective 1 November 2025</li>
+        <li><a href="https://www.customs.gov.my/images/06-prosedur/eksais/perintah/PUA389_2025.pdf" rel="noopener">Excise Duties Order 2025, P.U.(A) 389/2025</a>, in force 1 November 2025 (replacing P.U.(A) 163/2022)</li>
         <li>Sales Tax Act 2018, 10% standard rate on imports</li>
       </ul>
       <p className="text-sm text-muted">Estimates for planning. The final assessment is made by the Royal Malaysian Customs Department at the time of import.</p>

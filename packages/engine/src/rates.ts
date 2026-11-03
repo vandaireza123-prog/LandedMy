@@ -1,6 +1,6 @@
 /**
  * Builds effective-dated RateTables from data/chapter22.json.
- * Two excise versions: the 2022 Order and the +10% Budget 2026 rise from 1 Nov 2025.
+ * Two excise versions: the 2022 Order (P.U.(A) 163/2022) and the 2025 Order (P.U.(A) 389/2025) from 1 Nov 2025.
  */
 import type { CountryCode, ExciseLine, FtaRate, ISODate, Rate, RateTables, SstRate, TariffLine } from "./types";
 import chapter22 from "../data/chapter22.json";
@@ -10,13 +10,8 @@ import sg from "../data/sg.json";
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
 const CUSTOMS_EFFECTIVE: ISODate = "2022-06-01";
-const EXCISE_V2_MULTIPLIER = 1.10;
 
 const S = chapter22._meta.sources;
-
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
 
 export function buildRateTables(): RateTables {
   const tariff_lines: TariffLine[] = [];
@@ -48,11 +43,11 @@ export function buildRateTables(): RateTables {
     excise_lines.push({
       hs_code: l.hs_code,
       description: l.description,
-      excise: { type: l.excise.type as Rate["type"], value: round2(l.excise.value * EXCISE_V2_MULTIPLIER) },
+      excise: l.excise_2025 as Rate,
       effective_from: EXCISE_V2_EFFECTIVE,
       effective_to: null,
-      source_doc: "Budget 2026 +10% alcohol excise (gazetted amendment to be loaded)",
-      source_url: S.budget_2026,
+      source_doc: "Excise Duties Order 2025, P.U.(A) 389/2025 (in force 1 Nov 2025)",
+      source_url: S.excise_2025,
     });
 
     sst_rates.push({

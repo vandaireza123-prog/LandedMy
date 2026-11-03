@@ -45,7 +45,7 @@ export const COUNTRIES: Record<DestCountry, CountryInfo> = {
       { code: "MYBKI", label: "Kota Kinabalu (Sepanggar)" },
       { code: "MYKUL", label: "KLIA (air freight)" },
     ],
-    rates_note: "Customs Duties Order 2022 · Excise Duties Order 2022 as raised 1 Nov 2025 (Budget 2026) · SST 10% on CIF + duty + excise.",
+    rates_note: "Customs Duties Order 2022 · Excise Duties Order 2025 (P.U.(A) 389/2025, from 1 Nov 2025) · SST 10% on CIF + duty + excise.",
     fx_note: "Bank Negara Malaysia rate; overwrite with the weekly RMCD customs rate if you have it.",
   },
   SG: {

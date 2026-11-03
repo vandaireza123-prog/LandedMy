@@ -52,7 +52,7 @@ const DOCS = {
   },
   response: "{ result: ShipmentResult } — per line CIF, duty, excise, SST, local charges, landed (total and per unit), rates_used with source documents; totals; warnings",
   errors: { 400: "invalid body", 422: "no rate in force for an HS code on that date (RateNotFoundError)", 429: "rate limited" },
-  rates: "MY: Customs Duties Order 2022 (MFN); Excise Duties Order 2022 and the +10% rise from 1 Nov 2025; SST 10% on CIF + duty + excise; verified against RMCD K1 assessments for chapter 22. SG: customs and excise per litre of alcohol from Singapore Customs List of Dutiable Goods; GST 9% on CIF + duties.",
+  rates: "MY: Customs Duties Order 2022 (MFN); Excise Duties Order 2025 (P.U.(A) 389/2025) from 1 Nov 2025; SST 10% on CIF + duty + excise; verified against RMCD K1 assessments for chapter 22. SG: customs and excise per litre of alcohol from Singapore Customs List of Dutiable Goods; GST 9% on CIF + duties.",
   contact: "https://landedmy.netlify.app/",
 };
 
