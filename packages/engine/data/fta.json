@@ -1,0 +1,28 @@
+{
+  "_meta": {
+    "scope": "Preferential duty into Malaysia. Alcohol (2203–2208) gets NO preference under any Malaysian FTA: ATIGA lists it in Malaysia's General Exclusion List, MAFTA's side letter gives Australian wine MFN treatment only and reserves Malaysia's tariff rights on the rest, MNZFTA follows the same pattern. General goods from ASEAN origins are 0% under ATIGA with a Form D certificate of origin (indicative until checked line by line).",
+    "sources": {
+      "atiga": "https://fta.miti.gov.my/index.php/pages/view/asean-afta",
+      "mafta_side_letter": "https://www.dfat.gov.au/trade/agreements/in-force/mafta/Pages/side-letter-alcoholic-beverages-australia-malaysia",
+      "miti_fta": "https://fta.miti.gov.my/"
+    }
+  },
+  "alcohol_excluded": {
+    "hs_prefixes": ["2203", "2204", "2205", "2206", "2207", "2208"],
+    "agreements": {
+      "ATIGA": { "origins": ["BN", "KH", "ID", "LA", "MM", "PH", "SG", "TH", "VN"], "note": "ATIGA: alcoholic beverages are on Malaysia's General Exclusion List — MFN duty applies." },
+      "MAFTA": { "origins": ["AU"], "note": "MAFTA side letter: Australian wine gets MFN treatment only; Malaysia reserves its tariff rights on other alcohol — MFN duty applies." },
+      "MNZFTA": { "origins": ["NZ"], "note": "MNZFTA: alcohol excluded from Malaysia's tariff commitments — MFN duty applies." }
+    }
+  },
+  "general_goods": [
+    {
+      "agreement": "ATIGA",
+      "origins": ["BN", "KH", "ID", "LA", "MM", "PH", "SG", "TH", "VN"],
+      "duty_pct": 0,
+      "effective_from": "2010-01-01",
+      "requires": "Form D certificate of origin (ASEAN origin, ≥40% regional value content or CTC rule)",
+      "confidence": "verify"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { computeShipment, manualRates, mergeRates, ratesFor, type ShipmentResult } from "@landedmy/engine";
+import { computeShipment, manualRates, mergeRates, ratesFor, withoutFta, type ShipmentResult } from "@landedmy/engine";
 import { buildShipment, manualLinesOf, snapshotOf, type AppState, type Scenario } from "@/lib/state";
 import { EQUIPMENT_LABEL } from "@/lib/lanes";
 import { Card, cs, rm, smallInputCls } from "./ui";
@@ -10,7 +10,8 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 function compute(snap: Scenario["snapshot"]): ShipmentResult | null {
   try {
-    const merged = mergeRates(ratesFor(snap.dest_country ?? "MY"), ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+    const base = ratesFor(snap.dest_country ?? "MY");
+    const merged = mergeRates(snap.fta_claim === false ? withoutFta(base) : base, ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
     return computeShipment(buildShipment(snap), merged);
   } catch {
     return null;

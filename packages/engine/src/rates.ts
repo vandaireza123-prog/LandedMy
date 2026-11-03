@@ -6,6 +6,7 @@ import type { CountryCode, ExciseLine, FtaRate, ISODate, Rate, RateTables, SstRa
 import chapter22 from "../data/chapter22.json";
 import general from "../data/general.json";
 import sg from "../data/sg.json";
+import fta from "../data/fta.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -84,7 +85,42 @@ export function buildRateTables(): RateTables {
     });
   }
 
+  // FTA preferences: only general goods, only ATIGA for now. Alcohol is excluded (see preferenceNote).
+  for (const f of fta.general_goods) {
+    for (const g of general.lines) {
+      for (const origin of f.origins) {
+        fta_rates.push({
+          hs_code: g.hs_code,
+          description: g.description,
+          origin_iso: origin,
+          agreement: f.agreement,
+          duty: { type: "ad_valorem", value: f.duty_pct },
+          effective_from: f.effective_from,
+          effective_to: null,
+          source_doc: `${f.agreement} preferential rate (indicative — ${f.confidence}); needs ${f.requires}`,
+          source_url: fta._meta.sources.atiga,
+        });
+      }
+    }
+  }
+
   return { country: "MY", tax_name: "SST", tariff_lines, excise_lines, sst_rates, fta_rates };
+}
+
+/**
+ * Why a line from an FTA-partner origin still pays MFN duty, or null if no FTA partner is involved.
+ * Alcohol into Malaysia gets no preference under ATIGA, MAFTA or MNZFTA.
+ */
+export function preferenceNote(origin_iso: string, hs_code: string): string | null {
+  const ex = fta.alcohol_excluded;
+  if (!ex.hs_prefixes.some((p) => hs_code.startsWith(p))) return null;
+  for (const a of Object.values(ex.agreements)) if (a.origins.includes(origin_iso)) return a.note;
+  return null;
+}
+
+/** Drop FTA rows so a shipment is priced at MFN (no certificate of origin). */
+export function withoutFta(tables: RateTables): RateTables {
+  return { ...tables, fta_rates: [] };
 }
 
 /**

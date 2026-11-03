@@ -181,6 +181,28 @@ describe("general goods", () => {
   });
 });
 
+describe("FTA preferences", () => {
+  it("ATIGA 0% applies to general goods from ASEAN with a warning; alcohol from AU/NZ/ASEAN stays MFN with a note", async () => {
+    const { preferenceNote, withoutFta } = await import("../src/index.js");
+    const chairs: Shipment = { ...fixtures[0].shipment, origin_iso: "VN", lines: [{ id: "g1", name: "Wooden chairs", hs_code: "9403.60.00", volume_ml: 0, abv: 0, units_per_case: 1, cases: 100, unit_cost: 40 }] };
+    const pref = computeShipment(chairs, rates);
+    expect(pref.lines[0].duty).toBe(0);
+    expect(pref.lines[0].rates_used.fta_agreement).toBe("ATIGA");
+    expect(pref.warnings.some((w) => w.includes("certificate of origin"))).toBe(true);
+    const mfn = computeShipment(chairs, withoutFta(rates));
+    expect(mfn.lines[0].duty).toBe(4480);
+    expect(computeShipment({ ...chairs, origin_iso: "DE" }, rates).lines[0].duty).toBe(4480);
+
+    const auWine = computeShipment({ ...fixtures[0].shipment, origin_iso: "AU" }, rates).lines[0];
+    expect(auWine.rates_used.fta_agreement).toBeNull();
+    expect(auWine.rates_used.duty.value).toBe(7);
+    expect(preferenceNote("AU", "2204.21.11")).toMatch(/MAFTA/);
+    expect(preferenceNote("TH", "2203.00.91")).toMatch(/ATIGA/);
+    expect(preferenceNote("FR", "2204.21.11")).toBeNull();
+    expect(preferenceNote("TH", "9403.60.00")).toBeNull();
+  });
+});
+
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");

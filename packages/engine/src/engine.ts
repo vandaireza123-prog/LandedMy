@@ -111,6 +111,7 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
       rates.fta_rates.filter((r) => r.hs_code === l.hs_code && r.origin_iso === shipment.origin_iso),
       date,
     );
+    if (fta) warnings.push(`${l.name}: ${fta.agreement} preferential duty applied (${fta.duty.value}%) — needs a certificate of origin; without it the MFN rate ${tariff.duty.value}% applies.`);
 
     const goods = goodsRm[i];
     const freight = freightRm * s;

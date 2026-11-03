@@ -33,6 +33,8 @@ export interface AppState {
   local_touched: boolean;
   products: ProductRow[];
   sell_price: number;
+  /** Claim FTA preferential duty where it exists (needs a certificate of origin). */
+  fta_claim: boolean;
   /** Saved scenarios for side-by-side comparison (max 3). */
   scenarios: Scenario[];
   lang: "en" | "ms";
@@ -68,6 +70,7 @@ export const initialState: AppState = {
   local_touched: false,
   products: [],
   sell_price: 0,
+  fta_claim: true,
   scenarios: [],
   lang: "en",
 };

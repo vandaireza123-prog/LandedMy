@@ -31,6 +31,7 @@ export interface ShipmentSnapshot {
   local_touched: boolean;
   products: ProductRow[];
   sell_price: number;
+  fta_claim?: boolean;
 }
 
 /** Pure: the engine input for a given app state. */

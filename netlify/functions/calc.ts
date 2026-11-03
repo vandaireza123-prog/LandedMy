@@ -11,7 +11,7 @@
  * requests without one are accepted but rate-limited harder. Responses carry every rate's source.
  */
 import type { Config, Context } from "@netlify/functions";
-import { COUNTRY_META, computeShipment, manualRates, mergeRates, ratesFor, RateNotFoundError, SUPPORTED_COUNTRIES, type CountryCode, type Shipment } from "../../packages/engine/src/index";
+import { COUNTRY_META, computeShipment, manualRates, mergeRates, ratesFor, withoutFta, RateNotFoundError, SUPPORTED_COUNTRIES, type CountryCode, type Shipment } from "../../packages/engine/src/index";
 const buckets = new Map<string, { n: number; reset: number }>();
 
 function limited(ip: string, max: number): boolean {
@@ -48,6 +48,7 @@ const DOCS = {
     lines: [
       { id: "w1", name: "Still red wine 750ml", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 6, cases: 100, unit_cost: 5.0 },
     ],
+    claim_fta: "optional, default true: apply FTA preferential duty where one exists (ATIGA 0% on general goods from ASEAN, needs Form D). Alcohol never gets a preference into Malaysia; result.warnings says when a preference was applied",
     manual_rates: "optional: [{ hs_code: 'MANUAL-x', name, duty_pct, sst_pct }] for lines not in our tables",
   },
   response: "{ result: ShipmentResult } — per line CIF, duty, excise, SST, local charges, landed (total and per unit), rates_used with source documents; totals; warnings",
@@ -65,7 +66,7 @@ export default async (req: Request, ctx: Context) => {
   const hasKey = !!req.headers.get("x-api-key");
   if (limited(ip, hasKey ? 300 : 60)) return json(429, { error: "Rate limited; try again in a minute" });
 
-  let body: Shipment & { manual_rates?: { hs_code: string; name: string; duty_pct: number; sst_pct: number }[] };
+  let body: Shipment & { manual_rates?: { hs_code: string; name: string; duty_pct: number; sst_pct: number }[]; claim_fta?: boolean };
   try {
     body = await req.json();
   } catch {
@@ -76,7 +77,7 @@ export default async (req: Request, ctx: Context) => {
 
   const dest_country = String(body.dest_country ?? "MY").toUpperCase() as CountryCode;
   if (!SUPPORTED_COUNTRIES.includes(dest_country)) return json(400, { error: `dest_country must be one of ${SUPPORTED_COUNTRIES.join(", ")}` });
-  const rates = ratesFor(dest_country);
+  const rates = body.claim_fta === false ? withoutFta(ratesFor(dest_country)) : ratesFor(dest_country);
   const shipment: Shipment = {
     dest_country,
     date: body.date ?? new Date().toISOString().slice(0, 10),

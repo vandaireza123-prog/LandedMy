@@ -61,10 +61,9 @@ npm run seed:sql          # regenerates supabase/seed/0001_chapter22.sql from th
 - Excise rows switch on 1 Nov 2025 to the Excise Duties Order 2025, P.U.(A) 389/2025 (every chapter-22 line = 2022 rate × 1.10, checked against the gazette).
 - A line with no effective tariff or SST row for the shipment date is refused, not guessed.
 - Alcohol with no excise row is refused.
-- FTA rows override MFN duty when origin matches.
+- FTA rows override MFN duty when origin matches. Alcohol into Malaysia never gets a preference (ATIGA exclusion list, MAFTA side letter, MNZFTA); `preferenceNote()` explains why. ATIGA 0% is loaded for general goods from ASEAN origins (indicative, needs Form D); `withoutFta()` prices at MFN and the app has a 'claim FTA' toggle.
 - Rounding to sen once per line per tax, on the unrounded invoice value — matches RMCD assessments exactly (verified on 50 declaration lines).
 
 ## Before launch
 
-- Add ATIGA / MAFTA / MNZFTA schedules to `fta_rates`.
 - Add more real K1 declarations as fixtures (beer, cider, spirits — the two we have are both still wine).

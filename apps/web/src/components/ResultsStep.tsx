@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { computeShipment, manualRates, mergeRates, ratesFor, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
+import { computeShipment, manualRates, mergeRates, preferenceNote, ratesFor, withoutFta, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
 import { COUNTRIES, fxDefault, localChargesFor } from "@/lib/country";
 import { FX_DEFAULT } from "@/lib/lanes";
 import { CompareDest } from "./CompareDest";
@@ -27,8 +27,9 @@ function Row({ k, v }: { k: string; v: number }) {
   );
 }
 
-function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: string; fx: number; unitCost: number }) {
+function LineCard({ l, currency, fx, unitCost, originIso }: { l: LineResult; currency: string; fx: number; unitCost: number; originIso: string }) {
   const t = useT();
+  const prefNote = preferenceNote(originIso, l.hs_code);
   const [open, setOpen] = useState(false);
   const ex = l.rates_used.excise;
   return (
@@ -73,6 +74,7 @@ function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: stri
             Duty: {l.rates_used.duty.source_doc}
             {ex ? ` · Excise: ${ex.source_doc} (from ${ex.effective_from})` : ""}
             {l.rates_used.fta_agreement ? ` · ${l.rates_used.fta_agreement} preference` : ""}
+            {prefNote ? ` · ${prefNote}` : ""}
           </div>
         </div>
       )}
@@ -105,12 +107,13 @@ export function ResultsStep({
   const [quote, setQuote] = useState(false);
   const result = useMemo<ShipmentResult | { error: string }>(() => {
     try {
-      const merged = mergeRates(ratesFor(state.dest_country), ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+      const base = state.fta_claim ? ratesFor(state.dest_country) : withoutFta(ratesFor(state.dest_country));
+      const merged = mergeRates(base, ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
       return computeShipment(shipment, merged);
     } catch (e) {
       return { error: (e as Error).message };
     }
-  }, [shipment, manualRateLines]);
+  }, [shipment, manualRateLines, state.fta_claim, state.dest_country]);
 
   if ("error" in result) {
     return (
@@ -213,7 +216,7 @@ export function ResultsStep({
 
       <div className="flex flex-col gap-2.5 px-5 pt-4">
         {result.lines.map((l) => (
-          <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} unitCost={state.products.find((p) => p.id === l.id)?.unit_cost ?? 0} />
+          <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} unitCost={state.products.find((p) => p.id === l.id)?.unit_cost ?? 0} originIso={state.origin_iso} />
         ))}
 
         <CompareDest
@@ -275,6 +278,12 @@ export function ResultsStep({
           <p className="mt-2 text-[11px] text-muted">Shown for the product types in this shipment. Requirements, not costs; confirm with your customs agent.</p>
         </Card>
 
+        {result.lines.some((l) => l.rates_used.fta_agreement) || !state.fta_claim ? (
+          <label className="flex items-start gap-2 px-0.5 text-[12px] leading-snug text-ink-2">
+            <input type="checkbox" className="mt-0.5 accent-teal" checked={state.fta_claim} onChange={(e) => update({ fta_claim: e.target.checked })} />
+            <span>Claim FTA preferential duty (I will have the certificate of origin, e.g. ATIGA Form D). Untick to price at the MFN rate.</span>
+          </label>
+        ) : null}
         <div className="px-0.5 text-[11px] leading-relaxed text-muted">
           Rates: {COUNTRIES[state.dest_country].rates_note} Customs FX {cs()} {state.fx_rate}/{state.currency}. {COUNTRIES[state.dest_country].verify_note} Estimate only; final assessment by {COUNTRIES[state.dest_country].customs_name}.
         </div>
