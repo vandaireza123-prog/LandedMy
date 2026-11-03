@@ -135,3 +135,36 @@ export async function saveProfile(p: Profile) {
   const { error } = await supabase().from("profiles").upsert({ id: u.user.id, ...p });
   if (error) throw error;
 }
+
+// ---- API keys ----
+export interface ApiKey {
+  id: string;
+  name: string;
+  key_prefix: string;
+  calls_total: number;
+  last_used_at: string | null;
+  revoked_at: string | null;
+  created_at: string;
+}
+
+export async function listApiKeys(): Promise<ApiKey[]> {
+  const { data } = await supabase().from("api_keys").select("id,name,key_prefix,calls_total,last_used_at,revoked_at,created_at").order("created_at", { ascending: false });
+  return (data ?? []) as ApiKey[];
+}
+
+/** Generates the key in the browser; only its SHA-256 hash is stored. Returns the raw key once. */
+export async function createApiKey(name: string): Promise<string> {
+  const { data: u } = await supabase().auth.getUser();
+  if (!u.user) throw new Error("Sign in first");
+  const bytes = crypto.getRandomValues(new Uint8Array(24));
+  const raw = "lmy_" + btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  const { error } = await supabase().from("api_keys").insert({ user_id: u.user.id, name: name || "default", key_prefix: raw.slice(0, 12), key_hash: hash });
+  if (error) throw error;
+  return raw;
+}
+
+export async function revokeApiKey(id: string) {
+  await supabase().from("api_keys").update({ revoked_at: new Date().toISOString() }).eq("id", id);
+}

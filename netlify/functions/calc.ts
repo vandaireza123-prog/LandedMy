@@ -25,6 +25,27 @@ function limited(ip: string, max: number): boolean {
   return b.n > max;
 }
 
+/** Validate an API key against Supabase (service role) and count the call. Null when keys are not configured. */
+async function validateKey(key: string): Promise<{ user_id: string; key_id: string } | null> {
+  const url = process.env.SUPABASE_URL;
+  const srk = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !srk || !/^lmy_[A-Za-z0-9_-]{20,}$/.test(key)) return null;
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(key));
+  const hash = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+  try {
+    const r = await fetch(`${url}/rest/v1/rpc/touch_api_key`, {
+      method: "POST",
+      headers: { apikey: srk, authorization: `Bearer ${srk}`, "content-type": "application/json" },
+      body: JSON.stringify({ p_hash: hash }),
+    });
+    if (!r.ok) return null;
+    const rows = (await r.json()) as { user_id: string; key_id: string }[];
+    return rows[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 const CORS = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type, x-api-key", "access-control-allow-methods": "GET, POST, OPTIONS" };
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body, null, 2), { status, headers: { "content-type": "application/json", ...CORS } });
 
@@ -52,7 +73,8 @@ const DOCS = {
     manual_rates: "optional: [{ hs_code: 'MANUAL-x', name, duty_pct, sst_pct }] for lines not in our tables",
   },
   response: "{ result: ShipmentResult } — per line CIF, duty, excise, SST, local charges, landed (total and per unit), rates_used with source documents; totals; warnings",
-  errors: { 400: "invalid body", 422: "no rate in force for an HS code on that date (RateNotFoundError)", 429: "rate limited" },
+  auth: "optional x-api-key header (create one under Account → API keys in the app): 300 req/min per key instead of 60 per IP, and usage is counted against your account",
+  errors: { 400: "invalid body", 401: "unknown or revoked API key", 422: "no rate in force for an HS code on that date (RateNotFoundError)", 429: "rate limited" },
   rates: "MY: Customs Duties Order 2022 (MFN); Excise Duties Order 2025 (P.U.(A) 389/2025) from 1 Nov 2025; SST 10% on CIF + duty + excise; verified against RMCD K1 assessments for chapter 22. SG: customs and excise per litre of alcohol from Singapore Customs List of Dutiable Goods; GST 9% on CIF + duties.",
   contact: "https://landedmy.netlify.app/",
 };
@@ -63,8 +85,10 @@ export default async (req: Request, ctx: Context) => {
   if (req.method !== "POST") return json(405, { error: "GET for docs, POST to calculate" });
 
   const ip = ctx.ip ?? req.headers.get("x-forwarded-for") ?? "anon";
-  const hasKey = !!req.headers.get("x-api-key");
-  if (limited(ip, hasKey ? 300 : 60)) return json(429, { error: "Rate limited; try again in a minute" });
+  const key = req.headers.get("x-api-key");
+  const keyed = key ? await validateKey(key) : null;
+  if (key && !keyed) return json(401, { error: "Unknown or revoked API key" });
+  if (limited(keyed ? `key:${keyed.key_id}` : ip, keyed ? 300 : 60)) return json(429, { error: "Rate limited; try again in a minute" });
 
   let body: Shipment & { manual_rates?: { hs_code: string; name: string; duty_pct: number; sst_pct: number }[]; claim_fta?: boolean };
   try {

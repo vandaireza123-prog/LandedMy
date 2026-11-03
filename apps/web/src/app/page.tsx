@@ -177,7 +177,7 @@ export default function Landing() {
           <div className="grid gap-5 md:grid-cols-2">
             <div id="api" className="flex flex-col gap-3">
               <h2 className="font-display text-[28px] font-bold tracking-tight">For forwarders and developers</h2>
-              <p className="text-[15px] leading-relaxed text-muted">The same engine over a public API. POST a shipment, get the priced result with every rate&apos;s source. Free during beta.</p>
+              <p className="text-[15px] leading-relaxed text-muted">The same engine over a public API. POST a shipment, get the priced result with every rate&apos;s source. Free during beta; create a key under Account for the higher limit.</p>
               <pre className="overflow-x-auto rounded-xl bg-ink p-4 font-mono text-[13px] leading-relaxed text-[#D6E6E4]">{`GET  /api/calc        → schema
 POST /api/calc
 { "origin_iso": "BE", "dest_port": "MYPKG",

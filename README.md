@@ -18,7 +18,7 @@ Environment variables on the site:
 
 ## Public API
 
-`GET https://landedmy.netlify.app/api/calc` returns the schema; `POST` the same shape (the engine's Shipment plus optional `manual_rates`) and get `{ result }` with every rate's source. Beta: free, 60 req/min per IP (300 with an `x-api-key` header once keys are issued).
+`GET https://landedmy.netlify.app/api/calc` returns the schema; `POST` the same shape (the engine's Shipment plus optional `manual_rates`) and get `{ result }` with every rate's source. Beta: free, 60 req/min per IP; with an `x-api-key` header (created under Account → API keys; only the SHA-256 hash is stored, validated by the `touch_api_key` RPC with the service role) 300 req/min per key and usage counted on the account. `dest_country: "SG"` prices for Singapore; `claim_fta: false` prices at MFN.
 
 ## Multi-country
 
@@ -26,7 +26,7 @@ Environment variables on the site:
 
 ## Database (Supabase)
 
-Paste `supabase/setup.sql` into the SQL Editor and run it once (safe to re-run). It creates every table, RLS policies, the chapter-22 rate seed, profiles, notifications and the rate-version stamp.
+Paste `supabase/setup.sql` into the SQL Editor and run it once (safe to re-run; re-run after pulling a version that adds a migration — 0003 adds `api_keys`). It creates every table, RLS policies, the chapter-22 rate seed, profiles, notifications and the rate-version stamp.
 In Authentication → URL Configuration set Site URL to the deployed site and add it to Redirect URLs, so magic links return to the app.
 
 Leads from "Get quotes" land in Netlify → Forms → `quote-request`; turn on email notifications there.

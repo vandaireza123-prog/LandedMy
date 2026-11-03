@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
-import { deleteShipment, getProfile, listNotifications, listShipments, markRead, saveProfile, sendMagicLink, setAlert, signOut, type Notification, type Profile, type SavedShipment } from "@/lib/supabase";
+import { createApiKey, deleteShipment, getProfile, listApiKeys, listNotifications, listShipments, markRead, revokeApiKey, saveProfile, sendMagicLink, setAlert, signOut, type ApiKey, type Notification, type Profile, type SavedShipment } from "@/lib/supabase";
 import type { AppState } from "@/lib/state";
 import { rm, smallInputCls } from "./ui";
 
@@ -13,12 +13,16 @@ export function AccountSheet({ user, onClose, update }: { user: User | null; onC
   const [notes, setNotes] = useState<Notification[]>([]);
   const [profile, setProfile] = useState<Profile>({ company_name: "", logo_url: "" });
   const [savedProfile, setSavedProfile] = useState(false);
+  const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [newKey, setNewKey] = useState<string | null>(null);
+  const [keyName, setKeyName] = useState("");
 
   useEffect(() => {
     if (!user) return;
     listShipments().then(setItems).catch((e) => setErr(e.message));
     listNotifications().then(setNotes).catch(() => {});
     getProfile().then((p) => p && setProfile({ company_name: p.company_name ?? "", logo_url: p.logo_url ?? "" })).catch(() => {});
+    listApiKeys().then(setKeys).catch(() => {});
   }, [user]);
 
   const onLogo = (f: File) => {
@@ -161,6 +165,70 @@ export function AccountSheet({ user, onClose, update }: { user: User | null; onC
                 >
                   {savedProfile ? "Saved" : "Save branding"}
                 </button>
+              </div>
+
+              <div className="mt-3 rounded-xl border border-line bg-white p-3">
+                <div className="text-sm font-semibold">API keys</div>
+                <p className="mt-0.5 text-[11px] text-muted">
+                  For <code className="font-mono">POST /api/calc</code>. Send the key as an <code className="font-mono">x-api-key</code> header: 300 requests a minute, usage counted here. Free in beta.
+                </p>
+                {newKey && (
+                  <div className="mt-2 rounded-lg bg-teal-tint p-2.5 text-[12px] text-teal-dark">
+                    <div className="font-semibold">Copy this key now; it is shown once.</div>
+                    <code className="mt-1 block break-all font-mono text-[12px]">{newKey}</code>
+                    <button type="button" className="mt-1.5 text-[12px] font-semibold text-teal" onClick={() => navigator.clipboard?.writeText(newKey)}>
+                      Copy
+                    </button>
+                  </div>
+                )}
+                <div className="mt-2 flex gap-2">
+                  <input className={smallInputCls} placeholder="Key name, e.g. forwarder portal" value={keyName} onChange={(e) => setKeyName(e.target.value)} />
+                  <button
+                    type="button"
+                    className="h-9 shrink-0 rounded-lg bg-teal px-3 text-[12px] font-semibold text-white"
+                    onClick={async () => {
+                      try {
+                        const raw = await createApiKey(keyName.trim());
+                        setNewKey(raw);
+                        setKeyName("");
+                        setKeys(await listApiKeys());
+                      } catch (e) {
+                        alert((e as Error).message);
+                      }
+                    }}
+                  >
+                    New key
+                  </button>
+                </div>
+                {keys.length > 0 && (
+                  <div className="mt-2 flex flex-col divide-y divide-line-2 text-[12px]">
+                    {keys.map((k) => (
+                      <div key={k.id} className="flex items-center justify-between gap-2 py-1.5">
+                        <div className="min-w-0">
+                          <div className="truncate font-semibold">
+                            {k.name} <span className="font-mono font-normal text-muted">{k.key_prefix}…</span>
+                          </div>
+                          <div className="text-[11px] text-muted">
+                            {k.calls_total.toLocaleString()} calls{k.last_used_at ? ` · last ${new Date(k.last_used_at).toLocaleDateString()}` : ""}
+                            {k.revoked_at ? " · revoked" : ""}
+                          </div>
+                        </div>
+                        {!k.revoked_at && (
+                          <button
+                            type="button"
+                            className="shrink-0 text-[11px] font-semibold text-muted"
+                            onClick={async () => {
+                              await revokeApiKey(k.id);
+                              setKeys(await listApiKeys());
+                            }}
+                          >
+                            Revoke
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </>
           )}
