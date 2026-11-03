@@ -2,8 +2,9 @@
 import { useEffect, useState } from "react";
 import { fetchFx, type FxResponse } from "@/lib/api";
 import type { AppState } from "@/lib/state";
-import { EQUIPMENT_LABEL, FX_AS_OF, FX_DEFAULT, defaultLocalCharges, type Equipment } from "@/lib/lanes";
-import { DEST_PORTS, type Port } from "@/lib/ports";
+import { EQUIPMENT_LABEL, FX_AS_OF, FX_DEFAULT, type Equipment } from "@/lib/lanes";
+import type { Port } from "@/lib/ports";
+import { COUNTRIES, DEST_COUNTRIES, fxDefault, fxFromBnm, localChargesFor, type DestCountry } from "@/lib/country";
 import { PortPicker } from "./PortPicker";
 import { useT } from "@/lib/i18n";
 import { Field, Footer, PrimaryButton, Progress, Title, inputCls } from "./ui";
@@ -21,30 +22,57 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
     fetchFx().then((r) => {
       if (!r) return;
       setFx(r);
-      if (!state.fx_source && r.rates[state.currency]) update({ fx_rate: r.rates[state.currency], fx_source: `${r.source}, ${r.as_of}` });
+      const live = fxFromBnm(state.dest_country, r.rates, state.currency);
+      if (!state.fx_source && live) update({ fx_rate: live, fx_source: `${r.source}, ${r.as_of}` });
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  const rateFor = (cur: string) => fx?.rates[cur] ?? FX_DEFAULT[cur] ?? state.fx_rate;
-  const sourceFor = (cur: string) => (fx?.rates[cur] ? `${fx.source}, ${fx.as_of}` : "");
+  const country = COUNTRIES[state.dest_country];
+  const rateFor = (cur: string, c: DestCountry = state.dest_country) => (fx ? fxFromBnm(c, fx.rates, cur) : undefined) ?? fxDefault(c, cur, FX_DEFAULT);
+  const sourceFor = (cur: string, c: DestCountry = state.dest_country) => (fx && fxFromBnm(c, fx.rates, cur) ? `${fx.source}, ${fx.as_of}${c === "SG" ? " (cross rate)" : ""}` : "");
+  const onCountry = (c: DestCountry) => {
+    if (c === state.dest_country) return;
+    update({
+      dest_country: c,
+      dest_port: COUNTRIES[c].ports[0].code,
+      fx_rate: rateFor(state.currency, c),
+      fx_source: sourceFor(state.currency, c),
+      local_charges: localChargesFor(c, state.equipment, state.pallets),
+      local_touched: false,
+    });
+  };
   const onPort = (p: Port) =>
     update({ origin_port: p.code, origin_iso: p.iso, origin_label: `${p.name}, ${p.country}`, currency: p.currency, fx_rate: rateFor(p.currency), fx_source: sourceFor(p.currency) });
   const onCustomPort = (name: string) => update({ origin_port: "CUSTOM", origin_label: name });
   const onEquip = (e: Equipment) =>
-    update({ equipment: e, local_charges: state.local_touched ? state.local_charges : defaultLocalCharges(e, state.pallets) });
+    update({ equipment: e, local_charges: state.local_touched ? state.local_charges : localChargesFor(state.dest_country, e, state.pallets) });
 
   return (
     <>
       <Progress step={1} />
-      <Title step={1} title="Where is it coming from?" sub="Set the lane once. Every product you add next shares it." />
+      <Title step={1} title="Where is it going?" sub="Set the lane once. Every product you add next shares it." />
       <div className="flex flex-1 flex-col gap-3 p-5">
+        <div className="flex flex-col gap-1.5">
+          <span className="text-xs font-semibold text-ink-2">{t("Destination country")}</span>
+          <div className="flex gap-1 rounded-xl border border-line bg-white p-[3px]">
+            {DEST_COUNTRIES.map((c) => {
+              const on = state.dest_country === c;
+              return (
+                <button key={c} type="button" onClick={() => onCountry(c)} className={`flex-1 rounded-[9px] py-2 text-sm font-semibold ${on ? "bg-teal text-white" : "text-muted"}`}>
+                  {COUNTRIES[c].name} · {COUNTRIES[c].symbol}
+                </button>
+              );
+            })}
+          </div>
+          <span className="text-[11px] leading-snug text-muted">{country.verify_note}</span>
+        </div>
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold text-ink-2">{t("From port")}</span>
           <PortPicker value={state.origin_port} label={state.origin_label} onPick={onPort} onCustom={onCustomPort} />
         </div>
         <Field label={t("To port")}>
           <select className={inputCls} value={state.dest_port} onChange={(e) => update({ dest_port: e.target.value })}>
-            {DEST_PORTS.map((p) => (
+            {country.ports.map((p) => (
               <option key={p.code} value={p.code}>
                 {p.label}
               </option>
@@ -80,7 +108,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
               value={state.pallets}
               onChange={(e) => {
                 const n = Math.max(1, Number(e.target.value) || 1);
-                update({ pallets: n, local_charges: state.local_touched ? state.local_charges : defaultLocalCharges("pallet", n) });
+                update({ pallets: n, local_charges: state.local_touched ? state.local_charges : localChargesFor(state.dest_country, "pallet", n) });
               }}
             />
           </Field>
@@ -115,7 +143,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
           <div>
             <div className="text-xs text-muted">{t("Customs exchange rate")}</div>
             <div className="flex items-baseline gap-1 text-[15px] font-semibold">
-              1 {state.currency} = RM
+              1 {state.currency} = {country.symbol}
               <input
                 type="number"
                 step="0.0001"
@@ -128,7 +156,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
           <div className="max-w-[45%] text-right text-[11px] leading-tight text-muted">{state.fx_source || FX_AS_OF}</div>
         </div>
         <div className="text-[11px] text-muted">
-          Lane: {state.origin_label} → {DEST_PORTS.find((p) => p.code === state.dest_port)?.label}
+          Lane: {state.origin_label} → {country.ports.find((p) => p.code === state.dest_port)?.label}
           {state.origin_port === "CUSTOM" ? " · origin country for duty: " : ""}
           {state.origin_port === "CUSTOM" && (
             <input className="w-10 border-b border-line bg-transparent text-center uppercase outline-none" maxLength={2} value={state.origin_iso} onChange={(e) => update({ origin_iso: e.target.value.toUpperCase() })} aria-label="Origin country code" />

@@ -3,7 +3,7 @@ import type { AppState } from "@/lib/state";
 import { BENCHMARK_AS_OF, EQUIPMENT_LABEL, benchmarkFor } from "@/lib/lanes";
 import { DEST_PORTS } from "@/lib/ports";
 import { useT } from "@/lib/i18n";
-import { Card, Footer, PrimaryButton, Progress, Title, rm, smallInputCls } from "./ui";
+import { Card, Footer, PrimaryButton, Progress, Title, cs, rm, smallInputCls } from "./ui";
 
 export function LogisticsStep({ state, update }: { state: AppState; update: (p: Partial<AppState>) => void }) {
   const t = useT();
@@ -60,7 +60,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
         </Card>
 
         <Card>
-          <div className="mb-2.5 text-sm font-semibold">{t("Local charges")}, {destLabel} (RM)</div>
+          <div className="mb-2.5 text-sm font-semibold">{t("Local charges")}, {destLabel} ({cs()})</div>
           <div className="flex flex-col gap-2">
             {Object.entries(state.local_charges).map(([k, v]) => (
               <div key={k} className="flex items-center justify-between gap-2">
@@ -73,7 +73,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
           </div>
           <div className="mt-3 flex justify-between border-t border-line-2 pt-2.5 text-sm">
             <span className="text-muted">Total local</span>
-            <span className="font-semibold">RM {rm(localTotal, 0)}</span>
+            <span className="font-semibold">{cs()} {rm(localTotal, 0)}</span>
           </div>
         </Card>
 

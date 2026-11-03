@@ -148,6 +148,8 @@ export interface LineResult {
     duty: Rate & { source_doc: string; source_url: string; effective_from: ISODate };
     excise: (Rate & { source_doc: string; source_url: string; effective_from: ISODate }) | null;
     sst_pct: number;
+    /** "SST" for Malaysia, "GST" for Singapore. */
+    sst_name?: string;
     fta_agreement: string | null;
   };
 }

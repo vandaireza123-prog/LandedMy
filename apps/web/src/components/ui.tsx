@@ -97,5 +97,11 @@ export function Footer({ children }: { children: ReactNode }) {
   return <div className="mt-auto flex flex-col gap-2 px-5 pb-8 pt-3">{children}</div>;
 }
 
+/** Display currency symbol for the current destination; set by the calculator page from state before render. */
+let SYMBOL = "RM";
+export function setCurrencySymbol(s: string) {
+  SYMBOL = s;
+}
+export const cs = () => SYMBOL;
 export const rm = (n: number, d = 2) =>
   new Intl.NumberFormat("en-MY", { minimumFractionDigits: d, maximumFractionDigits: d }).format(n);

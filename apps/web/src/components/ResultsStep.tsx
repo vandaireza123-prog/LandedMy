@@ -1,8 +1,11 @@
 "use client";
 import { useMemo, useState } from "react";
-import { buildRateTables, computeShipment, manualRates, mergeRates, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
+import { computeShipment, manualRates, mergeRates, ratesFor, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
+import { COUNTRIES, fxDefault, localChargesFor } from "@/lib/country";
+import { FX_DEFAULT } from "@/lib/lanes";
+import { CompareDest } from "./CompareDest";
 import type { AppState } from "@/lib/state";
-import { Card, Footer, Progress, SecondaryButton, rm, smallInputCls } from "./ui";
+import { Card, Footer, Progress, SecondaryButton, cs, rm, smallInputCls } from "./ui";
 import { QuoteGap } from "./QuoteGap";
 import { ReverseCalc } from "./ReverseCalc";
 import { Scenarios } from "./Scenarios";
@@ -13,7 +16,6 @@ import { snapshotOf } from "@/lib/state";
 import { QuoteSheet } from "./QuoteSheet";
 import { requirementsFor } from "@/lib/compliance";
 
-const rates = buildRateTables();
 
 function Row({ k, v }: { k: string; v: number }) {
   const t = useT();
@@ -34,22 +36,22 @@ function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: stri
       <div className="flex items-baseline justify-between gap-2">
         <div className="min-w-0 truncate text-[15px] font-semibold">{l.name}</div>
         <div className="shrink-0 font-display text-[22px] font-bold text-teal">
-          RM {rm(l.per_unit.landed)}
+          {cs()} {rm(l.per_unit.landed)}
           <span className="text-xs font-medium text-muted"> {t("/ unit")}</span>
         </div>
       </div>
       <div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
         <Row k={`Goods ${currency}${unitCost} × ${fx}`} v={l.per_unit.goods} />
         <Row k="Freight + insurance" v={l.per_unit.freight_insurance} />
-        <Row k="Import duty" v={l.per_unit.duty} />
+        <Row k={l.rates_used.duty.value === 0 ? "Import duty · nil" : "Import duty"} v={l.per_unit.duty} />
         <Row k="Excise" v={l.per_unit.excise} />
-        <Row k="SST 10%" v={l.per_unit.sst} />
+        <Row k={`${l.rates_used.sst_name ?? "SST"} ${l.rates_used.sst_pct}%`} v={l.per_unit.sst} />
         <Row k="Local charges" v={l.per_unit.local_charges} />
       </div>
       <div className="mt-2.5 flex justify-between border-t border-line-2 pt-2.5 text-xs text-muted">
         <span>
-          Case RM {rm(l.per_case)}
-          {l.per_pallet ? ` · Pallet RM ${rm(l.per_pallet, 0)}` : ""} · line RM {rm(l.landed, 0)}
+          Case {cs()} {rm(l.per_case)}
+          {l.per_pallet ? ` · Pallet ${cs()} ${rm(l.per_pallet, 0)}` : ""} · line {cs()} {rm(l.landed, 0)}
         </span>
         <button type="button" onClick={() => setOpen(!open)} className="font-semibold text-teal">
           {open ? t("Hide formula") : t("Show formula")}
@@ -59,14 +61,14 @@ function LineCard({ l, currency, fx, unitCost }: { l: LineResult; currency: stri
         <div className="mt-2 rounded-lg bg-ground p-2.5 font-mono text-[11px] leading-relaxed text-ink-2">
           {l.litres > 0 && <div>litres = {l.litres} L for {l.units} units</div>}
           <div>
-            duty = {l.rates_used.duty.type === "per_litre" ? `${l.litres} L × RM${l.rates_used.duty.value}` : l.rates_used.duty.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × RM${l.rates_used.duty.value}` : `CIF × ${l.rates_used.duty.value}%`} = {rm(l.duty)}
+            duty = {l.rates_used.duty.type === "per_litre" ? `${l.litres} L × ${cs()}${l.rates_used.duty.value}` : l.rates_used.duty.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × ${cs()}${l.rates_used.duty.value}` : `CIF × ${l.rates_used.duty.value}%`} = {rm(l.duty)}
           </div>
           {ex && (
             <div>
-              excise = {ex.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × RM${ex.value}` : `RM${ex.value}`} = {rm(l.excise)}
+              excise = {ex.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × ${cs()}${ex.value}` : `${cs()}${ex.value}`} = {rm(l.excise)}
             </div>
           )}
-          <div>SST = 10% × (CIF {rm(l.cif)} + duty + excise) = {rm(l.sst)}</div>
+          <div>{l.rates_used.sst_name ?? "SST"} = {l.rates_used.sst_pct}% × (CIF {rm(l.cif)} + duty + excise) = {rm(l.sst)}</div>
           <div className="mt-1 text-muted">
             Duty: {l.rates_used.duty.source_doc}
             {ex ? ` · Excise: ${ex.source_doc} (from ${ex.effective_from})` : ""}
@@ -103,7 +105,7 @@ export function ResultsStep({
   const [quote, setQuote] = useState(false);
   const result = useMemo<ShipmentResult | { error: string }>(() => {
     try {
-      const merged = mergeRates(rates, ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+      const merged = mergeRates(ratesFor(state.dest_country), ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
       return computeShipment(shipment, merged);
     } catch (e) {
       return { error: (e as Error).message };
@@ -134,7 +136,7 @@ export function ResultsStep({
     { k: t("Goods"), v: pct(tot.goods), c: "#FFFFFF" },
     { k: t("Duty"), v: pct(tot.duty), c: "#9ED3CE" },
     { k: t("Excise"), v: pct(tot.excise), c: "#5FB5AE" },
-    { k: t("SST"), v: pct(tot.sst), c: "#2E8A84" },
+    { k: COUNTRIES[state.dest_country].tax_name, v: pct(tot.sst), c: "#2E8A84" },
     { k: t("Freight & local"), v: pct(tot.freight + tot.insurance + tot.local_charges), c: "#CFE9E6" },
   ];
   const first = result.lines[0];
@@ -164,7 +166,7 @@ export function ResultsStep({
     }
   };
   const exportCsv = () => {
-    const head = ["Product", "HS", "Units", "Litres", "Goods RM", "Freight+Ins RM", "CIF RM", "Duty RM", "Excise RM", "SST RM", "Local RM", "Landed RM", "Landed/unit RM"];
+    const head = ["Product", "HS", "Units", "Litres", `Goods ${cs()}`, `Freight+Ins ${cs()}`, `CIF ${cs()}`, `Duty ${cs()}`, `Excise ${cs()}`, `${COUNTRIES[state.dest_country].tax_name} ${cs()}`, `Local ${cs()}`, `Landed ${cs()}`, `Landed/unit ${cs()}`];
     const rows = result.lines.map((l) => [l.name, l.hs_code, l.units, l.litres, l.goods, l.freight + l.insurance, l.cif, l.duty, l.excise, l.sst, l.local_charges, l.landed, l.per_unit.landed]);
     const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
@@ -176,9 +178,17 @@ export function ResultsStep({
   return (
     <>
       <Progress step={4} />
+      {!COUNTRIES[state.dest_country].verified && (
+        <div className="mx-5 mt-3 flex items-start gap-2 rounded-[10px] bg-amber-tint px-3 py-2.5 text-[12px] leading-snug text-amber">
+          <span aria-hidden="true">⚠</span>
+          <span>
+            <strong>{COUNTRIES[state.dest_country].name} rates: verify.</strong> {COUNTRIES[state.dest_country].verify_note}
+          </span>
+        </div>
+      )}
       <div className="mx-5 mt-3 rounded-2xl bg-teal p-5 text-white">
-        <div className="text-xs font-semibold uppercase tracking-wider opacity-85">{t("Shipment landed at your warehouse")}</div>
-        <div className="mt-1.5 font-display text-[40px] font-bold leading-[1.05] tracking-tight">RM {rm(tot.landed, 0)}</div>
+        <div className="text-xs font-semibold uppercase tracking-wider opacity-85">{t("Shipment landed at your warehouse")} · {COUNTRIES[state.dest_country].name}</div>
+        <div className="mt-1.5 font-display text-[40px] font-bold leading-[1.05] tracking-tight">{cs()} {rm(tot.landed, 0)}</div>
         <div className="mt-1 text-[13px] opacity-85">
           {result.lines.length} product{result.lines.length === 1 ? "" : "s"} · {units.toLocaleString()} units · {t("tax is {n}% of it", { n: Math.round(tot.tax_share_pct) })}
         </div>
@@ -206,11 +216,28 @@ export function ResultsStep({
           <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} unitCost={state.products.find((p) => p.id === l.id)?.unit_cost ?? 0} />
         ))}
 
+        <CompareDest
+          state={state}
+          shipment={shipment}
+          manualRateLines={manualRateLines}
+          onSwitch={(c) =>
+            update({
+              dest_country: c,
+              dest_port: COUNTRIES[c].ports[0].code,
+              fx_rate: fxDefault(c, state.currency, FX_DEFAULT),
+              fx_source: "",
+              local_charges: localChargesFor(c, state.equipment, state.pallets),
+              local_touched: false,
+              step: 1,
+            })
+          }
+        />
+
         <Card>
           <div className="mb-2 text-sm font-semibold">{t("Margin check")}</div>
           <div className="flex items-center justify-between gap-2">
             <label htmlFor="sell" className="text-[13px] text-muted">
-              Sell {first?.name ?? "it"} at (RM / unit)
+              Sell {first?.name ?? "it"} at ({cs()} / unit)
             </label>
             <input id="sell" type="number" className={`${smallInputCls} !w-24 text-right`} value={state.sell_price || ""} onChange={(e) => update({ sell_price: Number(e.target.value) || 0 })} />
           </div>
@@ -218,7 +245,7 @@ export function ResultsStep({
             <div className="mt-2 flex justify-between text-sm">
               <span className="text-muted">{t("Gross margin")}</span>
               <span className={`font-semibold ${margin >= 0 ? "text-teal" : "text-red-700"}`}>
-                RM {rm(margin)} · {Math.round((margin / state.sell_price) * 100)}%
+                {cs()} {rm(margin)} · {Math.round((margin / state.sell_price) * 100)}%
               </span>
             </div>
           )}
@@ -233,7 +260,7 @@ export function ResultsStep({
         <Card>
           <div className="mb-2 text-sm font-semibold">{t("Before you ship")}</div>
           <div className="flex flex-col gap-2.5 text-[13px]">
-            {requirementsFor(state.products).map((r) => (
+            {requirementsFor(state.products, state.dest_country).map((r) => (
               <label key={r.id} className="flex items-start gap-2.5">
                 <input type="checkbox" className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-teal" />
                 <span>
@@ -249,7 +276,7 @@ export function ResultsStep({
         </Card>
 
         <div className="px-0.5 text-[11px] leading-relaxed text-muted">
-          Rates: Customs Duties Order 2022 · Excise Duties Order 2022 as raised 1 Nov 2025 (Budget 2026) · SST 10% on CIF + duty + excise. Customs FX RM {state.fx_rate}/{state.currency}. Calculation verified against RMCD K1 assessments. Estimate only; final assessment by RMCD.
+          Rates: {COUNTRIES[state.dest_country].rates_note} Customs FX {cs()} {state.fx_rate}/{state.currency}. {COUNTRIES[state.dest_country].verify_note} Estimate only; final assessment by {COUNTRIES[state.dest_country].customs_name}.
         </div>
 
         <div className="grid grid-cols-2 gap-2">

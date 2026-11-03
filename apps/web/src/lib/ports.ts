@@ -112,6 +112,8 @@ export const DEST_PORTS = [
   { code: "MYKCH", label: "Kuching" },
   { code: "MYBKI", label: "Kota Kinabalu (Sepanggar)" },
   { code: "MYKUL", label: "KLIA (air freight)" },
+  { code: "SGSIN", label: "Singapore (PSA Tanjong Pagar / Pasir Panjang / Tuas)" },
+  { code: "SGCHG", label: "Changi (air freight)" },
 ];
 
 export function searchPorts(q: string): Port[] {

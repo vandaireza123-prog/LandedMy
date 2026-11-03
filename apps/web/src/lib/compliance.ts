@@ -125,11 +125,25 @@ export const REQUIREMENTS: Requirement[] = [
   },
 ];
 
-export function requirementsFor(products: { category: Category; hs_code: string; general_group?: string }[]): Requirement[] {
+const ALC = (c: { hsPrefixes: Set<string> }) => has(c.hsPrefixes, "2203", "2204", "2205", "2206", "2208");
+
+/** Singapore: Singapore Customs permits and licences. Kept short; detail on the linked pages. */
+export const REQUIREMENTS_SG: Requirement[] = [
+  { id: "sg-uen", text: "Importer has a UEN and is activated with Singapore Customs (Customs Account) before the first permit", authority: "Singapore Customs", url: "https://www.customs.gov.sg/businesses/registration-and-licensing/registering-and-activating-a-customs-account/", when: () => true },
+  { id: "sg-permit", text: "In-Payment (GST + duty) import permit taken out on TradeNet by you or a declaring agent before the goods are released", authority: "Singapore Customs", url: "https://www.customs.gov.sg/businesses/importing-goods/import-procedures/", when: () => true },
+  { id: "sg-coo", text: "Certificate of origin only matters for non-dutiable goods under an FTA; liquor duty is not reduced by origin", authority: "Singapore Customs", url: "https://www.customs.gov.sg/businesses/international-connectivity/free-trade-agreements/", when: (c) => !ALC(c) },
+  { id: "sg-liquor-licence", text: "Liquor licence (Class 1–4 or wholesale) from the Police Licensing & Regulatory Department before selling or supplying", authority: "SPF PLRD", url: "https://www.police.gov.sg/e-services/apply/licences-and-permits/liquor-licence", when: ALC },
+  { id: "sg-licensed-warehouse", text: "Optional: a Licensed Warehouse suspends duty and GST until the goods leave the warehouse — worth it for stock held more than a few weeks", authority: "Singapore Customs", url: "https://www.customs.gov.sg/businesses/customs-schemes-licences-framework/licensed-warehouse-scheme/", when: ALC },
+  { id: "sg-label", text: "Labels per the Food Regulations: product name, alcohol content, volume, importer name and address; no health claims", authority: "SFA", url: "https://www.sfa.gov.sg/food-import-export/", when: ALC },
+  { id: "sg-sfa-food", text: "Food importer licence and SFA import permit for food products; meat and dairy only from SFA-accredited sources", authority: "SFA", url: "https://www.sfa.gov.sg/food-import-export/commercial-food-imports", when: (c) => c.groups.has("food") },
+  { id: "sg-hsa", text: "Cosmetics notified to HSA before sale; electrical goods need the Safety Mark (Consumer Protection registration)", authority: "HSA / Enterprise Singapore", url: "https://www.hsa.gov.sg/cosmetic-products", when: (c) => c.groups.has("beauty") || c.groups.has("electronics") },
+];
+
+export function requirementsFor(products: { category: Category; hs_code: string; general_group?: string }[], country: "MY" | "SG" = "MY"): Requirement[] {
   const ctx = {
     categories: new Set(products.map((p) => p.category)),
     hsPrefixes: new Set(products.map((p) => (p.hs_code || "").replace(/\./g, ""))),
     groups: new Set(products.filter((p) => p.category === "general").map((p) => p.general_group ?? "other")),
   };
-  return REQUIREMENTS.filter((r) => r.when(ctx));
+  return (country === "SG" ? REQUIREMENTS_SG : REQUIREMENTS).filter((r) => r.when(ctx));
 }

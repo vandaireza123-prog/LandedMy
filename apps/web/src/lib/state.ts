@@ -5,6 +5,7 @@ import { buildShipment as _build, manualLinesOf as _manual, type ProductRow } fr
 import type { Category } from "./products";
 import type { Equipment } from "./lanes";
 import { FX_DEFAULT, defaultLocalCharges } from "./lanes";
+import { countryOfPort, type DestCountry } from "./country";
 
 export type { ProductRow } from "./shipment";
 export { buildShipment, manualLinesOf } from "./shipment";
@@ -15,6 +16,8 @@ export interface AppState {
   origin_port: string;
   /** Display name; for ports not in the list this is what the user typed. */
   origin_label: string;
+  /** Destination country: decides rate tables, currency and tax name. */
+  dest_country: DestCountry;
   dest_port: string;
   equipment: Equipment;
   pallets: number;
@@ -50,6 +53,7 @@ export const initialState: AppState = {
   origin_iso: "BE",
   origin_port: "BEANR",
   origin_label: "Antwerp, Belgium",
+  dest_country: "MY",
   dest_port: "MYPKG",
   equipment: "pallet",
   pallets: 1,
@@ -82,7 +86,7 @@ function encodeShare(s: AppState): string {
 function decodeShare(h: string): AppState | null {
   try {
     const obj = JSON.parse(decodeURIComponent(escape(atob(h))));
-    return { ...initialState, ...obj };
+    return { ...initialState, ...obj, dest_country: obj.dest_country ?? countryOfPort(obj.dest_port ?? "MYPKG") };
   } catch {
     return null;
   }
@@ -100,7 +104,10 @@ export function useAppState() {
         setState(shared);
       } else {
         const raw = localStorage.getItem(KEY);
-        if (raw) setState({ ...initialState, ...JSON.parse(raw) });
+        if (raw) {
+          const saved = JSON.parse(raw) as Partial<AppState>;
+          setState({ ...initialState, ...saved, dest_country: saved.dest_country ?? countryOfPort(saved.dest_port ?? "MYPKG") });
+        }
       }
     } catch {
       /* storage unavailable: run in memory */

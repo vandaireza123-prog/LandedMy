@@ -95,7 +95,7 @@ export function AccountSheet({ user, onClose, update }: { user: User | null; onC
                   <div key={s.id} className="rounded-xl border border-line bg-white p-3">
                     <div className="flex items-baseline justify-between gap-2">
                       <div className="min-w-0 truncate text-sm font-semibold">{s.name ?? "Untitled"}</div>
-                      <div className="shrink-0 text-sm font-semibold text-teal">{s.landed_total != null ? `RM ${rm(s.landed_total, 0)}` : ""}</div>
+                      <div className="shrink-0 text-sm font-semibold text-teal">{s.landed_total != null ? `${(s.snapshot_json as { dest_country?: string } | null)?.dest_country === "SG" ? "S$" : "RM"} ${rm(s.landed_total, 0)}` : ""}</div>
                     </div>
                     <div className="mt-0.5 text-[11px] text-muted">{new Date(s.updated_at).toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric" })}</div>
                     <div className="mt-2 flex items-center justify-between">

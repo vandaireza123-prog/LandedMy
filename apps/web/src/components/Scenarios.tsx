@@ -1,17 +1,16 @@
 "use client";
 import { useMemo, useState } from "react";
-import { buildRateTables, computeShipment, manualRates, mergeRates, type ShipmentResult } from "@landedmy/engine";
+import { computeShipment, manualRates, mergeRates, ratesFor, type ShipmentResult } from "@landedmy/engine";
 import { buildShipment, manualLinesOf, snapshotOf, type AppState, type Scenario } from "@/lib/state";
 import { EQUIPMENT_LABEL } from "@/lib/lanes";
-import { Card, rm, smallInputCls } from "./ui";
+import { Card, cs, rm, smallInputCls } from "./ui";
 import { useT } from "@/lib/i18n";
 
-const rates = buildRateTables();
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 function compute(snap: Scenario["snapshot"]): ShipmentResult | null {
   try {
-    const merged = mergeRates(rates, ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+    const merged = mergeRates(ratesFor(snap.dest_country ?? "MY"), ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
     return computeShipment(buildShipment(snap), merged);
   } catch {
     return null;
@@ -81,7 +80,7 @@ export function Scenarios({ state, update, current }: { state: AppState; update:
                 <td className="py-1 pr-2 text-muted">Shipment landed</td>
                 {rows.map((r) => (
                   <td key={r.id} className="py-1 pr-2 font-semibold">
-                    {r.res ? `RM ${rm(r.res.totals.landed, 0)}` : "—"}
+                    {r.res ? `${cs()} ${rm(r.res.totals.landed, 0)}` : "—"}
                   </td>
                 ))}
               </tr>
@@ -100,7 +99,7 @@ export function Scenarios({ state, update, current }: { state: AppState; update:
                     const l = r.res?.lines.find((x) => x.name === pn);
                     return (
                       <td key={r.id} className="py-1 pr-2">
-                        {l ? `RM ${rm(l.per_unit.landed)}` : "—"}
+                        {l ? `${cs()} ${rm(l.per_unit.landed)}` : "—"}
                       </td>
                     );
                   })}

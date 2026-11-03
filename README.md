@@ -22,7 +22,7 @@ Environment variables on the site:
 
 ## Multi-country
 
-`ratesFor(country)` serves the rate tables. `MY` is K1-verified. `SG` (`data/sg.json`, Singapore Customs List of Dutiable Goods: customs + excise per litre of alcohol, GST 9% on CIF + duties) is registered and available through the API (`dest_country: "SG"`), but labelled unverified until a Singapore Customs permit is checked against it. The web UI still prices Malaysia only; the country switch is pending design approval.
+`ratesFor(country)` serves the rate tables. `MY` is K1-verified. `SG` (`data/sg.json`, Singapore Customs List of Dutiable Goods: customs + excise per litre of alcohol, GST 9% on CIF + duties) is registered and available through the API (`dest_country: "SG"`), but labelled unverified until a Singapore Customs permit is checked against it. The web UI has a Malaysia / Singapore switch on step 1: it changes the rate tables, currency (RM / S$), tax name (SST / GST), destination ports, default local charges, FX (BNM cross rate for SGD) and the compliance checklist, and the results page shows the same shipment priced for the other country. Singapore results carry a 'verify' banner until permit-checked.
 
 ## Database (Supabase)
 

@@ -5,8 +5,9 @@ import type { ShipmentResult } from "@landedmy/engine";
 import type { AppState } from "@/lib/state";
 import { getProfile, type Profile } from "@/lib/supabase";
 import { DEST_PORTS } from "@/lib/ports";
+import { COUNTRIES } from "@/lib/country";
 import { EQUIPMENT_LABEL } from "@/lib/lanes";
-import { rm, smallInputCls } from "./ui";
+import { cs, rm, smallInputCls } from "./ui";
 
 const LS = "landedmy:quote";
 
@@ -119,7 +120,7 @@ export function QuoteSheet({ state, result, user, onClose }: { state: AppState; 
           <div>
             <div style={{ color: "#5B6664" }}>Exchange rate</div>
             <div style={{ fontWeight: 600 }}>
-              1 {state.currency} = RM {state.fx_rate}
+              1 {state.currency} = {cs()} {state.fx_rate}
             </div>
           </div>
         </div>
@@ -127,7 +128,7 @@ export function QuoteSheet({ state, result, user, onClose }: { state: AppState; 
         <table style={{ width: "100%", borderCollapse: "collapse", marginTop: 18, fontSize: 11.5 }}>
           <thead>
             <tr style={{ background: "#E6F1F0" }}>
-              {["Product", "Units", "Goods", "Freight+Ins", "Duty", "Excise", "SST", "Local", "Landed", "Per unit"].map((h, i) => (
+              {["Product", "Units", "Goods", "Freight+Ins", "Duty", "Excise", COUNTRIES[state.dest_country].tax_name, "Local", "Landed", "Per unit"].map((h, i) => (
                 <th key={h} style={{ textAlign: i === 0 ? "left" : "right", padding: "6px 6px", fontWeight: 600, borderBottom: "1px solid #D9DAD3" }}>
                   {h}
                 </th>
@@ -147,7 +148,7 @@ export function QuoteSheet({ state, result, user, onClose }: { state: AppState; 
               </tr>
             ))}
             <tr style={{ fontWeight: 700 }}>
-              <td style={{ padding: "8px 6px" }}>Total (RM)</td>
+              <td style={{ padding: "8px 6px" }}>Total ({cs()})</td>
               <td style={{ textAlign: "right", padding: "8px 6px" }}>{result.lines.reduce((a, l) => a + l.units, 0).toLocaleString()}</td>
               {[t.goods, t.freight + t.insurance, t.duty, t.excise, t.sst, t.local_charges, t.landed].map((v, i) => (
                 <td key={i} style={{ textAlign: "right", padding: "8px 6px" }}>
@@ -167,7 +168,7 @@ export function QuoteSheet({ state, result, user, onClose }: { state: AppState; 
         )}
 
         <div style={{ marginTop: 22, fontSize: 10, color: "#5B6664", lineHeight: 1.5 }}>
-          Rates: Customs Duties Order 2022 · Excise Duties Order 2022 as raised 1 Nov 2025 · SST on CIF + duty + excise. Estimate only; final assessment by the Royal Malaysian Customs Department. Tax share of landed cost: {Math.round(t.tax_share_pct)}%.
+          Rates: {COUNTRIES[state.dest_country].rates_note} Estimate only; final assessment by {COUNTRIES[state.dest_country].customs_name}. Tax share of landed cost: {Math.round(t.tax_share_pct)}%.
           <div style={{ marginTop: 6, fontWeight: 600, color: "#0B5E5A" }}>Made with LandedMY · landedmy.netlify.app</div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { LineResult } from "@landedmy/engine";
-import { Card, rm, smallInputCls } from "./ui";
+import { Card, cs, rm, smallInputCls } from "./ui";
 import { useT } from "@/lib/i18n";
 
 /**
@@ -38,7 +38,7 @@ export function ReverseCalc({ line, currency, fx, unitCost }: { line: LineResult
       <p className="mt-1 text-[12px] text-muted">For {line.name}. Taxes and logistics stay as calculated; only the supplier price moves.</p>
       <div className="mt-2 grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] text-muted">I want to sell at (RM / unit)</span>
+          <span className="text-[11px] text-muted">I want to sell at ({cs()} / unit)</span>
           <input type="number" className={smallInputCls} value={sell || ""} placeholder="e.g. 120" onChange={(e) => setSell(Number(e.target.value) || 0)} />
         </label>
         <label className="flex flex-col gap-1">
@@ -50,11 +50,11 @@ export function ReverseCalc({ line, currency, fx, unitCost }: { line: LineResult
         <div className="mt-2.5 rounded-lg bg-ground p-3 text-[13px]">
           <div className="flex justify-between">
             <span className="text-muted">Landed cost must be ≤</span>
-            <span>RM {rm(targetLanded)}</span>
+            <span>{cs()} {rm(targetLanded)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted">Fixed taxes + logistics per unit</span>
-            <span>RM {rm(fixed)}</span>
+            <span>{cs()} {rm(fixed)}</span>
           </div>
           <div className="mt-1.5 flex justify-between border-t border-line-2 pt-1.5 font-semibold">
             <span>Max supplier price</span>

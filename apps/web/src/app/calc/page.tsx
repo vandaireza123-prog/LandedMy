@@ -1,6 +1,7 @@
 "use client";
 import { useAppState } from "@/lib/state";
-import { Shell } from "@/components/ui";
+import { Shell, setCurrencySymbol } from "@/components/ui";
+import { COUNTRIES } from "@/lib/country";
 import { SetupStep } from "@/components/SetupStep";
 import { ProductsStep } from "@/components/ProductsStep";
 import { LogisticsStep } from "@/components/LogisticsStep";
@@ -14,6 +15,7 @@ import { useState } from "react";
 export default function Page() {
   const { state, update, reset, hydrated, shareUrl, shipment, manualRateLines } = useAppState();
   const dest = DEST_PORTS.find((p) => p.code === state.dest_port);
+  setCurrencySymbol(COUNTRIES[state.dest_country].symbol);
   const right = state.step === 1 ? undefined : `${state.origin_label.split(",")[0]} → ${dest?.label.split(" (")[0] ?? ""}`;
 
   const toggleLang = () => update({ lang: state.lang === "ms" ? "en" : "ms" });

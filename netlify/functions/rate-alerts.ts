@@ -8,7 +8,7 @@
  */
 import type { Config, Context } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
-import { buildRateTables, computeShipment, manualRates, mergeRates } from "../../packages/engine/src/index";
+import { computeShipment, manualRates, mergeRates, ratesFor } from "../../packages/engine/src/index";
 
 const CURRENT_RATE_VERSION = "2025-11-01-budget2026";
 
@@ -35,7 +35,6 @@ export default async (req: Request, _ctx: Context) => {
   const { data, error } = await sb.from("shipments").select("id,user_id,name,snapshot_json,landed_total,rate_version").eq("alert_on_rate_change", true).not("snapshot_json", "is", null);
   if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 });
 
-  const rates = buildRateTables();
 
   let checked = 0,
     changed = 0,
@@ -44,7 +43,7 @@ export default async (req: Request, _ctx: Context) => {
     checked++;
     try {
       const snap = row.snapshot_json as unknown as ShipmentSnapshot;
-      const merged = mergeRates(rates, ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+      const merged = mergeRates(ratesFor(snap.dest_country ?? "MY"), ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
       const res = computeShipment(buildShipment(snap), merged);
       const newTotal = res.totals.landed;
       const oldTotal = row.landed_total ?? newTotal;

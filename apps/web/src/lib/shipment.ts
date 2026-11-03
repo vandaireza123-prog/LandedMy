@@ -1,6 +1,7 @@
 import type { Shipment, ShipmentLine } from "@landedmy/engine";
 import type { Category } from "./products";
 import type { Equipment } from "./lanes";
+import type { DestCountry } from "./country";
 
 export interface ProductRow extends ShipmentLine {
   category: Category;
@@ -15,6 +16,7 @@ export interface ShipmentSnapshot {
   origin_iso: string;
   origin_port: string;
   origin_label: string;
+  dest_country?: DestCountry;
   dest_port: string;
   equipment: Equipment;
   pallets: number;
@@ -36,6 +38,7 @@ export function buildShipment(state: ShipmentSnapshot): Shipment {
   return {
     date: new Date().toISOString().slice(0, 10),
     origin_iso: state.origin_iso,
+    dest_country: state.dest_country ?? "MY",
     dest_port: state.dest_port,
     currency: state.currency,
     fx_rate: state.fx_rate,

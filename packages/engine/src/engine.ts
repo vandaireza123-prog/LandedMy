@@ -172,6 +172,7 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
         duty: { ...dutyRate, ...src(fta ?? tariff) },
         excise: excise ? { ...excise.excise, ...src(excise) } : null,
         sst_pct: sst.rate_pct,
+        sst_name: rates.tax_name ?? "SST",
         fta_agreement: fta ? fta.agreement : null,
       },
     };
