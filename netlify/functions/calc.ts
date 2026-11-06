@@ -11,7 +11,7 @@
  * requests without one are accepted but rate-limited harder. Responses carry every rate's source.
  */
 import type { Config, Context } from "@netlify/functions";
-import { COUNTRY_META, computeShipment, manualRates, mergeRates, ratesFor, withoutFta, RateNotFoundError, SUPPORTED_COUNTRIES, type CountryCode, type Shipment } from "../../packages/engine/src/index";
+import { DESTINATION_CODES, computeShipment, destination, manualRates, mergeRates, ratesForShipment, withoutFta, RateNotFoundError, type CountryCode, type Shipment } from "../../packages/engine/src/index";
 const buckets = new Map<string, { n: number; reset: number }>();
 
 function limited(ip: string, max: number): boolean {
@@ -56,7 +56,7 @@ const DOCS = {
   endpoint: "POST /api/calc",
   body: {
     date: "YYYY-MM-DD (picks the rate version in force)",
-    dest_country: "MY (default) | SG — Singapore prices in SGD with GST; from Singapore Customs' published list, not yet permit-verified",
+    dest_country: "ISO-2 code. MY (verified, default) and SG (official schedule) price every line from national tables. 53 more destinations (ASEAN, AU, NZ, JP, KR, CN, HK, TW, IN, Gulf, UK, EU, US, CA, MX, BR…) are indicative: give duty_pct on each line (or rely on the country default where one exists, e.g. GCC 5%) and the standard VAT/GST is applied; alcohol is refused there until excise is loaded. GET /api/calc?destinations=1 lists them",
     origin_iso: "FR",
     dest_port: "MYPKG",
     currency: "EUR",
@@ -81,7 +81,11 @@ const DOCS = {
 
 export default async (req: Request, ctx: Context) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
-  if (req.method === "GET") return json(200, DOCS);
+  if (req.method === "GET") {
+    const u = new URL(req.url);
+    if (u.searchParams.has("destinations")) return json(200, { destinations: DESTINATION_CODES.map((c) => { const d = destination(c); return { code: d.code, name: d.name, currency: d.currency, tax_name: d.tax_name, tax_pct: d.tax_pct, tier: d.tier, lookup: d.lookup, duty_default_pct: d.duty_default_pct ?? null }; }) });
+    return json(200, DOCS);
+  }
   if (req.method !== "POST") return json(405, { error: "GET for docs, POST to calculate" });
 
   const ip = ctx.ip ?? req.headers.get("x-forwarded-for") ?? "anon";
@@ -100,8 +104,16 @@ export default async (req: Request, ctx: Context) => {
   if (body.lines.length > 200) return json(400, { error: "max 200 lines per call" });
 
   const dest_country = String(body.dest_country ?? "MY").toUpperCase() as CountryCode;
-  if (!SUPPORTED_COUNTRIES.includes(dest_country)) return json(400, { error: `dest_country must be one of ${SUPPORTED_COUNTRIES.join(", ")}` });
-  const rates = body.claim_fta === false ? withoutFta(ratesFor(dest_country)) : ratesFor(dest_country);
+  if (!DESTINATION_CODES.includes(dest_country)) return json(400, { error: `dest_country must be one of ${DESTINATION_CODES.join(", ")}` });
+  const dest = destination(dest_country);
+  let rates;
+  try {
+    rates = ratesForShipment(dest_country, (body.lines ?? []).map((l) => ({ hs_code: l.hs_code, name: l.name, duty_pct: l.duty_pct })));
+  } catch (e) {
+    if (e instanceof RateNotFoundError) return json(422, { error: `${dest.name} is an indicative destination: give duty_pct on each line (look it up at ${dest.lookup}); ${dest.tax_name} ${dest.tax_pct}% is applied automatically`, lookup: dest.lookup });
+    throw e;
+  }
+  if (body.claim_fta === false) rates = withoutFta(rates);
   const shipment: Shipment = {
     dest_country,
     date: body.date ?? new Date().toISOString().slice(0, 10),
@@ -131,7 +143,7 @@ export default async (req: Request, ctx: Context) => {
   try {
     const merged = mergeRates(rates, ...(body.manual_rates ?? []).map((m) => manualRates(m.hs_code, m.name, Number(m.duty_pct), Number(m.sst_pct))));
     const result = computeShipment(shipment, merged);
-    return json(200, { result, destination: { country: dest_country, ...COUNTRY_META[dest_country] } });
+    return json(200, { result, destination: { country: dest_country, name: dest.name, currency: dest.currency, symbol: dest.symbol, tax_name: dest.tax_name, tier: rates.tier ?? dest.tier, lookup: dest.lookup, note: dest.tax_note } });
   } catch (e) {
     if (e instanceof RateNotFoundError) return json(422, { error: e.message, hs_code: e.hs_code, date: e.date });
     return json(400, { error: (e as Error).message });

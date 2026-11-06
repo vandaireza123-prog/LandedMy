@@ -2,11 +2,12 @@
  * Builds effective-dated RateTables from data/chapter22.json.
  * Two excise versions: the 2022 Order (P.U.(A) 163/2022) and the 2025 Order (P.U.(A) 389/2025) from 1 Nov 2025.
  */
-import type { CountryCode, ExciseLine, FtaRate, ISODate, Rate, RateTables, SstRate, TariffLine } from "./types";
+import { RateNotFoundError, type CountryCode, type ExciseLine, type FtaRate, type ISODate, type Rate, type RateTables, type SstRate, type TariffLine } from "./types";
 import chapter22 from "../data/chapter22.json";
 import general from "../data/general.json";
 import sg from "../data/sg.json";
 import fta from "../data/fta.json";
+import destinations from "../data/destinations.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -104,7 +105,7 @@ export function buildRateTables(): RateTables {
     }
   }
 
-  return { country: "MY", tax_name: "SST", tariff_lines, excise_lines, sst_rates, fta_rates };
+  return { country: "MY", tax_name: "SST", tier: "verified", tariff_lines, excise_lines, sst_rates, fta_rates };
 }
 
 /**
@@ -169,7 +170,7 @@ export function buildSgRateTables(): RateTables {
       });
     }
   }
-  return { country: "SG", tax_name: "GST", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+  return { country: "SG", tax_name: "GST", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
@@ -179,11 +180,61 @@ export const COUNTRY_META: Record<string, { currency: string; symbol: string; ta
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
 const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables };
+/** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {
   const f = REGISTRY[country];
   if (!f) throw new Error(`No rate tables for destination ${country} yet (supported: ${SUPPORTED_COUNTRIES.join(", ")})`);
   return f();
+}
+
+export interface Destination {
+  code: CountryCode;
+  name: string;
+  currency: string;
+  symbol: string;
+  tax_name: string;
+  tax_pct: number;
+  tax_note: string;
+  tier: "verified" | "official" | "indicative";
+  lookup: string;
+  customs: string;
+  region: string;
+  duty_default_pct?: number;
+  extra_note?: string;
+  de_minimis?: string;
+  tax_base?: string;
+}
+export const DESTINATIONS: Destination[] = destinations.countries as Destination[];
+export const DESTINATION_CODES: CountryCode[] = DESTINATIONS.map((d) => d.code);
+export function destination(code: CountryCode): Destination {
+  const d = DESTINATIONS.find((x) => x.code === code);
+  if (!d) throw new Error(`Unknown destination ${code} (known: ${DESTINATION_CODES.join(", ")})`);
+  return d;
+}
+
+/**
+ * Indicative destinations: build tables from the country's standard import tax and the duty %
+ * on each line (user-entered, or the country's default where one exists). No excise rows, so the
+ * engine still refuses alcohol — excise must be researched per country before it is priced.
+ */
+export function genericRates(country: CountryCode, lines: { hs_code: string; name: string; duty_pct?: number }[]): RateTables {
+  const d = destination(country);
+  const base = { effective_from: "2000-01-01", effective_to: null };
+  const tariff_lines: TariffLine[] = [];
+  const sst_rates: SstRate[] = [];
+  for (const l of lines) {
+    const duty = l.duty_pct ?? d.duty_default_pct;
+    if (duty == null) throw new RateNotFoundError("tariff", l.hs_code, base.effective_from);
+    tariff_lines.push({ ...base, hs_code: l.hs_code, description: l.name, unit: "u", duty: { type: "ad_valorem", value: duty }, source_doc: l.duty_pct != null ? `Duty % entered by you — verify at ${d.customs}` : `${d.name} common duty ${duty}% (indicative)`, source_url: d.lookup });
+    sst_rates.push({ ...base, hs_code: l.hs_code, description: l.name, rate_pct: d.tax_pct, source_doc: `${d.tax_name} ${d.tax_pct}% — ${d.tax_note}`, source_url: destinations._meta.sources.vat_rates });
+  }
+  return { country, tax_name: d.tax_name === "none" ? "Tax" : d.tax_name, tier: "indicative", tax_base_uplift_pct: d.tax_base === "cif_uplift_10_plus_duty" ? 10 : 0, tariff_lines, excise_lines: [], sst_rates, fta_rates: [] };
+}
+
+/** The right tables for a shipment: national schedule where we have one, otherwise indicative generic tables. */
+export function ratesForShipment(country: CountryCode, lines: { hs_code: string; name: string; duty_pct?: number }[]): RateTables {
+  return REGISTRY[country] ? ratesFor(country) : genericRates(country, lines);
 }
 
 export const GENERAL_GROUPS = general.groups as { key: string; label: string }[];

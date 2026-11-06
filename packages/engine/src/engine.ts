@@ -124,7 +124,8 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
     const dutyRate = fta ? fta.duty : tariff.duty;
     const duty = specificOrAdValorem(dutyRate, litres, l.abv, cif);
     const exciseAmt = excise ? specificOrAdValorem(excise.excise, litres, l.abv, cif + duty) : 0;
-    const sstAmt = (cif + duty + exciseAmt) * (sst.rate_pct / 100);
+    const uplift = 1 + (rates.tax_base_uplift_pct ?? 0) / 100;
+    const sstAmt = (cif * uplift + duty + exciseAmt) * (sst.rate_pct / 100);
     const dutyPaid = cif + duty + exciseAmt + sstAmt;
     const local = localTotal * s;
     const landed = dutyPaid + local;

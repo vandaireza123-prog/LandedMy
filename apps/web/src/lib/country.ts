@@ -2,10 +2,9 @@
  * Destination-country presentation: currency symbol, tax name, ports, default local charges,
  * verification status. Rates themselves live in the engine (ratesFor(country)).
  */
-import type { CountryCode } from "@landedmy/engine";
 import type { Equipment } from "./lanes";
 
-export type DestCountry = Extract<CountryCode, "MY" | "SG">;
+export type DestCountry = "MY" | "SG";
 
 export interface CountryInfo {
   code: DestCountry;

@@ -203,6 +203,32 @@ describe("FTA preferences", () => {
   });
 });
 
+describe("any destination (indicative)", () => {
+  it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
+    const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
+    expect(DESTINATIONS.length).toBeGreaterThanOrEqual(50);
+    expect(destination("TH").tax_pct).toBe(7);
+    const lines = [{ id: "c", name: "Wooden chairs", hs_code: "9403.60", volume_ml: 0, abv: 0, units_per_case: 1, cases: 100, unit_cost: 40, duty_pct: 20 }];
+    const s: Shipment = { ...fixtures[0].shipment, dest_country: "TH", dest_port: "THBKK", currency: "USD", fx_rate: 33, lines };
+    const r = computeShipment(s, ratesForShipment("TH", lines)).lines[0];
+    // goods 100 × 40 × 33 = 132,000; freight 480 × 33 = 15,840 → CIF 147,840; duty 20% = 29,568; VAT 7% × 177,408 = 12,418.56
+    expect(r.cif).toBe(147840);
+    expect(r.duty).toBe(29568);
+    expect(r.sst).toBe(12418.56);
+    expect(r.rates_used.sst_name).toBe("VAT");
+    // no duty % and no country default → refused, not guessed
+    expect(() => ratesForShipment("TH", [{ hs_code: "9403.60", name: "x" }])).toThrow(RateNotFoundError);
+    // GCC default duty 5%
+    expect(ratesForShipment("AE", [{ hs_code: "9403.60", name: "x" }]).tariff_lines[0].duty.value).toBe(5);
+    // alcohol into an indicative destination is refused (no excise table)
+    const wine = { ...fixtures[0].shipment.lines[0], duty_pct: 54 };
+    expect(() => computeShipment({ ...s, lines: [wine] }, ratesForShipment("TH", [wine]))).toThrow(/excise/i);
+    // South Africa: VAT on CIF × 1.10 + duty
+    const za = computeShipment({ ...s, dest_country: "ZA" }, ratesForShipment("ZA", lines)).lines[0];
+    expect(za.sst).toBe(Math.round((147840 * 1.1 + 29568) * 0.15 * 100) / 100);
+  });
+});
+
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");

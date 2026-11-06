@@ -23,7 +23,8 @@ Environment variables on the site:
 ## Going global
 
 Layer 1 (done): the full HS 2022 nomenclature (5,613 six-digit subheadings, public domain, `packages/engine/data/hs2022-source.csv` → `apps/web/src/lib/hs/hs6.json`, lazy-loaded) is searchable in plain language (`lib/hs/search.ts`, ~400 everyday-word synonyms) and the invoice/photo classifier returns an HS-6 for any goods. An HS-6 that matches a national line prices at once; otherwise the line asks for duty % and tax % with a link to the official lookup.
-Layer 2 (next): indicative MFN duty at HS-6 for every destination from World Bank WITS/TRAINS. Layer 3: VAT/GST per destination. Layer 4: excise on sensitive goods per country, by demand, declaration-verified.
+Layer 3 (done, engine + API): `packages/engine/data/destinations.json` registers 55 destinations with currency, standard import tax (VAT/GST/sales tax) and base, official tariff lookup and data tier. `ratesForShipment(country, lines)` uses the national schedule for MY/SG and otherwise builds indicative tables from the country's tax and each line's `duty_pct` (user-entered, or the country default such as GCC 5%); alcohol is refused there until excise is loaded. `GET /api/calc?destinations=1` lists them. The web UI still offers MY/SG; the any-destination picker is pending design approval.
+Layer 2 (blocked on data access): indicative MFN duty at HS-6 for every destination from World Bank WITS/TRAINS. Layer 4: excise on sensitive goods per country, by demand, declaration-verified.
 
 ## Multi-country
 

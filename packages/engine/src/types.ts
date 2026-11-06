@@ -53,13 +53,18 @@ export interface FtaRate extends RateRowBase {
   duty: Rate;
 }
 
-export type CountryCode = "MY" | "SG" | "TH" | "ID" | "VN" | "PH";
+/** ISO 3166-1 alpha-2 destination code; the registry in data/destinations.json says what each one supports. */
+export type CountryCode = string;
 
 export interface RateTables {
   /** Destination country these tables price for. */
   country?: CountryCode;
   /** Consumption tax name for display: SST (MY), GST (SG), VAT (TH/ID/VN/PH). */
   tax_name?: string;
+  /** Data tier: verified (declaration-checked), official (national schedule), indicative (standard tax + user duty %). */
+  tier?: "verified" | "official" | "indicative";
+  /** Some countries tax an uplifted customs value (South Africa: CIF + 10%). Percent, default 0. */
+  tax_base_uplift_pct?: number;
   tariff_lines: TariffLine[];
   excise_lines: ExciseLine[];
   sst_rates: SstRate[];
@@ -89,6 +94,8 @@ export interface ShipmentLine {
   declared_value?: number;
   /** Optional: cases per pallet, used only for per-pallet output. */
   cases_per_pallet?: number;
+  /** For indicative destinations: ad valorem duty % the user entered (or loaded from WITS). */
+  duty_pct?: number;
 }
 
 export interface Shipment {
