@@ -445,11 +445,33 @@
       "symbol": "£",
       "tax_name": "VAT",
       "tax_pct": 20,
-      "tax_note": "VAT 20% on CIF + duty + excise",
-      "tier": "indicative",
+      "tax_note": "VAT 20% on CIF + duty + Alcohol Duty; Alcohol Duty by ABV band per litre of pure alcohol (HMRC, from 1 Feb 2026)",
+      "tier": "official",
       "lookup": "https://www.trade-tariff.service.gov.uk/",
       "customs": "HMRC",
-      "region": "Europe"
+      "region": "Europe",
+      "ports": [
+        {
+          "code": "GBFXT",
+          "label": "Felixstowe"
+        },
+        {
+          "code": "GBSOU",
+          "label": "Southampton"
+        },
+        {
+          "code": "GBLGP",
+          "label": "London Gateway"
+        },
+        {
+          "code": "GBLIV",
+          "label": "Liverpool"
+        },
+        {
+          "code": "GBLHR",
+          "label": "Heathrow (air freight)"
+        }
+      ]
     },
     {
       "code": "IE",

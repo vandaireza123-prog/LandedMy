@@ -350,12 +350,16 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                       <input type="number" step="0.5" className={smallInputCls} value={r.manual_duty_pct ?? 0} onChange={(e) => patchRow(r.id, { manual_duty_pct: Number(e.target.value) || 0 })} />
                     </label>
                     <label className="flex flex-col gap-1">
-                      <span className="text-[11px] text-muted">SST %</span>
-                      <select className={smallInputCls} value={r.manual_sst_pct ?? 10} onChange={(e) => patchRow(r.id, { manual_sst_pct: Number(e.target.value) })}>
-                        <option value={0}>0% (exempt)</option>
-                        <option value={5}>5%</option>
-                        <option value={10}>10%</option>
-                      </select>
+                      <span className="text-[11px] text-muted">{country.tax_name}{state.dest_country === "MY" ? " %" : ""}</span>
+                      {state.dest_country === "MY" ? (
+                        <select className={smallInputCls} value={r.manual_sst_pct ?? 10} onChange={(e) => patchRow(r.id, { manual_sst_pct: Number(e.target.value) })}>
+                          <option value={0}>0% (exempt)</option>
+                          <option value={5}>5%</option>
+                          <option value={10}>10%</option>
+                        </select>
+                      ) : (
+                        <div className={`${smallInputCls} flex items-center bg-ground text-muted`}>{country.tax_pct}% · applied</div>
+                      )}
                     </label>
                   </div>
                 )}

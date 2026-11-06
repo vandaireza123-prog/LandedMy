@@ -203,6 +203,35 @@ describe("FTA preferences", () => {
   });
 });
 
+describe("United Kingdom", () => {
+  it("prices beer and wine with ABV-banded Alcohol Duty, £/hl customs duty and VAT 20%; refuses cider", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const gb = ratesFor("GB");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "GB", dest_port: "GBFXT", currency: "GBP", fx_rate: 1, freight: 300, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    // 100 cases × 24 × 330 ml lager 5% at £1: 792 L, 39.6 L alc → excise 39.6 × 22.58 = 894.17; duty 0; VAT 20% × (2700 + 894.17)
+    const beer = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 1 }] }, gb).lines[0];
+    expect(beer.duty).toBe(0);
+    expect(beer.excise).toBeCloseTo(39.6 * 22.58, 2);
+    expect(beer.sst).toBeCloseTo((2700 + 39.6 * 22.58) * 0.2, 2);
+    expect(beer.rates_used.sst_name).toBe("VAT");
+    // 60 cases × 12 × 750 ml wine 13% at £5: 540 L, 70.2 L alc → band 8.5–22 = 30.62; duty 540 × 0.10 = 54
+    const wine = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 5 }] }, gb).lines[0];
+    expect(wine.duty).toBeCloseTo(54, 2);
+    expect(wine.excise).toBeCloseTo(70.2 * 30.62, 2);
+    // 8% abbey ale falls in the 3.5–8.4 beer band; 8.5% ale in the 8.5–22 band
+    const ale8 = computeShipment({ ...base, lines: [{ id: "a", name: "Ale", hs_code: "2203.00.99", volume_ml: 330, abv: 8, units_per_case: 24, cases: 100, unit_cost: 1 }] }, gb).lines[0];
+    const ale85 = computeShipment({ ...base, lines: [{ id: "a", name: "Ale", hs_code: "2203.00.99", volume_ml: 330, abv: 8.5, units_per_case: 24, cases: 100, unit_cost: 1 }] }, gb).lines[0];
+    expect(ale8.rates_used.excise!.value).toBe(22.58);
+    expect(ale85.rates_used.excise!.value).toBe(30.62);
+    // whisky 40%: duty 0, excise band 22.1+ = 33.99
+    const whisky = computeShipment({ ...base, lines: [{ id: "s", name: "Whisky", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 12 }] }, gb).lines[0];
+    expect(whisky.duty).toBe(0);
+    expect(whisky.rates_used.excise!.value).toBe(33.99);
+    // cider is deliberately not loaded
+    expect(() => computeShipment({ ...base, lines: [{ id: "c", name: "Cider", hs_code: "2206.00.10", volume_ml: 500, abv: 4.5, units_per_case: 12, cases: 10, unit_cost: 1 }] }, gb)).toThrow(RateNotFoundError);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -232,7 +261,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);

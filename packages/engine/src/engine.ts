@@ -103,7 +103,10 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
     if (!tariff) throw new RateNotFoundError("tariff", l.hs_code, date);
     const sst = effectiveRow(rates.sst_rates.filter((r) => r.hs_code === l.hs_code), date);
     if (!sst) throw new RateNotFoundError("sst", l.hs_code, date);
-    const excise = effectiveRow(rates.excise_lines.filter((r) => r.hs_code === l.hs_code), date);
+    const excise = effectiveRow(
+      rates.excise_lines.filter((r) => r.hs_code === l.hs_code && (r.abv_min == null || l.abv >= r.abv_min) && (r.abv_max == null || l.abv <= r.abv_max)),
+      date,
+    );
     if (!excise && l.abv > 0) {
       throw new Error(`No effective excise rate for alcohol line HS ${l.hs_code} (${l.abv}% ABV) on ${date}`);
     }

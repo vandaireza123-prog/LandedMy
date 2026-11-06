@@ -97,9 +97,12 @@ function fromRegistry(d: Destination): CountryInfo {
     duty_default_pct: d.duty_default_pct,
     region: d.region,
     verified: false,
-    verify_note: `${d.tax_name === "none" ? "no import VAT/GST" : `${d.tax_name} ${d.tax_pct}%`} is applied from the standard rate; import duty is the % you enter per product${d.duty_default_pct != null ? ` (default ${d.duty_default_pct}%)` : ""}. Verify at ${d.customs} before you commit.`,
+    verify_note:
+      d.tier === "official"
+        ? `Loaded from ${d.customs}'s published schedule and tax tables. Not yet checked against a real import entry — treat as official but verify.`
+        : `${d.tax_name === "none" ? "no import VAT/GST" : `${d.tax_name} ${d.tax_pct}%`} is applied from the standard rate; import duty is the % you enter per product${d.duty_default_pct != null ? ` (default ${d.duty_default_pct}%)` : ""}. Verify at ${d.customs} before you commit.`,
     customs_name: d.customs,
-    ports: [
+    ports: d.ports ?? [
       { code: `${d.code}SEA`, label: `${d.name} · main seaport` },
       { code: `${d.code}AIR`, label: `${d.name} · airport (air freight)` },
     ],

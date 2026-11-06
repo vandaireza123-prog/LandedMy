@@ -1,4 +1,4 @@
-import { GENERAL_LINES, genericRates, manualRates, mergeRates, ratesFor, withoutFta, type RateTables, type Shipment, type ShipmentLine } from "@landedmy/engine";
+import { GENERAL_LINES, SUPPORTED_COUNTRIES, destination, genericRates, manualRates, mergeRates, ratesFor, withoutFta, type RateTables, type Shipment, type ShipmentLine } from "@landedmy/engine";
 
 /** A general-goods line prices from a national row only when its code is one we have; anything else is user-rated. */
 export function isManualLine(p: ProductRow): boolean {
@@ -74,7 +74,7 @@ export function buildShipment(state: ShipmentSnapshot): Shipment {
 }
 
 export function isExactDestination(country?: string): boolean {
-  return country === undefined || country === "MY" || country === "SG";
+  return country === undefined || SUPPORTED_COUNTRIES.includes(country);
 }
 
 /**
@@ -85,7 +85,9 @@ export function tablesFor(state: ShipmentSnapshot): RateTables {
   const country = state.dest_country ?? "MY";
   let t: RateTables;
   if (isExactDestination(country)) {
-    t = mergeRates(ratesFor(country), ...manualLinesOf(state).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+    // User-rated lines: Malaysia lets the user pick the SST band (0/5/10); other schedules apply their single standard rate.
+    const taxPct = country === "MY" ? undefined : destination(country).tax_pct;
+    t = mergeRates(ratesFor(country), ...manualLinesOf(state).map((m) => ({ ...manualRates(m.hs_code, m.name, m.duty_pct, taxPct ?? m.sst_pct), country })));
   } else {
     t = genericRates(
       country,

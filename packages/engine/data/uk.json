@@ -1,0 +1,45 @@
+{
+  "_meta": {
+    "country": "GB",
+    "currency": "GBP",
+    "tax_name": "VAT",
+    "scope": "United Kingdom: customs duty per hectolitre by UK Global Tariff line (chapter 22), Alcohol Duty by ABV band per litre of pure alcohol (HMRC, rates in force from 1 Feb 2026), VAT 20% on CIF + duty + excise.",
+    "notes": [
+      "Alcohol Duty bands are the non-draught rates. Draught relief (lower rates for containers ≥20 L for on-trade) and Small Producer Relief are not modelled; both reduce the figure.",
+      "Still-wine customs duty: £10/hl up to 13% ABV, £12/hl above (UK Global Tariff). Sparkling £26/hl. Beer and most spirits 0%. Rum carries a compound duty (£0.50 per %vol/hl + £2.60/hl) modelled here as £0.50 per litre of pure alcohol; the £0.026/L fixed part is omitted.",
+      "Cider and perry (2206) customs duty not yet confirmed on the UK tariff — those lines are left out so the engine refuses rather than guesses.",
+      "No permit/entry has been checked yet — tier 'official'."
+    ],
+    "sources": {
+      "alcohol_duty": "https://www.gov.uk/guidance/alcohol-duty-rates",
+      "trade_tariff": "https://www.trade-tariff.service.gov.uk/",
+      "trade_tariff_mirror": "https://treayo.com/en/hs/uk/ch/22",
+      "vat": "https://www.gov.uk/guidance/vat-imports-acquisitions-and-purchases-from-abroad"
+    },
+    "duty_effective_from": "2021-01-01",
+    "excise_effective_from": "2026-02-01",
+    "checked": "2026-11-07"
+  },
+  "duty": [
+    { "prefix": "2203", "type": "per_litre", "value": 0, "label": "Beer: 0%" },
+    { "prefix": "2204.10", "type": "per_litre", "value": 0.26, "label": "Sparkling wine £26/hl" },
+    { "prefix": "2204.21.11", "type": "per_litre", "value": 0.10, "label": "Still wine ≤13%: £10/hl" },
+    { "prefix": "2204.21.13", "type": "per_litre", "value": 0.12, "label": "Still wine >13%: £12/hl" },
+    { "prefix": "2204.21.14", "type": "per_litre", "value": 0.12, "label": "Still wine >15%: £12/hl" },
+    { "prefix": "2204.22", "type": "per_litre", "value": 0.10, "label": "Still wine 2–10 L: £10/hl (≤13%)" },
+    { "prefix": "2204.29", "type": "per_litre", "value": 0.10, "label": "Still wine >10 L: £10/hl (≤13%)" },
+    { "prefix": "2205", "type": "per_litre", "value": 0.10, "label": "Vermouth: treated as wine £10/hl (verify)" },
+    { "prefix": "2208.40", "type": "per_litre_pure_alcohol", "value": 0.50, "label": "Rum: £0.50 per %vol/hl (compound, simplified)" },
+    { "prefix": "2208", "type": "per_litre", "value": 0, "label": "Spirits and liqueurs: 0%" }
+  ],
+  "excise_bands": [
+    { "abv_min": 0, "abv_max": 1.2, "rate": 0, "applies": "all" },
+    { "abv_min": 1.3, "abv_max": 3.4, "rate": 9.96, "applies": "all" },
+    { "abv_min": 3.5, "abv_max": 8.4, "rate": 22.58, "applies": "beer" },
+    { "abv_min": 3.5, "abv_max": 8.4, "rate": 10.39, "applies": "cider" },
+    { "abv_min": 3.5, "abv_max": 8.4, "rate": 26.61, "applies": "wine_spirits_other" },
+    { "abv_min": 8.5, "abv_max": 22, "rate": 30.62, "applies": "all" },
+    { "abv_min": 22.1, "abv_max": 100, "rate": 33.99, "applies": "all" }
+  ],
+  "vat_pct": 20
+}

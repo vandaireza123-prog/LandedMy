@@ -39,6 +39,9 @@ export interface TariffLine extends RateRowBase {
 
 export interface ExciseLine extends RateRowBase {
   excise: Rate;
+  /** Optional ABV band (percent, inclusive) the row applies to — UK-style banded duty. */
+  abv_min?: number;
+  abv_max?: number;
 }
 
 export interface SstRate extends RateRowBase {

@@ -8,6 +8,7 @@ import general from "../data/general.json";
 import sg from "../data/sg.json";
 import fta from "../data/fta.json";
 import destinations from "../data/destinations.json";
+import uk from "../data/uk.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -173,13 +174,37 @@ export function buildSgRateTables(): RateTables {
   return { country: "SG", tax_name: "GST", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/**
+ * United Kingdom: UK Global Tariff duty per hectolitre, Alcohol Duty by ABV band per litre of pure alcohol,
+ * VAT 20% on CIF + duty + excise. Cider lines are omitted (duty unconfirmed) so they are refused.
+ */
+export function buildUkRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  const doc = "UK Global Tariff (trade-tariff.service.gov.uk)";
+  for (const l of chapter22.lines) {
+    const d = uk.duty.find((r) => l.hs_code.startsWith(r.prefix));
+    if (!d) continue; // cider/perry: not loaded on purpose
+    tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: { type: d.type as Rate["type"], value: d.value }, effective_from: uk._meta.duty_effective_from, effective_to: null, source_doc: `${doc} — ${d.label}`, source_url: uk._meta.sources.trade_tariff });
+    const kind = l.hs_code.startsWith("2203") ? "beer" : l.hs_code.startsWith("2206.00.10") ? "cider" : "wine_spirits_other";
+    for (const b of uk.excise_bands) {
+      if (b.applies !== "all" && b.applies !== kind) continue;
+      excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre_pure_alcohol", value: b.rate }, abv_min: b.abv_min, abv_max: b.abv_max, effective_from: uk._meta.excise_effective_from, effective_to: null, source_doc: `HMRC Alcohol Duty, ${b.abv_min}–${b.abv_max}% ABV band, from 1 Feb 2026 (non-draught)`, source_url: uk._meta.sources.alcohol_duty });
+    }
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: uk.vat_pct, effective_from: "2011-01-04", effective_to: null, source_doc: "UK import VAT 20% on CIF + duty + excise", source_url: uk._meta.sources.vat });
+  }
+  return { country: "GB", tax_name: "VAT", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
+  GB: { currency: "GBP", symbol: "£", tax_name: "VAT", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {
@@ -204,6 +229,7 @@ export interface Destination {
   extra_note?: string;
   de_minimis?: string;
   tax_base?: string;
+  ports?: { code: string; label: string }[];
 }
 export const DESTINATIONS: Destination[] = destinations.countries as Destination[];
 export const DESTINATION_CODES: CountryCode[] = DESTINATIONS.map((d) => d.code);
