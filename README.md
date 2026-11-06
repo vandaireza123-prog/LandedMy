@@ -26,6 +26,14 @@ Layer 1 (done): the full HS 2022 nomenclature (5,613 six-digit subheadings, publ
 Layer 3 (done, engine + API): `packages/engine/data/destinations.json` registers 55 destinations with currency, standard import tax (VAT/GST/sales tax) and base, official tariff lookup and data tier. `ratesForShipment(country, lines)` uses the national schedule for MY/SG and otherwise builds indicative tables from the country's tax and each line's `duty_pct` (user-entered, or the country default such as GCC 5%); alcohol is refused there until excise is loaded. `GET /api/calc?destinations=1` lists them. The web UI has a searchable destination picker (exact vs indicative, tier badges), a per-line duty % field with the country's tariff lookup for indicative destinations, BNM cross-rate FX into any of the 55 currencies, tier-aware result banner and a generic compliance list.
 Layer 2 (blocked on data access): indicative MFN duty at HS-6 for every destination from World Bank WITS/TRAINS. Layer 4: excise on sensitive goods per country, by demand, declaration-verified.
 
+## World rates backbone (migration 0004)
+
+`duty_rates` holds one row per destination × HS code (6-digit universal or national line) × origin (MFN / ISO-2 / agreement) × measure, effective-dated, with `source_id` → `rate_sources` and a tier. `best_duty(dest, hs6, origin, date)` picks the best row (named origin > MFN, national line > HS-6, verified > official > indicative). `hs_codes` holds the nomenclature; `declarations` receives user-uploaded customs declarations for the verification loop.
+
+Loaders (run locally with `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`, all support `--dry-run`): `scripts/load/hs-codes.mjs` (HS 2022), `scripts/load/wto-tdf.mjs --file <csv>` (WTO Tariff Download Facility HS-6 export), `scripts/load/wits.mjs --country TH --year 2024 [--partner CHN]` (WITS/TRAINS SDMX API, MFN and preferential).
+
+`GET /api/rates?dest=TH&hs=940131&origin=CN` serves the best rate with its source; the app pre-fills the duty field from it for indicative destinations and labels the provenance. `nomenclature-watch` runs weekly: diffs the public HS dataset into `hs_codes` and flags rate sources older than 400 days.
+
 ## Multi-country
 
 `ratesFor(country)` serves the rate tables. `MY` is K1-verified. `SG` (`data/sg.json`, Singapore Customs List of Dutiable Goods: customs + excise per litre of alcohol, GST 9% on CIF + duties) is registered and available through the API (`dest_country: "SG"`), but labelled unverified until a Singapore Customs permit is checked against it. The web UI has a Malaysia / Singapore switch on step 1: it changes the rate tables, currency (RM / S$), tax name (SST / GST), destination ports, default local charges, FX (BNM cross rate for SGD) and the compliance checklist, and the results page shows the same shipment priced for the other country. Singapore results carry a 'verify' banner until permit-checked.

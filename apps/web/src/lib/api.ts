@@ -100,3 +100,25 @@ export async function submitLead(fields: Record<string, string>): Promise<boolea
     return false;
   }
 }
+
+// ---- World duty rates ----
+export interface WorldRate {
+  rate: { hs_code: string; hs_level: number; origin: string; rate_type: string; value: number | null; compound_text: string | null; source_id: string; tier: string; year: number | null } | null;
+  source: { id: string; name: string; url: string; tier: string } | null;
+  tier: string | null;
+  note: string;
+}
+const rateCache = new Map<string, Promise<WorldRate | null>>();
+/** Best known duty for dest + HS-6 (+ origin). Null when the API is unreachable. */
+export function fetchWorldRate(dest: string, hs6: string, origin: string): Promise<WorldRate | null> {
+  const k = `${dest}:${hs6}:${origin}`;
+  if (!rateCache.has(k)) {
+    rateCache.set(
+      k,
+      fetch(`/api/rates?dest=${dest}&hs=${hs6}&origin=${origin}`)
+        .then((r) => (r.ok ? (r.json() as Promise<WorldRate>) : null))
+        .catch(() => null),
+    );
+  }
+  return rateCache.get(k)!;
+}

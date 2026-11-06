@@ -9,6 +9,7 @@ import { GENERAL_GROUPS, GENERAL_LINES, GENERAL_VERIFY_URL } from "@landedmy/eng
 import { SENSITIVE_CHAPTERS, searchHs, type HsHit } from "@/lib/hs/search";
 import { useEffect } from "react";
 import { COUNTRIES } from "@/lib/country";
+import { fetchWorldRate } from "@/lib/api";
 import { useT } from "@/lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -40,9 +41,9 @@ function groupForChapter(ch: string): string {
   return "other";
 }
 
-function fromHs(h: HsHit, name: string): ProductRow {
+function fromHs(h: HsHit, name: string, indicative = false): ProductRow {
   const dotted = `${h.code6.slice(0, 4)}.${h.code6.slice(4)}`;
-  const line = GENERAL_LINES.find((g) => g.hs_code.startsWith(dotted));
+  const line = indicative ? undefined : GENERAL_LINES.find((g) => g.hs_code.startsWith(dotted));
   return {
     id: uid(),
     name: name || h.description.split(";")[0],
@@ -50,14 +51,14 @@ function fromHs(h: HsHit, name: string): ProductRow {
     general_group: line?.group ?? groupForChapter(h.chapter),
     hs6: h.code6,
     hs6_desc: h.description,
-    hs_code: line ? line.hs_code : "MANUAL",
+    hs_code: line ? line.hs_code : indicative ? dotted : "MANUAL",
     volume_ml: 0,
     abv: 0,
     units_per_case: 1,
     cases: 100,
     unit_cost: 0,
     hs_confirmed: !!line,
-    manual_duty_pct: line ? line.duty_pct : 0,
+    manual_duty_pct: line ? line.duty_pct : indicative ? undefined : 0,
     manual_sst_pct: line ? line.sst_pct : 10,
   };
 }
@@ -100,6 +101,31 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   const indicative = country.tier === "indicative";
 
   const setRows = (next: ProductRow[]) => update({ products: next });
+
+  // Indicative destinations: pre-fill duty % from the world rates database for lines that have an HS-6 and no user-entered duty.
+  useEffect(() => {
+    if (!indicative) return;
+    const todo = rows.filter((r) => r.category === "general" && r.hs6 && r.manual_duty_pct == null && !r.duty_source);
+    if (!todo.length) return;
+    let live = true;
+    Promise.all(todo.map((r) => fetchWorldRate(state.dest_country, r.hs6!, state.origin_iso).then((w) => [r.id, w] as const))).then((res) => {
+      if (!live) return;
+      const byId = new Map(res);
+      update({
+        products: rows.map((r) => {
+          const w = byId.get(r.id);
+          if (w === undefined) return r;
+          if (!w || !w.rate || w.rate.value == null) return { ...r, duty_source: "none" };
+          const label = `${w.rate.origin === "MFN" ? "MFN" : `${w.rate.origin} preferential`} ${w.rate.year ?? ""} · ${w.source?.name?.split(" (")[0] ?? w.rate.source_id} · ${w.rate.tier}${w.rate.rate_type === "compound" ? " · average, some lines specific" : ""}`;
+          return { ...r, manual_duty_pct: w.rate.value, duty_source: label };
+        }),
+      });
+    });
+    return () => {
+      live = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indicative, state.dest_country, state.origin_iso, rows.map((r) => `${r.id}:${r.hs6}:${r.manual_duty_pct ?? ""}:${r.duty_source ?? ""}`).join("|")]);
   const patchRow = (id: string, patch: Partial<ProductRow>) =>
     setRows(
       rows.map((r) => {
@@ -137,7 +163,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
     setQ("");
   };
   const addHs = (h: HsHit) => {
-    setRows([...rows, fromHs(h, q.trim())]);
+    setRows([...rows, fromHs(h, q.trim(), indicative)]);
     setQ("");
   };
 
@@ -287,7 +313,9 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                   <div className="grid grid-cols-2 gap-2">
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">Import duty % into {country.name}</span>
-                      <input type="number" step="0.5" className={`${smallInputCls} border-teal`} value={r.manual_duty_pct ?? country.duty_default_pct ?? ""} placeholder={country.duty_default_pct != null ? String(country.duty_default_pct) : "e.g. 20"} onChange={(e) => patchRow(r.id, { manual_duty_pct: e.target.value === "" ? undefined : Number(e.target.value) || 0 })} />
+                      <input type="number" step="0.5" className={`${smallInputCls} border-teal`} value={r.manual_duty_pct ?? country.duty_default_pct ?? ""} placeholder={country.duty_default_pct != null ? String(country.duty_default_pct) : "e.g. 20"} onChange={(e) => patchRow(r.id, { manual_duty_pct: e.target.value === "" ? undefined : Number(e.target.value) || 0, duty_source: "you" })} />
+                      {r.duty_source && r.duty_source !== "none" && r.duty_source !== "you" && <span className="text-[10px] leading-snug text-muted">Pre-filled: {r.duty_source}</span>}
+                      {r.duty_source === "none" && <span className="text-[10px] leading-snug text-muted">No rate loaded yet for this code — enter it from the tariff tool.</span>}
                     </label>
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">{country.tax_name}</span>

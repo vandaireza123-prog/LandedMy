@@ -1,4 +1,9 @@
-import { genericRates, manualRates, mergeRates, ratesFor, withoutFta, type RateTables, type Shipment, type ShipmentLine } from "@landedmy/engine";
+import { GENERAL_LINES, genericRates, manualRates, mergeRates, ratesFor, withoutFta, type RateTables, type Shipment, type ShipmentLine } from "@landedmy/engine";
+
+/** A general-goods line prices from a national row only when its code is one we have; anything else is user-rated. */
+export function isManualLine(p: ProductRow): boolean {
+  return p.category === "general" && (!p.hs_code || p.hs_code === "MANUAL" || !GENERAL_LINES.some((g) => g.hs_code === p.hs_code));
+}
 import type { Category } from "./products";
 import type { Equipment } from "./lanes";
 import type { DestCountry } from "./country";
@@ -12,6 +17,8 @@ export interface ProductRow extends ShipmentLine {
   /** Universal HS 2022 six-digit code and its description, when the product came from the world HS search. */
   hs6?: string;
   hs6_desc?: string;
+  /** Where the duty % came from when pre-filled ("WTO MFN 2024 · indicative"); cleared when the user types. */
+  duty_source?: string;
 }
 
 /** Everything the engine needs, without UI-only fields. */
@@ -54,7 +61,7 @@ export function buildShipment(state: ShipmentSnapshot): Shipment {
     lines: state.products.map((p) => ({
       id: p.id,
       name: p.name,
-      hs_code: p.category === "general" && (!p.hs_code || p.hs_code === "MANUAL") ? `MANUAL-${p.id}` : p.hs_code,
+      hs_code: isManualLine(p) ? `MANUAL-${p.id}` : p.hs_code,
       volume_ml: p.volume_ml,
       abv: p.abv,
       units_per_case: p.units_per_case,
@@ -82,7 +89,7 @@ export function tablesFor(state: ShipmentSnapshot): RateTables {
   } else {
     t = genericRates(
       country,
-      state.products.map((p) => ({ hs_code: p.category === "general" && (!p.hs_code || p.hs_code === "MANUAL") ? `MANUAL-${p.id}` : p.hs_code, name: p.name, duty_pct: p.manual_duty_pct })),
+      state.products.map((p) => ({ hs_code: isManualLine(p) ? `MANUAL-${p.id}` : p.hs_code, name: p.name, duty_pct: p.manual_duty_pct })),
     );
   }
   return state.fta_claim === false ? withoutFta(t) : t;
@@ -90,7 +97,7 @@ export function tablesFor(state: ShipmentSnapshot): RateTables {
 
 export function manualLinesOf(state: { products: ProductRow[] }) {
   return state.products
-    .filter((p) => p.category === "general" && (!p.hs_code || p.hs_code === "MANUAL"))
+    .filter(isManualLine)
     .map((p) => ({ hs_code: `MANUAL-${p.id}`, name: p.name, duty_pct: p.manual_duty_pct ?? 0, sst_pct: p.manual_sst_pct ?? 10 }));
 }
 
