@@ -124,7 +124,9 @@ export function ResultsStep({
             <p className="mt-1 text-sm text-muted">
               {/excise/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
                 ? `Alcohol into ${COUNTRIES[state.dest_country].name} isn't priced yet: its excise rates haven't been loaded, and we don't guess them. Choose Malaysia or Singapore as the destination, or remove the alcohol lines.`
-                : /No effective tariff/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
+                : /fx_rate must be/i.test(result.error)
+                  ? `Enter the exchange rate on step 1: how many ${COUNTRIES[state.dest_country].symbol} per 1 ${state.currency}. We have no feed for ${COUNTRIES[state.dest_country].currency} yet.`
+                  : /No effective tariff/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
                   ? `Enter the import duty % for every product (step 2) — ${COUNTRIES[state.dest_country].name} has no default rate we can safely apply.`
                   : result.error}
             </p>

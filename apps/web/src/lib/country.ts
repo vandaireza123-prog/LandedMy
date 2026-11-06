@@ -178,6 +178,11 @@ export const FX_MYR: Record<string, number> = {
   MYR: 1, SGD: 3.28, EUR: 4.93, USD: 4.2, GBP: 5.6, AUD: 2.8, NZD: 2.5, JPY: 0.028, KRW: 0.003, CNY: 0.59, HKD: 0.54, TWD: 0.135, INR: 0.048, PKR: 0.015, BDT: 0.035, LKR: 0.014,
   IDR: 0.00026, THB: 0.125, VND: 0.00016, PHP: 0.072, BND: 3.28, KHR: 0.00103, LAK: 0.00019, MMK: 0.002, AED: 1.14, SAR: 1.12, QAR: 1.15, OMR: 10.9, BHD: 11.1, KWD: 13.7,
   TRY: 0.1, EGP: 0.085, ZAR: 0.24, NGN: 0.0027, KES: 0.0325, PLN: 1.15, SEK: 0.44, DKK: 0.66, NOK: 0.41, CHF: 5.3, CAD: 3.05, MXN: 0.23, BRL: 0.78, CLP: 0.0044, ARS: 0.003,
+  CZK: 0.2, HUF: 0.0125, RON: 0.97, BGN: 2.5, HRK: 0.65, ISK: 0.031, UAH: 0.1, RUB: 0.052, KZT: 0.0082, UZS: 0.00033, GEL: 1.55, AMD: 0.011, AZN: 2.47, RSD: 0.042, BAM: 2.5, MKD: 0.08, ALL: 0.05, MDL: 0.24, BYN: 1.3,
+  COP: 0.001, PEN: 1.13, UYU: 0.1, PYG: 0.00055, BOB: 0.6, CRC: 0.0083, GTQ: 0.55, HNL: 0.16, NIO: 0.115, DOP: 0.07, JMD: 0.027, TTD: 0.62, BSD: 4.2, BBD: 2.1, BZD: 2.1, XCD: 1.55, GYD: 0.02, SRD: 0.11, HTG: 0.032, PAB: 4.2, VES: 0.02, CUP: 0.175,
+  MAD: 0.45, TND: 1.4, DZD: 0.031, LYD: 0.77, ETB: 0.028, TZS: 0.0016, UGX: 0.00115, RWF: 0.003, GHS: 0.35, XOF: 0.0075, XAF: 0.0075, MUR: 0.092, SCR: 0.3, MZN: 0.066, AOA: 0.0046, ZMW: 0.17, BWP: 0.31, NAD: 0.24, SZL: 0.24, LSL: 0.24, MWK: 0.0024, MGA: 0.00093, CDF: 0.0015, SDG: 0.007, GMD: 0.06, SLE: 0.18, LRD: 0.021, GNF: 0.00049, MRU: 0.105, CVE: 0.045, DJF: 0.0236, KMF: 0.01, STN: 0.2, BIF: 0.0014, SOS: 0.0074, SSP: 0.001, ERN: 0.28, ZWG: 0.16,
+  JOD: 5.93, ILS: 1.15, LBP: 0.000047, IQD: 0.0032, IRR: 0.0001, YER: 0.0168, SYP: 0.0003, AFN: 0.06, NPR: 0.03, MVR: 0.27, BTN: 0.048, MNT: 0.0012, KGS: 0.048, TJS: 0.4, TMT: 1.2, MMK: 0.002, LAK: 0.00019, KHR: 0.00103, BND: 3.28, MOP: 0.52, KPW: 0.0047,
+  FJD: 1.85, PGK: 1.05, SBD: 0.5, VUV: 0.035, WST: 1.5, TOP: 1.78, XPF: 0.041, GIP: 5.6, ANG: 2.35, AWG: 2.35, BMD: 4.2, KYD: 5.05,
 };
 
 function destCurrency(country: DestCountry): string {
@@ -189,7 +194,8 @@ export function fxDefault(country: DestCountry, currency: string, myrDefaults: R
   const toMyr = myrDefaults[currency] ?? FX_MYR[currency] ?? 1;
   const dest = destCurrency(country);
   if (dest === "MYR") return toMyr;
-  const destToMyr = myrDefaults[dest] ?? FX_MYR[dest] ?? 1;
+  const destToMyr = myrDefaults[dest] ?? FX_MYR[dest];
+  if (!destToMyr) return 0; // unknown: the user enters the rate
   return +(toMyr / destToMyr).toFixed(dest === "IDR" || dest === "VND" || dest === "KRW" || dest === "LAK" || dest === "KHR" ? 2 : 4);
 }
 
