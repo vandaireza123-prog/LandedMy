@@ -20,6 +20,11 @@ Environment variables on the site:
 
 `GET https://landedmy.netlify.app/api/calc` returns the schema; `POST` the same shape (the engine's Shipment plus optional `manual_rates`) and get `{ result }` with every rate's source. Beta: free, 60 req/min per IP; with an `x-api-key` header (created under Account → API keys; only the SHA-256 hash is stored, validated by the `touch_api_key` RPC with the service role) 300 req/min per key and usage counted on the account. `dest_country: "SG"` prices for Singapore; `claim_fta: false` prices at MFN.
 
+## Going global
+
+Layer 1 (done): the full HS 2022 nomenclature (5,613 six-digit subheadings, public domain, `packages/engine/data/hs2022-source.csv` → `apps/web/src/lib/hs/hs6.json`, lazy-loaded) is searchable in plain language (`lib/hs/search.ts`, ~400 everyday-word synonyms) and the invoice/photo classifier returns an HS-6 for any goods. An HS-6 that matches a national line prices at once; otherwise the line asks for duty % and tax % with a link to the official lookup.
+Layer 2 (next): indicative MFN duty at HS-6 for every destination from World Bank WITS/TRAINS. Layer 3: VAT/GST per destination. Layer 4: excise on sensitive goods per country, by demand, declaration-verified.
+
 ## Multi-country
 
 `ratesFor(country)` serves the rate tables. `MY` is K1-verified. `SG` (`data/sg.json`, Singapore Customs List of Dutiable Goods: customs + excise per litre of alcohol, GST 9% on CIF + duties) is registered and available through the API (`dest_country: "SG"`), but labelled unverified until a Singapore Customs permit is checked against it. The web UI has a Malaysia / Singapore switch on step 1: it changes the rate tables, currency (RM / S$), tax name (SST / GST), destination ports, default local charges, FX (BNM cross rate for SGD) and the compliance checklist, and the results page shows the same shipment priced for the other country. Singapore results carry a 'verify' banner until permit-checked.

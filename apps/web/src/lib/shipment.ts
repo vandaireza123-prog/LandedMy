@@ -9,6 +9,9 @@ export interface ProductRow extends ShipmentLine {
   manual_duty_pct?: number;
   manual_sst_pct?: number;
   general_group?: string;
+  /** Universal HS 2022 six-digit code and its description, when the product came from the world HS search. */
+  hs6?: string;
+  hs6_desc?: string;
 }
 
 /** Everything the engine needs, without UI-only fields. */

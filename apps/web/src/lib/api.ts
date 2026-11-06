@@ -28,6 +28,8 @@ export interface ExtractedLine {
   units_per_case: number | null;
   cases: number | null;
   unit_cost: number | null;
+  /** Universal 6-digit HS 2022 code (digits only). */
+  hs6?: string;
   hs_code: string;
   hs_confidence: number;
   hs_alternatives?: string[];

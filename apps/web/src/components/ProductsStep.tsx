@@ -6,6 +6,8 @@ import { Card, Footer, PrimaryButton, Progress, Title, smallInputCls } from "./u
 import { ScanSheet } from "./ScanSheet";
 import { FX_DEFAULT } from "@/lib/lanes";
 import { GENERAL_GROUPS, GENERAL_LINES, GENERAL_VERIFY_URL } from "@landedmy/engine";
+import { SENSITIVE_CHAPTERS, searchHs, type HsHit } from "@/lib/hs/search";
+import { useEffect } from "react";
 import { useT } from "@/lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -22,6 +24,40 @@ function blankRow(): ProductRow {
     cases: 100,
     unit_cost: 0,
     hs_confirmed: false,
+  };
+}
+
+/** Chapter → our general-goods group, for the default compliance list and tariff shortlist. */
+function groupForChapter(ch: string): string {
+  const n = Number(ch);
+  if (n <= 24) return "food";
+  if (n === 33 || n === 34) return "beauty";
+  if (n === 69 || n === 70 || n === 73 || n === 82) return "kitchen";
+  if (n === 84 || n === 85 || n === 90) return "electronics";
+  if (n === 94) return "furniture";
+  if (n >= 61 && n <= 65) return "apparel";
+  return "other";
+}
+
+function fromHs(h: HsHit, name: string): ProductRow {
+  const dotted = `${h.code6.slice(0, 4)}.${h.code6.slice(4)}`;
+  const line = GENERAL_LINES.find((g) => g.hs_code.startsWith(dotted));
+  return {
+    id: uid(),
+    name: name || h.description.split(";")[0],
+    category: "general",
+    general_group: line?.group ?? groupForChapter(h.chapter),
+    hs6: h.code6,
+    hs6_desc: h.description,
+    hs_code: line ? line.hs_code : "MANUAL",
+    volume_ml: 0,
+    abv: 0,
+    units_per_case: 1,
+    cases: 100,
+    unit_cost: 0,
+    hs_confirmed: !!line,
+    manual_duty_pct: line ? line.duty_pct : 0,
+    manual_sst_pct: line ? line.sst_pct : 10,
   };
 }
 
@@ -45,6 +81,19 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   const [q, setQ] = useState("");
   const [scan, setScan] = useState(false);
   const hits = searchLibrary(q);
+  const [hsHits, setHsHits] = useState<HsHit[]>([]);
+  useEffect(() => {
+    if (q.trim().length < 2) {
+      setHsHits([]);
+      return;
+    }
+    let live = true;
+    const t = setTimeout(() => searchHs(q, 6).then((r) => live && setHsHits(r)), 120);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [q]);
   const rows = state.products;
 
   const setRows = (next: ProductRow[]) => update({ products: next });
@@ -82,6 +131,10 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
 
   const add = (p?: LibraryProduct) => {
     setRows([...rows, p ? fromLibrary(p) : blankRow()]);
+    setQ("");
+  };
+  const addHs = (h: HsHit) => {
+    setRows([...rows, fromHs(h, q.trim())]);
     setQ("");
   };
 
@@ -125,6 +178,20 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                 </span>
               </button>
             ))}
+            {hsHits.length > 0 && (
+              <div className="border-t border-line-2">
+                <div className="px-3.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted">Any product · world HS code</div>
+                {hsHits.map((h) => (
+                  <button key={h.code6} type="button" onClick={() => addHs(h)} className="flex w-full items-start justify-between gap-3 px-3.5 py-2 text-left hover:bg-teal-tint">
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-medium">{h.description}</span>
+                      <span className="block truncate text-[11px] text-muted">{h.heading}</span>
+                    </span>
+                    <span className="shrink-0 font-mono text-[12px] text-teal">{h.code}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             <button type="button" onClick={() => add()} className="flex w-full px-3.5 py-3 text-left text-sm font-semibold text-teal hover:bg-teal-tint">
               + Add “{q}” as a new product
             </button>
@@ -202,6 +269,17 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
 
             {r.category === "general" && (
               <div className="mt-2 flex flex-col gap-2">
+                {r.hs6 && (
+                  <div className="flex items-start justify-between gap-2 rounded-lg bg-ground px-2.5 py-2 text-[11px]">
+                    <span className="min-w-0">
+                      <span className="font-mono font-semibold text-teal">HS {r.hs6.slice(0, 4)}.{r.hs6.slice(4)}</span> <span className="text-muted">{r.hs6_desc}</span>
+                      {SENSITIVE_CHAPTERS[r.hs6.slice(0, 2)] && <span className="mt-0.5 block text-amber">{SENSITIVE_CHAPTERS[r.hs6.slice(0, 2)]}</span>}
+                    </span>
+                    <a href={`${GENERAL_VERIFY_URL}`} target="_blank" rel="noopener" className="shrink-0 font-semibold text-teal">
+                      {state.dest_country === "SG" ? "SG rate" : "MY rate"} →
+                    </a>
+                  </div>
+                )}
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted">Tariff line (pick one, or enter rates yourself)</span>
                   <select
@@ -214,7 +292,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                     }}
                   >
                     <option value="MANUAL">Enter duty % and SST % myself</option>
-                    {GENERAL_LINES.filter((g) => g.group === (r.general_group ?? "other")).map((g) => (
+                    {GENERAL_LINES.filter((g) => (r.hs6 ? g.hs_code.replace(/\./g, "").startsWith(r.hs6.slice(0, 4)) : false) || g.group === (r.general_group ?? "other")).map((g) => (
                       <option key={g.hs_code} value={g.hs_code}>
                         {g.hs_code} · {g.description} · duty {g.duty_pct}% · SST {g.sst_pct}%
                       </option>

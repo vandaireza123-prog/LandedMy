@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useState } from "react";
 import { extractFromFile, extractFromText, type ExtractedLine, type ExtractResponse } from "@/lib/api";
+import { GENERAL_LINES } from "@landedmy/engine";
 import { CATEGORY_LABEL, hsForCategory, type Category } from "@/lib/products";
 import type { ProductRow } from "@/lib/state";
 import { smallInputCls } from "./ui";
@@ -14,6 +15,27 @@ export function toRows(lines: ExtractedLine[]): ProductRow[] {
   return lines.map((l) => {
     const cat = (l.category ?? "other") as Category;
     const abv = l.abv ?? 0;
+    if (cat === "general") {
+      const hs6 = (l.hs6 ?? l.hs_code ?? "").replace(/\D/g, "").slice(0, 6);
+      const line = hs6 ? GENERAL_LINES.find((g) => g.hs_code.replace(/\./g, "").startsWith(hs6)) : undefined;
+      return {
+        id: uid(),
+        name: l.name,
+        category: "general",
+        general_group: line?.group ?? "other",
+        hs6: hs6 || undefined,
+        hs6_desc: undefined,
+        hs_code: line ? line.hs_code : "MANUAL",
+        volume_ml: 0,
+        abv: 0,
+        units_per_case: l.units_per_case ?? 1,
+        cases: l.cases ?? 1,
+        unit_cost: l.unit_cost ?? 0,
+        hs_confirmed: !!line && (l.hs_confidence ?? 0) >= 0.85,
+        manual_duty_pct: line ? line.duty_pct : 0,
+        manual_sst_pct: line ? line.sst_pct : 10,
+      };
+    }
     return {
       id: uid(),
       name: l.name,
