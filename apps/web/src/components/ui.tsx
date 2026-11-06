@@ -1,11 +1,11 @@
 "use client";
 import type { ReactNode } from "react";
-import { useT } from "@/lib/i18n";
+import { LANGS, isRtl, useT, type Lang } from "@/lib/i18n";
 
-export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { children: ReactNode; right?: ReactNode; onLang?: () => void; lang?: string; onAccount?: () => void; signedIn?: boolean }) {
+export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { children: ReactNode; right?: ReactNode; onLang?: (l: Lang) => void; lang?: Lang; onAccount?: () => void; signedIn?: boolean }) {
   const t = useT();
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground">
+    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground" dir={lang && isRtl(lang) ? "rtl" : "ltr"} lang={lang ?? "en"}>
       <header className="flex items-center justify-between px-5 pb-3 pt-12">
         <a href="/" className="font-display text-lg font-bold tracking-tight text-ink no-underline" aria-label="LandedMY home">
           Landed<span className="text-teal">MY</span>
@@ -18,9 +18,13 @@ export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { 
             </button>
           )}
           {onLang && (
-            <button type="button" onClick={onLang} className="rounded-md border border-line bg-white px-1.5 py-0.5 text-[11px] font-semibold text-ink" aria-label="Switch language">
-              {lang === "ms" ? "EN" : "BM"}
-            </button>
+            <select value={lang ?? "en"} onChange={(e) => onLang(e.target.value as Lang)} className="rounded-md border border-line bg-white px-1 py-0.5 text-[11px] font-semibold text-ink" aria-label="Language">
+              {LANGS.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.native}
+                </option>
+              ))}
+            </select>
           )}
         </div>
       </header>

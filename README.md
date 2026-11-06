@@ -1,6 +1,6 @@
 # LandedMY
 
-Malaysian landed-cost calculator: verified engine, phone-first app at `/calc/`, landing page at `/`, SEO guides under `/guides/` (figures computed from the engine at build time), invoice reader, live FX, forwarder-quote check, general goods, reverse calculator, scenarios, Bahasa Malaysia, accounts, rate alerts, PDF quotes, compliance checklist, public API.
+Malaysian landed-cost calculator: verified engine, phone-first app at `/calc/`, landing page at `/`, SEO guides under `/guides/` (figures computed from the engine at build time), invoice reader, live FX, forwarder-quote check, general goods, reverse calculator, scenarios, 9 UI languages (EN, MS, ZH, ES, FR, AR with RTL, ID, VI, PT), accounts, rate alerts, PDF quotes, compliance checklist, public API.
 
 General-goods duty rates in `packages/engine/data/general.json` are indicative (labelled "verify") until checked against a K1; the UI always allows manual duty % and SST %, and links to JKDM's tariff tool.
 

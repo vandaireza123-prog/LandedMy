@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Shipment } from "@landedmy/engine";
 import { buildShipment as _build, manualLinesOf as _manual, type ProductRow } from "./shipment";
 import type { Category } from "./products";
+import type { Lang } from "./i18n";
 import type { Equipment } from "./lanes";
 import { FX_DEFAULT, defaultLocalCharges } from "./lanes";
 import { countryOfPort, type DestCountry } from "./country";
@@ -37,7 +38,7 @@ export interface AppState {
   fta_claim: boolean;
   /** Saved scenarios for side-by-side comparison (max 3). */
   scenarios: Scenario[];
-  lang: "en" | "ms";
+  lang: Lang;
   /** Id/name of the account-saved shipment this state was loaded from, if any. */
   saved_id?: string;
   saved_name?: string;

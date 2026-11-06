@@ -37,7 +37,7 @@ export default function Landing() {
               </div>
               <div className="flex flex-wrap gap-6 text-[13px] text-muted">
                 <span>No login needed</span>
-                <span>Bahasa Malaysia available</span>
+                <span>9 languages, Arabic right-to-left</span>
                 <span>Every rate links to its gazette</span>
               </div>
             </div>

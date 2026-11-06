@@ -7,7 +7,7 @@ import { ProductsStep } from "@/components/ProductsStep";
 import { LogisticsStep } from "@/components/LogisticsStep";
 import { ResultsStep } from "@/components/ResultsStep";
 import { DEST_PORTS } from "@/lib/ports";
-import { LangProvider } from "@/lib/i18n";
+import { LangProvider, type Lang } from "@/lib/i18n";
 import { useUser } from "@/lib/supabase";
 import { AccountSheet } from "@/components/AccountSheet";
 import { useState } from "react";
@@ -18,7 +18,7 @@ export default function Page() {
   setCurrencySymbol(COUNTRIES[state.dest_country].symbol);
   const right = state.step === 1 ? undefined : `${state.origin_label.split(",")[0]} → ${dest?.label.split(" (")[0] ?? ""}`;
 
-  const toggleLang = () => update({ lang: state.lang === "ms" ? "en" : "ms" });
+  const toggleLang = (l: Lang) => update({ lang: l });
   const { user } = useUser();
   const [account, setAccount] = useState(false);
 

@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { COUNTRIES, EXACT_COUNTRIES, INDICATIVE_COUNTRIES, TIER_LABEL, type DestCountry } from "@/lib/country";
+import { useT } from "@/lib/i18n";
 
 const BADGE: Record<string, string> = {
   verified: "bg-teal-tint text-teal",
@@ -14,6 +15,7 @@ export function TierBadge({ tier }: { tier: keyof typeof TIER_LABEL }) {
 
 /** Searchable destination picker: exact (national schedule) countries first, then indicative ones. */
 export function CountryPicker({ value, onChange }: { value: DestCountry; onChange: (c: DestCountry) => void }) {
+  const t = useT();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const cur = COUNTRIES[value];
@@ -55,7 +57,7 @@ export function CountryPicker({ value, onChange }: { value: DestCountry; onChang
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-ink-2">Destination country</span>
+      <span className="text-xs font-semibold text-ink-2">{t("Destination country")}</span>
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
