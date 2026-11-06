@@ -13,6 +13,7 @@ import ca from "../data/ca.json";
 import au from "../data/au.json";
 import jp from "../data/jp.json";
 import us from "../data/us.json";
+import kr from "../data/kr.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -296,6 +297,29 @@ export function buildUsRateTables(): RateTables {
   return { country: "US", tax_name: "Tax", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/** South Korea: Liquor Tax Act + Education Tax folded into the excise rate, VAT 10%; duty from summaries (indicative). */
+export function buildKrRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  const lt = kr.liquor_tax;
+  for (const l of chapter22.lines) {
+    const ds = kr.duty.filter((r) => l.hs_code.startsWith(r.prefix));
+    const d = ds.reduce((a, r) => (r.prefix.length > a.prefix.length ? r : a), ds[0]);
+    tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: { type: "ad_valorem", value: d.pct }, effective_from: kr._meta.duty_effective_from, effective_to: null, source_doc: `MFN customs duty — ${d.label}`, source_url: kr._meta.sources.unipass });
+    const beer = l.hs_code.startsWith("2203");
+    const wine = l.hs_code.startsWith("2204") || l.hs_code.startsWith("2205") || l.hs_code.startsWith("2206");
+    const excise: Rate = beer
+      ? { type: "per_litre", value: Math.round(lt.beer_per_litre * (1 + lt.education_tax_high) * 100) / 100 }
+      : wine
+        ? { type: "ad_valorem", value: lt.wine_pct * (1 + lt.education_tax_low) }
+        : { type: "ad_valorem", value: lt.spirits_pct * (1 + lt.education_tax_high) };
+    excise_lines.push({ hs_code: l.hs_code, description: l.description, excise, effective_from: kr._meta.excise_effective_from, effective_to: null, source_doc: beer ? "Liquor Tax 885,700 won/kl + Education Tax 30% of it" : wine ? "Liquor Tax 30% of (CIF + duty) + Education Tax 10% of it = 33%" : "Liquor Tax 72% of (CIF + duty) + Education Tax 30% of it = 93.6%", source_url: kr._meta.sources.liquor_tax_act });
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: kr.vat_pct, effective_from: "2000-01-01", effective_to: null, source_doc: "VAT 10% on CIF + duty + liquor tax + education tax", source_url: kr._meta.sources.liquor_tax_act });
+  }
+  return { country: "KR", tax_name: "VAT", tier: "indicative", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
@@ -304,10 +328,11 @@ export const COUNTRY_META: Record<string, { currency: string; symbol: string; ta
   AU: { currency: "AUD", symbol: "A$", tax_name: "GST", verified: false },
   JP: { currency: "JPY", symbol: "¥", tax_name: "Consumption tax", verified: false },
   US: { currency: "USD", symbol: "US$", tax_name: "Tax", verified: false },
+  KR: { currency: "KRW", symbol: "₩", tax_name: "VAT", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables, US: buildUsRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables, US: buildUsRateTables, KR: buildKrRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {

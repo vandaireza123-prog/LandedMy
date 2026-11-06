@@ -327,6 +327,24 @@ describe("United States", () => {
   });
 });
 
+describe("South Korea", () => {
+  it("whisky: 20% duty, 72% liquor tax + 30% education tax on CIF + duty, VAT 10%", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const krT = ratesFor("KR");
+    expect(krT.tier).toBe("indicative");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "KR", dest_port: "KRPUS", currency: "KRW", fx_rate: 1, freight: 300000, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    // whisky 60 bottles × 30,000: goods 1.8m + 0.3m = 2.1m; duty 20% = 420k; excise 93.6% × 2.52m = 2,358,720; VAT 10% × (2.1m+420k+2,358,720)
+    const w = computeShipment({ ...base, lines: [{ id: "s", name: "Whisky", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 30000 }] }, krT).lines[0];
+    expect(w.duty).toBe(420000);
+    expect(w.excise).toBeCloseTo(2520000 * 0.936, 2);
+    expect(w.sst).toBeCloseTo((2100000 + 420000 + 2520000 * 0.936) * 0.1, 2);
+    // beer per litre incl. education tax
+    const b = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 1000 }] }, krT).lines[0];
+    expect(b.rates_used.duty.value).toBe(30);
+    expect(b.excise).toBeCloseTo(792 * 1151.41, 0);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -356,7 +374,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP", "US"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP", "US", "KR"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);

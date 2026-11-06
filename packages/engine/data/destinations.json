@@ -242,11 +242,30 @@
       "symbol": "₩",
       "tax_name": "VAT",
       "tax_pct": 10,
-      "tax_note": "VAT 10% on CIF + duty + individual consumption tax",
+      "tax_note": "VAT 10% on CIF + duty + liquor tax + education tax; liquor tax 72% of value on spirits (93.6% with education tax), 30% on wine (33%), beer per litre (Liquor Tax Act)",
       "tier": "indicative",
       "lookup": "https://unipass.customs.go.kr/clip/index.do",
       "customs": "Korea Customs Service",
-      "region": "East Asia"
+      "region": "East Asia",
+      "warning": "Liquor tax, education tax and VAT are loaded from the Liquor Tax Act; customs duty rates (wine 15%, beer 30%, spirits 20%) come from published summaries and should be confirmed on UNI-PASS.",
+      "ports": [
+        {
+          "code": "KRPUS",
+          "label": "Busan"
+        },
+        {
+          "code": "KRINC",
+          "label": "Incheon"
+        },
+        {
+          "code": "KRKAN",
+          "label": "Gwangyang"
+        },
+        {
+          "code": "KRICN",
+          "label": "Incheon International (air freight)"
+        }
+      ]
     },
     {
       "code": "CN",

@@ -2,7 +2,7 @@
  * Destination-country presentation: currency symbol, tax name, ports, default local charges,
  * verification status. Rates themselves live in the engine (ratesFor(country)).
  */
-import { DESTINATIONS, type Destination } from "@landedmy/engine";
+import { DESTINATIONS, SUPPORTED_COUNTRIES, type Destination } from "@landedmy/engine";
 import type { Equipment } from "./lanes";
 
 /** ISO-2 destination code; "MY" and "SG" have national schedules, the rest are indicative. */
@@ -100,7 +100,9 @@ function fromRegistry(d: Destination): CountryInfo {
     verify_note:
       d.tier === "official"
         ? `${d.warning ? `${d.warning} ` : ""}Loaded from ${d.customs}'s published schedule and tax tables. Not yet checked against a real import entry — treat as official but verify.`
-        : `${d.tax_name === "none" ? "no import VAT/GST" : `${d.tax_name} ${d.tax_pct}%`} is applied from the standard rate; import duty is the % you enter per product${d.duty_default_pct != null ? ` (default ${d.duty_default_pct}%)` : ""}. Verify at ${d.customs} before you commit.`,
+        : SUPPORTED_COUNTRIES.includes(d.code) && d.warning
+          ? d.warning
+          : `${d.tax_name === "none" ? "no import VAT/GST" : `${d.tax_name} ${d.tax_pct}%`} is applied from the standard rate; import duty is the % you enter per product${d.duty_default_pct != null ? ` (default ${d.duty_default_pct}%)` : ""}. Verify at ${d.customs} before you commit.`,
     customs_name: d.customs,
     ports: d.ports ?? [
       { code: `${d.code}SEA`, label: `${d.name} · main seaport` },

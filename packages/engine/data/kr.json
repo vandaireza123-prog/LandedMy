@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "country": "KR",
+    "currency": "KRW",
+    "tax_name": "VAT",
+    "scope": "South Korea: Liquor Tax Act rates (official), Education Tax 30% of liquor tax (10% where the liquor tax rate is 30%), VAT 10% on CIF + duty + liquor tax + education tax. Customs duty from published MFN summaries — verify on UNI-PASS.",
+    "notes": [
+      "Liquor tax: beer 885,700 won/kl (Act figure; the decree adjusts it yearly within ±30%), fruit wine/cheongju/sake 30% of value, distilled spirits (whisky, brandy, soju, vodka, gin, rum, liqueur) 72% of value. Value for imports = price at import declaration (customs value + duty).",
+      "Education tax: 30% of the liquor tax where the liquor tax rate is 70% or more (spirits, and beer); 10% where it is 30% (wine). Modelled by scaling the excise rate: spirits 72% × 1.3 = 93.6%; wine 30% × 1.1 = 33%; beer 885.7 × 1.3 = 1,151.41 won/L.",
+      "Customs duty (MFN, to verify): wine and sparkling 15%, beer 30%, whisky/vodka/gin/rum/liqueurs 20%, brandy 15%, cider/sake 15–30%. EU, US, Chile, Australia, UK, ASEAN (KORUS, EU-Korea FTA, RCEP…) are mostly 0% with origin certificate.",
+      "Tier indicative until the duty rows are taken from the national schedule and a declaration is checked."
+    ],
+    "sources": {
+      "liquor_tax_act": "https://www.law.go.kr/LSW/eng/engLsInfoR.do?lsiSeq=267559",
+      "overview": "https://www.seoulz.com/korea-alcohol-regulation/",
+      "unipass": "https://unipass.customs.go.kr/clip/index.do"
+    },
+    "duty_effective_from": "2024-01-01",
+    "excise_effective_from": "2024-01-01",
+    "checked": "2026-11-07"
+  },
+  "duty": [
+    { "prefix": "2203", "pct": 30, "label": "Beer 30% (verify)" },
+    { "prefix": "2204", "pct": 15, "label": "Wine 15% (verify)" },
+    { "prefix": "2205", "pct": 15, "label": "Vermouth 15% (verify)" },
+    { "prefix": "2206", "pct": 30, "label": "Cider/sake/other fermented 30% (verify)" },
+    { "prefix": "2208.20", "pct": 15, "label": "Brandy 15% (verify)" },
+    { "prefix": "2208", "pct": 20, "label": "Spirits and liqueurs 20% (verify)" }
+  ],
+  "liquor_tax": {
+    "beer_per_litre": 885.7,
+    "wine_pct": 30,
+    "spirits_pct": 72,
+    "education_tax_high": 0.3,
+    "education_tax_low": 0.1
+  },
+  "vat_pct": 10
+}
