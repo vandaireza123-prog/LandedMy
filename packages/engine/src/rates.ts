@@ -9,6 +9,7 @@ import sg from "../data/sg.json";
 import fta from "../data/fta.json";
 import destinations from "../data/destinations.json";
 import uk from "../data/uk.json";
+import ca from "../data/ca.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -197,14 +198,41 @@ export function buildUkRateTables(): RateTables {
   return { country: "GB", tax_name: "VAT", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/**
+ * Canada: 2026 Customs Tariff chapter 22 (CBSA), federal excise (CRA, from 1 Apr 2026), GST 5% on CIF + duty + excise.
+ * Provincial liquor-board markups are outside scope and noted in the data file.
+ */
+export function buildCaRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  type Band = { abv_min?: number; abv_max?: number; value: number; label: string; type?: string };
+  for (const l of chapter22.lines) {
+    const ds = (ca.duty as (Band & { prefix: string })[]).filter((r) => l.hs_code.startsWith(r.prefix));
+    // most specific prefix wins; banded rows under the same prefix all apply
+    const best = ds.reduce((a, r) => (r.prefix.length > a ? r.prefix.length : a), 0);
+    for (const d of ds.filter((r) => r.prefix.length === best)) {
+      tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: { type: d.type as Rate["type"], value: d.value }, abv_min: d.abv_min, abv_max: d.abv_max, effective_from: ca._meta.duty_effective_from, effective_to: null, source_doc: `Customs Tariff 2026, ch. 22 — ${d.label} (MFN)`, source_url: ca._meta.sources.tariff });
+    }
+    const kind = l.hs_code.startsWith("2203") ? "beer" : l.hs_code.startsWith("2208") ? "spirits" : "wine";
+    const bands: Band[] = kind === "beer" ? ca.excise.beer_per_litre : kind === "spirits" ? ca.excise.spirits : ca.excise.wine_per_litre;
+    for (const b of bands) {
+      excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: (b.type ?? "per_litre") as Rate["type"], value: b.value }, abv_min: b.abv_min, abv_max: b.abv_max, effective_from: ca._meta.excise_effective_from, effective_to: null, source_doc: `CRA excise duty from 1 Apr 2026 — ${b.label}`, source_url: ca._meta.sources.excise });
+    }
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: ca.gst_pct, effective_from: "2008-01-01", effective_to: null, source_doc: "GST 5% on duty-paid value (CIF + duty + excise); provincial HST/PST and liquor-board markup excluded", source_url: ca._meta.sources.gst });
+  }
+  return { country: "CA", tax_name: "GST", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
   GB: { currency: "GBP", symbol: "£", tax_name: "VAT", verified: false },
+  CA: { currency: "CAD", symbol: "C$", tax_name: "GST", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {

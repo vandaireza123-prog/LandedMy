@@ -99,12 +99,13 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
     const litres = lineLitres(l);
     const s = share(i);
 
-    const tariff = effectiveRow(rates.tariff_lines.filter((r) => r.hs_code === l.hs_code), date);
+    const inBand = (r: { abv_min?: number; abv_max?: number }) => (r.abv_min == null || l.abv >= r.abv_min) && (r.abv_max == null || l.abv <= r.abv_max);
+    const tariff = effectiveRow(rates.tariff_lines.filter((r) => r.hs_code === l.hs_code && inBand(r)), date);
     if (!tariff) throw new RateNotFoundError("tariff", l.hs_code, date);
     const sst = effectiveRow(rates.sst_rates.filter((r) => r.hs_code === l.hs_code), date);
     if (!sst) throw new RateNotFoundError("sst", l.hs_code, date);
     const excise = effectiveRow(
-      rates.excise_lines.filter((r) => r.hs_code === l.hs_code && (r.abv_min == null || l.abv >= r.abv_min) && (r.abv_max == null || l.abv <= r.abv_max)),
+      rates.excise_lines.filter((r) => r.hs_code === l.hs_code && inBand(r)),
       date,
     );
     if (!excise && l.abv > 0) {

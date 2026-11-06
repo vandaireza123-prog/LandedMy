@@ -676,11 +676,33 @@
       "symbol": "C$",
       "tax_name": "GST",
       "tax_pct": 5,
-      "tax_note": "GST 5% on duty-paid value at import (provincial HST/PST collected separately); most MFN duty 0–18%",
-      "tier": "indicative",
+      "tax_note": "GST 5% on duty-paid value (CIF + duty + federal excise); provincial HST/PST and liquor-board markups on alcohol are extra and large",
+      "tier": "official",
       "lookup": "https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/menu-eng.html",
       "customs": "Canada Border Services Agency",
-      "region": "Americas"
+      "region": "Americas",
+      "ports": [
+        {
+          "code": "CAVAN",
+          "label": "Vancouver"
+        },
+        {
+          "code": "CAMTR",
+          "label": "Montréal"
+        },
+        {
+          "code": "CAHAL",
+          "label": "Halifax"
+        },
+        {
+          "code": "CATOR",
+          "label": "Toronto (rail/inland)"
+        },
+        {
+          "code": "CAYYZ",
+          "label": "Toronto Pearson (air freight)"
+        }
+      ]
     },
     {
       "code": "MX",

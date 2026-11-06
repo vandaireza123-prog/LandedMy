@@ -1,0 +1,62 @@
+{
+  "_meta": {
+    "country": "CA",
+    "currency": "CAD",
+    "tax_name": "GST",
+    "scope": "Canada: MFN customs duty from the 2026 Customs Tariff chapter 22 (CBSA), federal excise duty from CRA rates effective 1 April 2026, GST 5% on the duty-paid value (CIF + duty + excise).",
+    "notes": [
+      "Provincial liquor board markups and provincial sales tax/HST are NOT included: in most provinces alcohol must be imported through or with the liquor board (LCBO, SAQ, BCLDB…), whose markup is usually larger than all federal charges combined. The result here is the federal landed cost at the border.",
+      "Rates are MFN. Preferential rates (CUSMA, CETA, CPTPP, UK, Australia, NZ, Korea…) are mostly Free and not yet loaded.",
+      "Cider: the 3% ad valorem rate for still cider is loaded; sparkling cider (28.16¢/L) is not distinguished in our line list.",
+      "Excise rates are indexed every 1 April (increase capped at 2% through 2026 by the 2026 relief measure)."
+    ],
+    "sources": {
+      "tariff": "https://www.cbsa-asfc.gc.ca/trade-commerce/tariff-tarif/2026/01-99/ch22-2026-eng.pdf",
+      "excise": "https://www.canada.ca/en/revenue-agency/services/forms-publications/publications/edrates/excise-duty-rates.html",
+      "excise_notice_2026": "https://www.canada.ca/en/revenue-agency/services/tax/technical-information/excise-duty/excise-duty-notices/edn104-adjusted-rates-excise-duty-spirits-wine-effective-april-1-2026.html",
+      "gst": "https://www.cbsa-asfc.gc.ca/import/duty-droit-eng.html"
+    },
+    "duty_effective_from": "2026-01-01",
+    "excise_effective_from": "2026-04-01",
+    "checked": "2026-11-07"
+  },
+  "duty": [
+    { "prefix": "2203", "type": "per_litre", "value": 0, "label": "Beer: Free" },
+    { "prefix": "2204.10", "type": "per_litre", "value": 0, "label": "Sparkling wine: Free" },
+    { "prefix": "2204.21.11", "type": "per_litre", "value": 0.0187, "abv_max": 13.7, "label": "Wine ≤13.7%: 1.87¢/L" },
+    { "prefix": "2204.21.11", "type": "per_litre", "value": 0.0468, "abv_min": 13.71, "abv_max": 14.9, "label": "Wine 13.7–14.9%: 4.68¢/L" },
+    { "prefix": "2204.21.11", "type": "per_litre", "value": 0, "abv_min": 14.91, "label": "Wine >14.9%: Free" },
+    { "prefix": "2204.21", "type": "per_litre", "value": 0, "label": "Wine >15%: Free" },
+    { "prefix": "2204.22", "type": "per_litre", "value": 0, "label": "Wine 2–10 L: Free" },
+    { "prefix": "2204.29", "type": "per_litre", "value": 0, "label": "Wine >10 L: Free" },
+    { "prefix": "2205", "type": "per_litre", "value": 0, "label": "Vermouth: Free" },
+    { "prefix": "2206.00.10", "type": "ad_valorem", "value": 3, "label": "Cider, other than sparkling: 3%" },
+    { "prefix": "2206.00.20", "type": "per_litre", "value": 0.0282, "label": "Sake ≤13.7%: 2.82¢/L" },
+    { "prefix": "2206.00.50", "type": "per_litre_pure_alcohol", "value": 0.1228, "label": "Mead: 12.28¢/L of absolute alcohol" },
+    { "prefix": "2206.00.60", "type": "per_litre", "value": 0.0282, "label": "Other fermented wine ≤13.7%: 2.82¢/L" },
+    { "prefix": "2208.20", "type": "per_litre_pure_alcohol", "value": 0, "label": "Brandy: Free" },
+    { "prefix": "2208.30", "type": "per_litre_pure_alcohol", "value": 0, "label": "Whisky: Free" },
+    { "prefix": "2208.40", "type": "per_litre_pure_alcohol", "value": 0.2456, "label": "Rum: 24.56¢/L of absolute alcohol" },
+    { "prefix": "2208.50", "type": "per_litre_pure_alcohol", "value": 0.0492, "label": "Gin: 4.92¢/L of absolute alcohol" },
+    { "prefix": "2208.60", "type": "per_litre_pure_alcohol", "value": 0.1228, "label": "Vodka: 12.28¢/L of absolute alcohol" },
+    { "prefix": "2208.70", "type": "per_litre_pure_alcohol", "value": 0.1228, "label": "Liqueurs: 12.28¢/L of absolute alcohol" },
+    { "prefix": "2208.90", "type": "per_litre_pure_alcohol", "value": 0.1228, "label": "Other spirits: 12.28¢/L of absolute alcohol" }
+  ],
+  "excise": {
+    "beer_per_litre": [
+      { "abv_max": 1.2, "value": 0.03128, "label": "Beer ≤1.2%: $3.128/hl" },
+      { "abv_min": 1.21, "abv_max": 2.5, "value": 0.1885, "label": "Beer 1.2–2.5%: $18.85/hl" },
+      { "abv_min": 2.51, "value": 0.3769, "label": "Beer >2.5%: $37.69/hl" }
+    ],
+    "wine_per_litre": [
+      { "abv_max": 1.2, "value": 0.022, "label": "Wine ≤1.2%: $0.022/L" },
+      { "abv_min": 1.21, "abv_max": 7, "value": 0.358, "label": "Wine 1.2–7%: $0.358/L" },
+      { "abv_min": 7.01, "value": 0.745, "label": "Wine >7%: $0.745/L" }
+    ],
+    "spirits": [
+      { "abv_max": 7, "type": "per_litre", "value": 0.358, "label": "Spirits ≤7%: $0.358/L" },
+      { "abv_min": 7.01, "type": "per_litre_pure_alcohol", "value": 14.117, "label": "Spirits >7%: $14.117/L of absolute alcohol" }
+    ]
+  },
+  "gst_pct": 5
+}

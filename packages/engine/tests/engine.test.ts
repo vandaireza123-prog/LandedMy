@@ -232,6 +232,33 @@ describe("United Kingdom", () => {
   });
 });
 
+describe("Canada", () => {
+  it("MFN duty by ABV band, CRA excise, GST 5% on duty-paid value", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const caT = ratesFor("CA");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "CA", dest_port: "CAVAN", currency: "CAD", fx_rate: 1, freight: 300, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    // wine 13%: 540 L → duty 1.87¢/L = 10.10; excise 0.745/L = 402.30; GST 5% × (3000 + 10.098 + 402.3)
+    const wine = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 5 }] }, caT).lines[0];
+    expect(wine.duty).toBeCloseTo(540 * 0.0187, 2);
+    expect(wine.excise).toBeCloseTo(540 * 0.745, 2);
+    expect(wine.sst).toBeCloseTo((3600 + 300 + 540 * 0.0187 + 540 * 0.745) * 0.05, 2);
+    // 14.5% wine: 4.68¢/L band
+    const w145 = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 14.5, units_per_case: 12, cases: 60, unit_cost: 5 }] }, caT).lines[0];
+    expect(w145.rates_used.duty.value).toBe(0.0468);
+    // beer 5%: duty Free, excise $37.69/hl → 0.3769/L
+    const beer = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 1 }] }, caT).lines[0];
+    expect(beer.duty).toBe(0);
+    expect(beer.excise).toBeCloseTo(792 * 0.3769, 2);
+    // whisky 40%: duty Free, excise 14.117 per L abs alcohol
+    const whisky = computeShipment({ ...base, lines: [{ id: "s", name: "Whisky", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 12 }] }, caT).lines[0];
+    expect(whisky.duty).toBe(0);
+    expect(whisky.excise).toBeCloseTo(42 * 0.4 * 14.117, 2);
+    // vodka: 12.28¢/L abs alcohol duty
+    const vodka = computeShipment({ ...base, lines: [{ id: "v", name: "Vodka", hs_code: "2208.60.00", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 12 }] }, caT).lines[0];
+    expect(vodka.duty).toBeCloseTo(42 * 0.4 * 0.1228, 2);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -261,7 +288,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);
