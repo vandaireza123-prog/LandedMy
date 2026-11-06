@@ -281,6 +281,32 @@ describe("Australia", () => {
   });
 });
 
+describe("Japan", () => {
+  it("wine duty 15% capped at ¥125/L with ¥67/L floor, liquor tax per litre, spirits stepped above 37%, consumption tax 10%", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const jpT = ratesFor("JP");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "JP", dest_port: "JPTYO", currency: "JPY", fx_rate: 1, freight: 30000, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    // cheap wine ¥300/bottle, 540 L: CIF 216000+30000 = 246000; 15% = 36900 vs cap 540×125 = 67500 → 36900; floor 540×67 = 36180 → 36900
+    const cheap = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 300 }] }, jpT).lines[0];
+    expect(cheap.duty).toBeCloseTo(36900, 2);
+    expect(cheap.excise).toBeCloseTo(540 * 100, 2);
+    expect(cheap.sst).toBeCloseTo((246000 + 36900 + 54000) * 0.1, 2);
+    // very cheap wine ¥100/bottle: CIF 72000+30000 = 102000; 15% = 15300 < floor 36180 → 36180
+    const vcheap = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 100 }] }, jpT).lines[0];
+    expect(vcheap.duty).toBeCloseTo(36180, 2);
+    // expensive wine ¥3000/bottle: 15% = 324000+... CIF 2,190,000 → 328,500 > cap 67,500 → 67,500
+    const exp = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 3000 }] }, jpT).lines[0];
+    expect(exp.duty).toBeCloseTo(67500, 2);
+    // whisky 40%, 42 L: duty free; liquor tax (370 + 10×3) × 42 = 16800
+    const whisky = computeShipment({ ...base, lines: [{ id: "s", name: "Whisky", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 2000 }] }, jpT).lines[0];
+    expect(whisky.duty).toBe(0);
+    expect(whisky.excise).toBeCloseTo(42 * 400, 2);
+    // beer: free duty, ¥155/L
+    const beer = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 100 }] }, jpT).lines[0];
+    expect(beer.excise).toBeCloseTo(792 * 155, 2);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -310,7 +336,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);

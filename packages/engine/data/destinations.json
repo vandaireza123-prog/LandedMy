@@ -203,11 +203,37 @@
       "symbol": "¥",
       "tax_name": "Consumption tax",
       "tax_pct": 10,
-      "tax_note": "Consumption tax 10% (8% food) on CIF + duty",
-      "tier": "indicative",
+      "tax_note": "Consumption tax 10% on CIF + duty + Liquor Tax; Liquor Tax per litre by category (beer ¥155/L from 1 Oct 2026, wine ¥100/L, spirits ¥370/L + ¥10 per 1% over 37%)",
+      "tier": "official",
       "lookup": "https://www.customs.go.jp/english/tariff/index.htm",
       "customs": "Japan Customs",
-      "region": "East Asia"
+      "region": "East Asia",
+      "ports": [
+        {
+          "code": "JPTYO",
+          "label": "Tokyo"
+        },
+        {
+          "code": "JPYOK",
+          "label": "Yokohama"
+        },
+        {
+          "code": "JPOSA",
+          "label": "Osaka"
+        },
+        {
+          "code": "JPUKB",
+          "label": "Kobe"
+        },
+        {
+          "code": "JPNGO",
+          "label": "Nagoya"
+        },
+        {
+          "code": "JPNRT",
+          "label": "Narita (air freight)"
+        }
+      ]
     },
     {
       "code": "KR",

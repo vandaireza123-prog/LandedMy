@@ -39,6 +39,13 @@ function specificOrAdValorem(rate: Rate, litres: number, abv: number, base: numb
       return litres * (abv / 100) * rate.value;
     case "ad_valorem":
       return base * (rate.value / 100);
+    case "ad_valorem_capped": {
+      const av = base * (rate.value / 100);
+      const capped = rate.cap_per_litre != null ? Math.min(av, litres * rate.cap_per_litre) : av;
+      return rate.floor_per_litre != null ? Math.max(capped, litres * rate.floor_per_litre) : capped;
+    }
+    case "per_litre_stepped":
+      return litres * (rate.value + (rate.step_per_litre ?? 0) * Math.max(0, abv - (rate.abv_from ?? 0)));
   }
 }
 

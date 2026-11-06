@@ -14,12 +14,22 @@ export type RateType =
   /** RM per litre of beverage, regardless of strength. */
   | "per_litre"
   /** RM per litre of 100% alcohol — multiply by litres × ABV. */
-  | "per_litre_pure_alcohol";
+  | "per_litre_pure_alcohol"
+  /** Japan-style: % of value, capped at `cap_per_litre`, with a floor of `floor_per_litre` (per litre of beverage). */
+  | "ad_valorem_capped"
+  /** Japan-style liquor tax: `value` per litre, plus `step_per_litre` per litre for every 1% ABV above `abv_from`. */
+  | "per_litre_stepped";
 
 export interface Rate {
   type: RateType;
   /** RM for specific rates; percentage (10 = 10%) for ad valorem. */
   value: number;
+  /** ad_valorem_capped only. */
+  cap_per_litre?: number;
+  floor_per_litre?: number;
+  /** per_litre_stepped only. */
+  step_per_litre?: number;
+  abv_from?: number;
 }
 
 export interface RateRowBase {

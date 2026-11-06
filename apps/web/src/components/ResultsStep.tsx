@@ -28,6 +28,21 @@ function Row({ k, v }: { k: string; v: number }) {
   );
 }
 
+function rateFormula(r: { type: string; value: number; cap_per_litre?: number; floor_per_litre?: number; step_per_litre?: number; abv_from?: number }, litres: number, sym: string): string {
+  switch (r.type) {
+    case "per_litre":
+      return `${litres} L × ${sym}${r.value}`;
+    case "per_litre_pure_alcohol":
+      return `${litres} L × ABV × ${sym}${r.value}`;
+    case "ad_valorem_capped":
+      return `CIF × ${r.value}%, max ${sym}${r.cap_per_litre}/L, min ${sym}${r.floor_per_litre}/L`;
+    case "per_litre_stepped":
+      return `${litres} L × (${sym}${r.value} + ${sym}${r.step_per_litre} per 1% ABV over ${r.abv_from}%)`;
+    default:
+      return `CIF × ${r.value}%`;
+  }
+}
+
 function LineCard({ l, currency, fx, unitCost, originIso }: { l: LineResult; currency: string; fx: number; unitCost: number; originIso: string }) {
   const t = useT();
   const prefNote = preferenceNote(originIso, l.hs_code);
@@ -63,11 +78,11 @@ function LineCard({ l, currency, fx, unitCost, originIso }: { l: LineResult; cur
         <div className="mt-2 rounded-lg bg-ground p-2.5 font-mono text-[11px] leading-relaxed text-ink-2">
           {l.litres > 0 && <div>litres = {l.litres} L for {l.units} units</div>}
           <div>
-            duty = {l.rates_used.duty.type === "per_litre" ? `${l.litres} L × ${cs()}${l.rates_used.duty.value}` : l.rates_used.duty.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × ${cs()}${l.rates_used.duty.value}` : `CIF × ${l.rates_used.duty.value}%`} = {rm(l.duty)}
+            duty = {rateFormula(l.rates_used.duty, l.litres, cs())} = {rm(l.duty)}
           </div>
           {ex && (
             <div>
-              excise = {ex.type === "per_litre_pure_alcohol" ? `${l.litres} L × ABV × ${cs()}${ex.value}` : `${cs()}${ex.value}`} = {rm(l.excise)}
+              excise = {ex.type === "ad_valorem" ? `(CIF + duty) × ${ex.value}%` : rateFormula(ex, l.litres, cs())} = {rm(l.excise)}
             </div>
           )}
           <div>{l.rates_used.sst_name ?? "SST"} = {l.rates_used.sst_pct}% × (CIF {rm(l.cif)} + duty + excise) = {rm(l.sst)}</div>

@@ -11,6 +11,7 @@ import destinations from "../data/destinations.json";
 import uk from "../data/uk.json";
 import ca from "../data/ca.json";
 import au from "../data/au.json";
+import jp from "../data/jp.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -254,16 +255,34 @@ export function buildAuRateTables(): RateTables {
   return { country: "AU", tax_name: "GST", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/** Japan: tariff chapter 22 (applied MFN), Liquor Tax from 1 Oct 2026, consumption tax 10% on CIF + duty + liquor tax. */
+export function buildJpRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  for (const l of chapter22.lines) {
+    const ds = jp.duty.filter((r) => l.hs_code.startsWith(r.prefix));
+    const d = ds.reduce((a, r) => (r.prefix.length > (a?.prefix.length ?? 0) ? r : a), ds[0]);
+    if (!d) continue;
+    tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: d.rate as Rate, effective_from: jp._meta.duty_effective_from, effective_to: null, source_doc: `Japan Customs tariff ch. 22 — ${d.label}`, source_url: jp._meta.sources.tariff });
+    const lt = l.hs_code.startsWith("2203") ? jp.liquor_tax.beer : l.hs_code.startsWith("2204") || l.hs_code.startsWith("2205") ? jp.liquor_tax.wine : l.hs_code.startsWith("2206.00.20") ? jp.liquor_tax.sake : l.hs_code.startsWith("2206") ? jp.liquor_tax.other_fermented : l.hs_code.startsWith("2208.70") ? jp.liquor_tax.liqueurs : jp.liquor_tax.spirits;
+    excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: lt as Rate, effective_from: jp._meta.excise_effective_from, effective_to: null, source_doc: "Liquor Tax from 1 Oct 2026 (NTA)", source_url: jp._meta.sources.liquor_tax_reform });
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: jp.consumption_tax_pct, effective_from: "2019-10-01", effective_to: null, source_doc: "Consumption tax 10% on CIF + duty + liquor tax", source_url: jp._meta.sources.nta });
+  }
+  return { country: "JP", tax_name: "Consumption tax", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
   GB: { currency: "GBP", symbol: "£", tax_name: "VAT", verified: false },
   CA: { currency: "CAD", symbol: "C$", tax_name: "GST", verified: false },
   AU: { currency: "AUD", symbol: "A$", tax_name: "GST", verified: false },
+  JP: { currency: "JPY", symbol: "¥", tax_name: "Consumption tax", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {

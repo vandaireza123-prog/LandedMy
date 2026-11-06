@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "country": "JP",
+    "currency": "JPY",
+    "tax_name": "Consumption tax",
+    "scope": "Japan: customs duty from the Japan Customs tariff schedule chapter 22 (applied MFN = Temporary rate where one exists, otherwise General/WTO), Liquor Tax from 1 Oct 2026, consumption tax 10% on CIF + duty + liquor tax.",
+    "notes": [
+      "Wine MFN duty is '15% or ¥125/L whichever is less, minimum ¥67/L' — modelled exactly (ad_valorem_capped). EU, UK, Australia, Chile, CPTPP and other EPA origins are duty-free with a certificate of origin; not yet loaded.",
+      "Liquor Tax from 1 Oct 2026: beer-type unified at ¥155,000/kl; wine and sake ¥100,000/kl; spirits ¥370,000/kl up to 37% plus ¥10,000/kl per 1% above; liqueurs ¥120,000/kl up to 12% plus ¥10,000/kl per 1% above (verify liqueur base).",
+      "Beer customs duty: Free. Spirits: Free. Sparkling wine ¥182/L. Vermouth ¥69.30/L. Cider/perry treated as 'other fermented, other' ¥42.40/L (schedule text partly garbled — verify).",
+      "Consumption tax 10% (reduced 8% does not apply to alcohol). Not yet checked against an import declaration — tier official."
+    ],
+    "sources": {
+      "tariff": "https://www.customs.go.jp/english/tariff/2026_10_31/data/e_22.htm",
+      "liquor_tax_reform": "https://www.visaverge.com/taxes/japan-unifies-beer-tax-rates-ending-third-category-beer-on-october-1-2026/",
+      "liquor_tax_overview": "https://ebc-jp.com/digital-white-paper/issues/consumer-goods/liquor/liquor-taxes",
+      "nta": "https://www.nta.go.jp/"
+    },
+    "duty_effective_from": "2026-10-31",
+    "excise_effective_from": "2026-10-01",
+    "checked": "2026-11-07"
+  },
+  "duty": [
+    { "prefix": "2203", "rate": { "type": "per_litre", "value": 0 }, "label": "Beer: Free" },
+    { "prefix": "2204.10", "rate": { "type": "per_litre", "value": 182 }, "label": "Sparkling wine ¥182/L" },
+    { "prefix": "2204.21.14", "rate": { "type": "per_litre", "value": 112 }, "label": "Fortified wine (sherry, port) ¥112/L" },
+    { "prefix": "2204", "rate": { "type": "ad_valorem_capped", "value": 15, "cap_per_litre": 125, "floor_per_litre": 67 }, "label": "Wine: 15% or ¥125/L whichever less, min ¥67/L" },
+    { "prefix": "2205", "rate": { "type": "per_litre", "value": 69.3 }, "label": "Vermouth ¥69.30/L" },
+    { "prefix": "2206.00.20", "rate": { "type": "per_litre", "value": 70.4 }, "label": "Sake ¥70.40/L" },
+    { "prefix": "2206", "rate": { "type": "per_litre", "value": 42.4 }, "label": "Other fermented (cider, perry, mead, fruit wine) ¥42.40/L (verify)" },
+    { "prefix": "2208", "rate": { "type": "per_litre", "value": 0 }, "label": "Spirits and liqueurs: Free" }
+  ],
+  "liquor_tax": {
+    "beer": { "type": "per_litre", "value": 155 },
+    "wine": { "type": "per_litre", "value": 100 },
+    "sake": { "type": "per_litre", "value": 100 },
+    "other_fermented": { "type": "per_litre", "value": 100 },
+    "spirits": { "type": "per_litre_stepped", "value": 370, "step_per_litre": 10, "abv_from": 37 },
+    "liqueurs": { "type": "per_litre_stepped", "value": 120, "step_per_litre": 10, "abv_from": 12 }
+  },
+  "consumption_tax_pct": 10
+}
