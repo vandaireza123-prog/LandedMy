@@ -1,0 +1,38 @@
+{
+  "_meta": {
+    "country": "AU",
+    "currency": "AUD",
+    "tax_name": "GST",
+    "scope": "Australia: customs duty 5% ad valorem (general rate, Schedule 3 chapter 22) plus the excise-equivalent customs duty at ATO excise rates for beer and spirits; Wine Equalisation Tax 29% on wine, cider, perry, mead and sake; GST 10% on CIF + duty + excise/WET.",
+    "notes": [
+      "Excise rates from 3 August 2026 (ATO, indexed each February and August; draught-beer items frozen until August 2027).",
+      "Beer: duty applies only to alcohol above 1.15% ABV. Packaged beer (≤48 L containers not for pump delivery) is modelled; draught (kegs >48 L or pump-ready 8–48 L) is lower (43.39/LAL at >3.5%) and not modelled.",
+      "WET is charged on the customs value + duty + transport and insurance (≈ CIF + duty) for imports, i.e. modelled as 29% ad valorem on CIF + duty. Wine, cider, perry, mead and sake between 1.15% and 22% ABV are WET goods; above 22% they are spirits.",
+      "Preferential rates (Free under ChAFTA, JAEPA, KAFTA, CPTPP, A-UKFTA, AANZFTA…) remove the 5% ad valorem only; the excise-equivalent component always applies.",
+      "Not yet checked against an import declaration — tier official."
+    ],
+    "sources": {
+      "excise": "https://www.ato.gov.au/businesses-and-organisations/gst-excise-and-indirect-taxes/excise-on-alcohol/excise-duty-rates-for-alcohol",
+      "tariff": "https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff",
+      "tariff_mirror": "https://treayo.com/en/hs/australia/22042120",
+      "wet": "https://www.ato.gov.au/businesses-and-organisations/gst-excise-and-indirect-taxes/wine-equalisation-tax"
+    },
+    "duty_effective_from": "2022-01-01",
+    "excise_effective_from": "2026-08-03",
+    "checked": "2026-11-07"
+  },
+  "ad_valorem_pct": 5,
+  "excise": {
+    "beer_packaged": [
+      { "abv_max": 3, "value": 55.83, "label": "Beer ≤3%, packaged (item 1.1)" },
+      { "abv_min": 3.01, "abv_max": 3.5, "value": 65.03, "label": "Beer 3–3.5%, packaged (item 1.5)" },
+      { "abv_min": 3.51, "value": 65.03, "label": "Beer >3.5%, packaged (item 1.10)" }
+    ],
+    "beer_abv_free_pct": 1.15,
+    "spirits_le_10": 110.15,
+    "spirits_gt_10": 110.15,
+    "brandy": 102.87,
+    "wet_pct": 29
+  },
+  "gst_pct": 10
+}

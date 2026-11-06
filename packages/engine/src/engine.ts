@@ -127,7 +127,8 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
     // rounded to the sen once per line, per tax. SST uses the unrounded base.
     const dutyRate = fta ? fta.duty : tariff.duty;
     const duty = specificOrAdValorem(dutyRate, litres, l.abv, cif);
-    const exciseAmt = excise ? specificOrAdValorem(excise.excise, litres, l.abv, cif + duty) : 0;
+    const exciseAbv = excise?.abv_free_pct ? Math.max(0, l.abv - excise.abv_free_pct) : l.abv;
+    const exciseAmt = excise ? specificOrAdValorem(excise.excise, litres, exciseAbv, cif + duty) : 0;
     const uplift = 1 + (rates.tax_base_uplift_pct ?? 0) / 100;
     const sstAmt = (cif * uplift + duty + exciseAmt) * (sst.rate_pct / 100);
     const dutyPaid = cif + duty + exciseAmt + sstAmt;

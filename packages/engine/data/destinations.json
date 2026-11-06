@@ -150,12 +150,38 @@
       "symbol": "A$",
       "tax_name": "GST",
       "tax_pct": 10,
-      "tax_note": "GST 10% on customs value + duty + transport/insurance; most MFN duty 0–5%",
-      "tier": "indicative",
+      "tax_note": "GST 10% on CIF + duty + excise/WET; customs duty 5% + excise-equivalent on beer and spirits (ATO rates), WET 29% on wine",
+      "tier": "official",
       "lookup": "https://www.abf.gov.au/importing-exporting-and-manufacturing/tariff-classification/current-tariff",
       "customs": "Australian Border Force",
       "region": "Oceania",
-      "de_minimis": "AUD 1,000 (GST still collected on low-value goods by the seller/platform)"
+      "de_minimis": "AUD 1,000 (GST still collected on low-value goods by the seller/platform)",
+      "ports": [
+        {
+          "code": "AUSYD",
+          "label": "Sydney (Port Botany)"
+        },
+        {
+          "code": "AUMEL",
+          "label": "Melbourne"
+        },
+        {
+          "code": "AUBNE",
+          "label": "Brisbane"
+        },
+        {
+          "code": "AUFRE",
+          "label": "Fremantle"
+        },
+        {
+          "code": "AUADL",
+          "label": "Adelaide"
+        },
+        {
+          "code": "AUSYDA",
+          "label": "Sydney Kingsford Smith (air freight)"
+        }
+      ]
     },
     {
       "code": "NZ",

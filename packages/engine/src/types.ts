@@ -42,6 +42,8 @@ export interface TariffLine extends RateRowBase {
 
 export interface ExciseLine extends RateRowBase {
   excise: Rate;
+  /** Alcohol below this ABV is duty-free (Australia: 1.15% for beer). Applies to per_litre_pure_alcohol rates. */
+  abv_free_pct?: number;
 }
 
 export interface SstRate extends RateRowBase {

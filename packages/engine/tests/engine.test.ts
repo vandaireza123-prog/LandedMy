@@ -259,6 +259,28 @@ describe("Canada", () => {
   });
 });
 
+describe("Australia", () => {
+  it("5% duty + excise-equivalent above 1.15% on beer, WET on wine, spirits per LAL, GST 10%", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const auT = ratesFor("AU");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "AU", dest_port: "AUSYD", currency: "AUD", fx_rate: 1, freight: 300, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    // beer 5%, 792 L: CIF 2700; duty 5% = 135; excise 792 × (5 − 1.15)/100 × 65.03 = 1982.95; GST 10% × (2700 + 135 + 1982.95)
+    const beer = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 1 }] }, auT).lines[0];
+    expect(beer.duty).toBeCloseTo(135, 2);
+    expect(beer.excise).toBeCloseTo(792 * 0.0385 * 65.03, 2);
+    expect(beer.sst).toBeCloseTo((2700 + 135 + 792 * 0.0385 * 65.03) * 0.1, 2);
+    // wine 13%: CIF 3900; duty 195; WET 29% × 4095 = 1187.55
+    const wine = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 5 }] }, auT).lines[0];
+    expect(wine.duty).toBeCloseTo(195, 2);
+    expect(wine.excise).toBeCloseTo((3900 + 195) * 0.29, 2);
+    // whisky 40%, 42 L: 16.8 LAL × 110.15
+    const whisky = computeShipment({ ...base, lines: [{ id: "s", name: "Whisky", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 12 }] }, auT).lines[0];
+    expect(whisky.excise).toBeCloseTo(16.8 * 110.15, 2);
+    const brandy = computeShipment({ ...base, lines: [{ id: "c", name: "Cognac", hs_code: "2208.20.50", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 12 }] }, auT).lines[0];
+    expect(brandy.rates_used.excise!.value).toBe(102.87);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -288,7 +310,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);

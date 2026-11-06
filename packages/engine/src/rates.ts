@@ -10,6 +10,7 @@ import fta from "../data/fta.json";
 import destinations from "../data/destinations.json";
 import uk from "../data/uk.json";
 import ca from "../data/ca.json";
+import au from "../data/au.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -224,15 +225,45 @@ export function buildCaRateTables(): RateTables {
   return { country: "CA", tax_name: "GST", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/**
+ * Australia: 5% ad valorem customs duty + excise-equivalent (ATO rates) on beer and spirits, WET 29% on
+ * wine/cider/mead/sake, GST 10% on CIF + duty + excise/WET. Beer excise only on alcohol above 1.15%.
+ */
+export function buildAuRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  const from = au._meta.excise_effective_from;
+  for (const l of chapter22.lines) {
+    tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: { type: "ad_valorem", value: au.ad_valorem_pct }, effective_from: au._meta.duty_effective_from, effective_to: null, source_doc: "Customs Tariff Schedule 3, chapter 22 — general rate 5% (excise-equivalent component listed under excise)", source_url: au._meta.sources.tariff });
+    if (l.hs_code.startsWith("2203")) {
+      for (const b of au.excise.beer_packaged) {
+        excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre_pure_alcohol", value: b.value }, abv_min: b.abv_min, abv_max: b.abv_max, abv_free_pct: au.excise.beer_abv_free_pct, effective_from: from, effective_to: null, source_doc: `ATO excise-equivalent from 3 Aug 2026 — ${b.label}, on alcohol above 1.15%`, source_url: au._meta.sources.excise });
+      }
+    } else if (l.hs_code.startsWith("2208")) {
+      const brandy = l.hs_code.startsWith("2208.20");
+      excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre_pure_alcohol", value: brandy ? au.excise.brandy : au.excise.spirits_gt_10 }, abv_min: 10.01, effective_from: from, effective_to: null, source_doc: `ATO excise-equivalent from 3 Aug 2026 — ${brandy ? "brandy (item 3.1)" : "spirits >10% (item 3.2)"}`, source_url: au._meta.sources.excise });
+      excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre_pure_alcohol", value: au.excise.spirits_le_10 }, abv_max: 10, effective_from: from, effective_to: null, source_doc: "ATO excise-equivalent from 3 Aug 2026 — other excisable beverages ≤10% (item 2)", source_url: au._meta.sources.excise });
+    } else {
+      // wine, vermouth, cider, perry, mead, sake: WET 29% on CIF + duty (≤22% ABV)
+      excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "ad_valorem", value: au.excise.wet_pct }, abv_max: 22, effective_from: "2000-07-01", effective_to: null, source_doc: "Wine Equalisation Tax 29% on customs value + duty + transport (≈ CIF + duty)", source_url: au._meta.sources.wet });
+      excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre_pure_alcohol", value: au.excise.spirits_gt_10 }, abv_min: 22.01, effective_from: from, effective_to: null, source_doc: "ATO excise-equivalent — fortified >22% treated as spirits", source_url: au._meta.sources.excise });
+    }
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: au.gst_pct, effective_from: "2000-07-01", effective_to: null, source_doc: "GST 10% on CIF + duty + excise/WET", source_url: au._meta.sources.wet });
+  }
+  return { country: "AU", tax_name: "GST", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
   GB: { currency: "GBP", symbol: "£", tax_name: "VAT", verified: false },
   CA: { currency: "CAD", symbol: "C$", tax_name: "GST", verified: false },
+  AU: { currency: "AUD", symbol: "A$", tax_name: "GST", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {
