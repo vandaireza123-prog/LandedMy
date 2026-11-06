@@ -307,6 +307,26 @@ describe("Japan", () => {
   });
 });
 
+describe("United States", () => {
+  it("HTS per-litre duty by strength, TTB excise, no federal tax", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const usT = ratesFor("US");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "US", dest_port: "USLAX", currency: "USD", fx_rate: 1, freight: 300, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    const wine = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 5 }] }, usT).lines[0];
+    expect(wine.duty).toBeCloseTo(540 * 0.063, 2);
+    expect(wine.excise).toBeCloseTo(540 * 0.2827, 2);
+    expect(wine.sst).toBe(0);
+    const w145 = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 14.5, units_per_case: 12, cases: 60, unit_cost: 5 }] }, usT).lines[0];
+    expect(w145.rates_used.duty.value).toBe(0.169);
+    const whisky = computeShipment({ ...base, lines: [{ id: "s", name: "Whisky", hs_code: "2208.30.90", volume_ml: 700, abv: 40, units_per_case: 6, cases: 10, unit_cost: 12 }] }, usT).lines[0];
+    expect(whisky.duty).toBe(0);
+    expect(whisky.excise).toBeCloseTo(42 * 0.4 * 7.1328, 2); // 16.8 L alc = 8.877 proof gal × $13.50 ≈ 119.83
+    expect(whisky.excise).toBeCloseTo((16.8 / 3.78541) * 2 * 13.5, 1);
+    const beer = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 1 }] }, usT).lines[0];
+    expect(beer.excise).toBeCloseTo(792 * 0.1534, 1);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -336,7 +356,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP", "US"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);

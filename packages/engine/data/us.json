@@ -1,0 +1,54 @@
+{
+  "_meta": {
+    "country": "US",
+    "currency": "USD",
+    "tax_name": "none",
+    "scope": "United States: HTSUS chapter 22 general (column 1) duty, TTB federal excise tax at the general (non-CBMA) rate, no federal VAT or sales tax at import.",
+    "notes": [
+      "ADDITIONAL TARIFFS NOT INCLUDED: since 2025 the US applies origin-based additional duties (IEEPA 'reciprocal' tariffs, Section 232 and 301) that change by executive order and sit on top of these rates — check HTSUS chapter 99 for the origin before you commit. The result shows this warning.",
+      "Fees not included: Merchandise Processing Fee 0.3464% of value (with annual min/max) and Harbor Maintenance Fee 0.125% on sea freight; add them under local charges.",
+      "Excise is the general rate: importers assigned CBMA reduced rates/credits by the foreign producer pay less (e.g. wine credit $1.00/gal on the first 30,000 gallons).",
+      "Conversions: 1 wine gallon = 3.78541 L; 1 beer barrel = 31 gallons = 117.348 L; 1 proof gallon = 1 gallon at 50% ABV, so $13.50/proof gallon = $7.1328 per litre of pure alcohol.",
+      "Rum: 23.7¢/proof litre applies to rum valued ≤ $3/proof litre (modelled); rum above that is Free. Vodka and most spirits Free. 2208.90 'other' 21.1¢/proof litre.",
+      "State alcohol excise and sales taxes are extra and vary by state; not modelled. Not yet checked against an entry summary — tier official."
+    ],
+    "sources": {
+      "hts": "https://hts.usitc.gov/",
+      "hts_mirror": "https://treayo.com/en/hs/us/ch/22",
+      "ttb": "https://www.ttb.gov/taxes/tax-audit/tax-and-fee-rates",
+      "cbp_fees": "https://www.cbp.gov/trade/programs-administration/trade-fees"
+    },
+    "duty_effective_from": "2025-01-01",
+    "excise_effective_from": "2018-01-01",
+    "checked": "2026-11-07"
+  },
+  "duty": [
+    { "prefix": "2203", "rate": { "type": "per_litre", "value": 0 }, "label": "Beer: Free" },
+    { "prefix": "2204.10", "rate": { "type": "per_litre", "value": 0.198 }, "label": "Sparkling wine 19.8¢/L" },
+    { "prefix": "2204.21.11", "rate": { "type": "per_litre", "value": 0.063 }, "abv_max": 14, "label": "Still wine ≤14%, ≤2 L: 6.3¢/L" },
+    { "prefix": "2204.21.11", "rate": { "type": "per_litre", "value": 0.169 }, "abv_min": 14.01, "label": "Still wine >14%, ≤2 L: 16.9¢/L" },
+    { "prefix": "2204.21", "rate": { "type": "per_litre", "value": 0.169 }, "label": "Still wine >14%, ≤2 L: 16.9¢/L" },
+    { "prefix": "2204.22", "rate": { "type": "per_litre", "value": 0.084 }, "abv_max": 14, "label": "Wine 2–10 L ≤14%: 8.4¢/L" },
+    { "prefix": "2204.22", "rate": { "type": "per_litre", "value": 0.224 }, "abv_min": 14.01, "label": "Wine 2–10 L >14%: 22.4¢/L" },
+    { "prefix": "2204.29", "rate": { "type": "per_litre", "value": 0.14 }, "abv_max": 14, "label": "Wine >10 L ≤14%: 14¢/L" },
+    { "prefix": "2204.29", "rate": { "type": "per_litre", "value": 0.224 }, "abv_min": 14.01, "label": "Wine >10 L >14%: 22.4¢/L" },
+    { "prefix": "2205", "rate": { "type": "per_litre", "value": 0.035 }, "label": "Vermouth 3.5¢/L" },
+    { "prefix": "2206.00.10", "rate": { "type": "per_litre", "value": 0.004 }, "label": "Cider 0.4¢/L" },
+    { "prefix": "2206.00.20", "rate": { "type": "per_litre", "value": 0.03 }, "label": "Sake 3¢/L" },
+    { "prefix": "2206", "rate": { "type": "per_litre", "value": 0.042 }, "label": "Other fermented 4.2¢/L" },
+    { "prefix": "2208.40", "rate": { "type": "per_litre_pure_alcohol", "value": 0.474 }, "label": "Rum ≤$3/proof L: 23.7¢/proof L (= 47.4¢/L alcohol)" },
+    { "prefix": "2208.90", "rate": { "type": "per_litre_pure_alcohol", "value": 0.422 }, "label": "Other spirits 21.1¢/proof L (= 42.2¢/L alcohol)" },
+    { "prefix": "2208", "rate": { "type": "per_litre", "value": 0 }, "label": "Brandy, whisky, gin, vodka, liqueurs: Free" }
+  ],
+  "excise": {
+    "beer_per_litre": 0.1534,
+    "wine_per_litre": [
+      { "abv_max": 16, "value": 0.2827, "label": "Still wine ≤16%: $1.07/gal" },
+      { "abv_min": 16.01, "abv_max": 21, "value": 0.4148, "label": "Still wine 16–21%: $1.57/gal" },
+      { "abv_min": 21.01, "abv_max": 24, "value": 0.8322, "label": "Still wine 21–24%: $3.15/gal" }
+    ],
+    "sparkling_per_litre": 0.8983,
+    "cider_per_litre": 0.0597,
+    "spirits_per_litre_alcohol": 7.1328
+  }
+}

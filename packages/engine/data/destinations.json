@@ -715,11 +715,46 @@
       "symbol": "US$",
       "tax_name": "none",
       "tax_pct": 0,
-      "tax_note": "No federal VAT or sales tax at import; MFN duty plus additional tariffs by origin (Section 301/232, reciprocal tariffs) — check the HTS and current executive orders; MPF 0.3464% and HMF 0.125% apply",
-      "tier": "indicative",
+      "tax_note": "No federal VAT or sales tax at import; HTSUS general duty + TTB federal excise. Origin-based additional tariffs (IEEPA reciprocal, Section 232/301, HTS chapter 99) are NOT included and can exceed everything else — check them for your origin. MPF 0.3464% and HMF 0.125% apply.",
+      "tier": "official",
       "lookup": "https://hts.usitc.gov/",
       "customs": "U.S. Customs and Border Protection",
-      "region": "Americas"
+      "region": "Americas",
+      "warning": "US additional tariffs by origin (HTSUS chapter 99: reciprocal, Section 232/301) are not included in this result. Check them for your origin before you commit.",
+      "ports": [
+        {
+          "code": "USLAX",
+          "label": "Los Angeles / Long Beach"
+        },
+        {
+          "code": "USNYC",
+          "label": "New York / New Jersey"
+        },
+        {
+          "code": "USSAV",
+          "label": "Savannah"
+        },
+        {
+          "code": "USHOU",
+          "label": "Houston"
+        },
+        {
+          "code": "USSEA",
+          "label": "Seattle / Tacoma"
+        },
+        {
+          "code": "USOAK",
+          "label": "Oakland"
+        },
+        {
+          "code": "USMIA",
+          "label": "Miami"
+        },
+        {
+          "code": "USJFK",
+          "label": "New York JFK (air freight)"
+        }
+      ]
     },
     {
       "code": "CA",

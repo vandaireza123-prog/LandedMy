@@ -99,7 +99,7 @@ function fromRegistry(d: Destination): CountryInfo {
     verified: false,
     verify_note:
       d.tier === "official"
-        ? `Loaded from ${d.customs}'s published schedule and tax tables. Not yet checked against a real import entry — treat as official but verify.`
+        ? `${d.warning ? `${d.warning} ` : ""}Loaded from ${d.customs}'s published schedule and tax tables. Not yet checked against a real import entry — treat as official but verify.`
         : `${d.tax_name === "none" ? "no import VAT/GST" : `${d.tax_name} ${d.tax_pct}%`} is applied from the standard rate; import duty is the % you enter per product${d.duty_default_pct != null ? ` (default ${d.duty_default_pct}%)` : ""}. Verify at ${d.customs} before you commit.`,
     customs_name: d.customs,
     ports: d.ports ?? [

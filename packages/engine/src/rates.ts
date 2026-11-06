@@ -12,6 +12,7 @@ import uk from "../data/uk.json";
 import ca from "../data/ca.json";
 import au from "../data/au.json";
 import jp from "../data/jp.json";
+import us from "../data/us.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -272,6 +273,29 @@ export function buildJpRateTables(): RateTables {
   return { country: "JP", tax_name: "Consumption tax", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/** United States: HTSUS general duty, TTB general excise, no federal VAT. Origin-based additional tariffs are flagged, not priced. */
+export function buildUsRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  type D = { prefix: string; rate: Rate; label: string; abv_min?: number; abv_max?: number };
+  for (const l of chapter22.lines) {
+    const ds = (us.duty as D[]).filter((r) => l.hs_code.startsWith(r.prefix));
+    const best = ds.reduce((a, r) => Math.max(a, r.prefix.length), 0);
+    for (const d of ds.filter((r) => r.prefix.length === best)) {
+      tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: d.rate, abv_min: d.abv_min, abv_max: d.abv_max, effective_from: us._meta.duty_effective_from, effective_to: null, source_doc: `HTSUS ch. 22 general rate — ${d.label}. Origin-based additional tariffs (ch. 99) NOT included`, source_url: us._meta.sources.hts });
+    }
+    const src = { effective_from: us._meta.excise_effective_from, effective_to: null, source_url: us._meta.sources.ttb };
+    if (l.hs_code.startsWith("2203")) excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre", value: us.excise.beer_per_litre }, ...src, source_doc: "TTB federal excise, beer $18/barrel general rate" });
+    else if (l.hs_code.startsWith("2204.10")) excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre", value: us.excise.sparkling_per_litre }, ...src, source_doc: "TTB federal excise, naturally sparkling wine $3.40/gal" });
+    else if (l.hs_code.startsWith("2206.00.10")) excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre", value: us.excise.cider_per_litre }, ...src, source_doc: "TTB federal excise, hard cider $0.226/gal" });
+    else if (l.hs_code.startsWith("2208")) excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre_pure_alcohol", value: us.excise.spirits_per_litre_alcohol }, ...src, source_doc: "TTB federal excise, distilled spirits $13.50/proof gallon general rate" });
+    else for (const b of us.excise.wine_per_litre) excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "per_litre", value: b.value }, abv_min: b.abv_min, abv_max: b.abv_max, ...src, source_doc: `TTB federal excise, ${b.label}` });
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: 0, effective_from: "2000-01-01", effective_to: null, source_doc: "No federal VAT or sales tax at import (state taxes apply after import)", source_url: us._meta.sources.cbp_fees });
+  }
+  return { country: "US", tax_name: "Tax", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
@@ -279,10 +303,11 @@ export const COUNTRY_META: Record<string, { currency: string; symbol: string; ta
   CA: { currency: "CAD", symbol: "C$", tax_name: "GST", verified: false },
   AU: { currency: "AUD", symbol: "A$", tax_name: "GST", verified: false },
   JP: { currency: "JPY", symbol: "¥", tax_name: "Consumption tax", verified: false },
+  US: { currency: "USD", symbol: "US$", tax_name: "Tax", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables, US: buildUsRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {
@@ -308,6 +333,8 @@ export interface Destination {
   de_minimis?: string;
   tax_base?: string;
   ports?: { code: string; label: string }[];
+  /** Shown prominently on results: something material the tables cannot price. */
+  warning?: string;
 }
 export const DESTINATIONS: Destination[] = destinations.countries as Destination[];
 export const DESTINATION_CODES: CountryCode[] = DESTINATIONS.map((d) => d.code);
