@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
-import { computeShipment, manualRates, mergeRates, ratesFor, withoutFta, type ShipmentResult } from "@landedmy/engine";
-import { buildShipment, manualLinesOf, snapshotOf, type AppState, type Scenario } from "@/lib/state";
+import { computeShipment, type ShipmentResult } from "@landedmy/engine";
+import { buildShipment, snapshotOf, type AppState, type Scenario } from "@/lib/state";
+import { tablesFor } from "@/lib/shipment";
 import { EQUIPMENT_LABEL } from "@/lib/lanes";
 import { Card, cs, rm, smallInputCls } from "./ui";
 import { useT } from "@/lib/i18n";
@@ -10,9 +11,7 @@ const uid = () => Math.random().toString(36).slice(2, 9);
 
 function compute(snap: Scenario["snapshot"]): ShipmentResult | null {
   try {
-    const base = ratesFor(snap.dest_country ?? "MY");
-    const merged = mergeRates(snap.fta_claim === false ? withoutFta(base) : base, ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
-    return computeShipment(buildShipment(snap), merged);
+    return computeShipment(buildShipment(snap), tablesFor(snap));
   } catch {
     return null;
   }

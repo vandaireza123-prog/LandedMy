@@ -139,11 +139,23 @@ export const REQUIREMENTS_SG: Requirement[] = [
   { id: "sg-hsa", text: "Cosmetics notified to HSA before sale; electrical goods need the Safety Mark (Consumer Protection registration)", authority: "HSA / Enterprise Singapore", url: "https://www.hsa.gov.sg/cosmetic-products", when: (c) => c.groups.has("beauty") || c.groups.has("electronics") },
 ];
 
-export function requirementsFor(products: { category: Category; hs_code: string; general_group?: string }[], country: "MY" | "SG" = "MY"): Requirement[] {
+/** Any other destination: the universal steps, with the country's own lookup filled in by the caller. */
+export const REQUIREMENTS_GENERIC: Requirement[] = [
+  { id: "g-reg", text: "Importer registration with the destination customs authority (importer number / trade licence) before the first shipment", authority: "Destination customs", url: "", when: () => true },
+  { id: "g-hs", text: "Confirm the national tariff line and duty rate for each HS-6 code on the official tariff tool; indicative results use the % you entered", authority: "Destination customs", url: "", when: () => true },
+  { id: "g-coo", text: "Certificate of origin if you claim a preferential (FTA) rate; otherwise MFN duty applies", authority: "Chamber of commerce / exporter", url: "", when: () => true },
+  { id: "g-alc", text: "Alcohol: excise and licensing differ by country and are not yet loaded for this destination — the calculator refuses to price it rather than guess", authority: "Destination customs / excise", url: "", when: (c) => has(c.hsPrefixes, "2203", "2204", "2205", "2206", "2208") },
+  { id: "g-food", text: "Food: import permit / registration with the food safety authority, labelling in the local language, shelf-life rules", authority: "Food safety authority", url: "", when: (c) => c.groups.has("food") },
+  { id: "g-beauty", text: "Cosmetics: product notification or registration with the health authority before sale", authority: "Health authority", url: "", when: (c) => c.groups.has("beauty") },
+  { id: "g-elec", text: "Electrical goods: safety certification / conformity mark and radio-equipment approval for wireless devices", authority: "Standards body / telecom regulator", url: "", when: (c) => c.groups.has("electronics") },
+];
+
+export function requirementsFor(products: { category: Category; hs_code: string; general_group?: string }[], country: string = "MY"): Requirement[] {
   const ctx = {
     categories: new Set(products.map((p) => p.category)),
     hsPrefixes: new Set(products.map((p) => (p.hs_code || "").replace(/\./g, ""))),
     groups: new Set(products.filter((p) => p.category === "general").map((p) => p.general_group ?? "other")),
   };
-  return (country === "SG" ? REQUIREMENTS_SG : REQUIREMENTS).filter((r) => r.when(ctx));
+  const list = country === "MY" ? REQUIREMENTS : country === "SG" ? REQUIREMENTS_SG : REQUIREMENTS_GENERIC;
+  return list.filter((r) => r.when(ctx));
 }

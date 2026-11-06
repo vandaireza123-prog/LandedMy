@@ -8,6 +8,7 @@ import { FX_DEFAULT } from "@/lib/lanes";
 import { GENERAL_GROUPS, GENERAL_LINES, GENERAL_VERIFY_URL } from "@landedmy/engine";
 import { SENSITIVE_CHAPTERS, searchHs, type HsHit } from "@/lib/hs/search";
 import { useEffect } from "react";
+import { COUNTRIES } from "@/lib/country";
 import { useT } from "@/lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -95,6 +96,8 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
     };
   }, [q]);
   const rows = state.products;
+  const country = COUNTRIES[state.dest_country];
+  const indicative = country.tier === "indicative";
 
   const setRows = (next: ProductRow[]) => update({ products: next });
   const patchRow = (id: string, patch: Partial<ProductRow>) =>
@@ -280,6 +283,18 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                     </a>
                   </div>
                 )}
+                {indicative ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted">Import duty % into {country.name}</span>
+                      <input type="number" step="0.5" className={`${smallInputCls} border-teal`} value={r.manual_duty_pct ?? country.duty_default_pct ?? ""} placeholder={country.duty_default_pct != null ? String(country.duty_default_pct) : "e.g. 20"} onChange={(e) => patchRow(r.id, { manual_duty_pct: e.target.value === "" ? undefined : Number(e.target.value) || 0 })} />
+                    </label>
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted">{country.tax_name}</span>
+                      <div className={`${smallInputCls} flex items-center bg-ground text-muted`}>{country.tax_name === "Tax" ? "none at import" : `${country.tax_pct}% · applied`}</div>
+                    </label>
+                  </div>
+                ) : (
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted">Tariff line (pick one, or enter rates yourself)</span>
                   <select
@@ -299,7 +314,8 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                     ))}
                   </select>
                 </label>
-                {r.hs_code === "MANUAL" && (
+                )}
+                {!indicative && r.hs_code === "MANUAL" && (
                   <div className="grid grid-cols-2 gap-2">
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">Import duty % of CIF</span>
@@ -315,12 +331,17 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                     </label>
                   </div>
                 )}
-                <a href={GENERAL_VERIFY_URL} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-teal">
-                  Look up the official rate on JKDM's tariff tool →
+                <a href={country.lookup} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-teal">
+                  {indicative ? `Look up ${r.hs6 ? `${r.hs6.slice(0, 4)}.${r.hs6.slice(4)}` : "the code"} on ${country.customs_name}'s tariff tool →` : "Look up the official rate on JKDM's tariff tool →"}
                 </a>
               </div>
             )}
 
+            {indicative && r.category !== "general" && (
+              <div className="mt-2 rounded-lg bg-amber-tint px-2.5 py-2 text-[11px] leading-snug text-amber">
+                Alcohol into {country.name} isn&apos;t priced yet (excise not loaded). Set the destination to Malaysia or Singapore, or change the type to non-alcohol goods.
+              </div>
+            )}
             <div className={`mt-2 grid gap-2 ${r.category === "general" ? "grid-cols-3" : "grid-cols-5"}`}>
               {r.category !== "general" && (
                 <>

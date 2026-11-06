@@ -4,7 +4,8 @@ import { fetchFx, type FxResponse } from "@/lib/api";
 import type { AppState } from "@/lib/state";
 import { EQUIPMENT_LABEL, FX_AS_OF, FX_DEFAULT, type Equipment } from "@/lib/lanes";
 import type { Port } from "@/lib/ports";
-import { COUNTRIES, DEST_COUNTRIES, fxDefault, fxFromBnm, localChargesFor, type DestCountry } from "@/lib/country";
+import { COUNTRIES, fxDefault, fxFromBnm, localChargesFor, type DestCountry } from "@/lib/country";
+import { CountryPicker } from "./CountryPicker";
 import { PortPicker } from "./PortPicker";
 import { useT } from "@/lib/i18n";
 import { Field, Footer, PrimaryButton, Progress, Title, inputCls } from "./ui";
@@ -52,20 +53,7 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
       <Progress step={1} />
       <Title step={1} title="Where is it going?" sub="Set the lane once. Every product you add next shares it." />
       <div className="flex flex-1 flex-col gap-3 p-5">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-ink-2">{t("Destination country")}</span>
-          <div className="flex gap-1 rounded-xl border border-line bg-white p-[3px]">
-            {DEST_COUNTRIES.map((c) => {
-              const on = state.dest_country === c;
-              return (
-                <button key={c} type="button" onClick={() => onCountry(c)} className={`flex-1 rounded-[9px] py-2 text-sm font-semibold ${on ? "bg-teal text-white" : "text-muted"}`}>
-                  {COUNTRIES[c].name} · {COUNTRIES[c].symbol}
-                </button>
-              );
-            })}
-          </div>
-          <span className="text-[11px] leading-snug text-muted">{country.verify_note}</span>
-        </div>
+        <CountryPicker value={state.dest_country} onChange={onCountry} />
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold text-ink-2">{t("From port")}</span>
           <PortPicker value={state.origin_port} label={state.origin_label} onPick={onPort} onCustom={onCustomPort} />
@@ -130,8 +118,8 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
               value={state.currency}
               onChange={(e) => update({ currency: e.target.value, fx_rate: rateFor(e.target.value), fx_source: sourceFor(e.target.value) })}
             >
-              {Object.keys(FX_DEFAULT)
-                .filter((c) => c !== "MYR")
+              {[...new Set([...Object.keys(FX_DEFAULT), "MYR", "SGD", "CNY", "JPY", "THB", "IDR", "VND", "INR", "AED"])]
+                .filter((c) => c !== country.currency)
                 .map((c) => (
                   <option key={c}>{c}</option>
                 ))}

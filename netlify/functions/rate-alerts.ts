@@ -8,7 +8,7 @@
  */
 import type { Config, Context } from "@netlify/functions";
 import { createClient } from "@supabase/supabase-js";
-import { computeShipment, manualRates, mergeRates, ratesFor, withoutFta } from "../../packages/engine/src/index";
+import { computeShipment } from "../../packages/engine/src/index";
 
 const CURRENT_RATE_VERSION = "2025-11-01-budget2026";
 
@@ -21,7 +21,7 @@ interface Row {
   rate_version: string | null;
 }
 
-import { buildShipment, manualLinesOf, type ShipmentSnapshot } from "../../apps/web/src/lib/shipment";
+import { buildShipment, tablesFor, type ShipmentSnapshot } from "../../apps/web/src/lib/shipment";
 
 export default async (req: Request, _ctx: Context) => {
   const runKey = process.env.RATE_ALERT_RUN_KEY;
@@ -43,9 +43,7 @@ export default async (req: Request, _ctx: Context) => {
     checked++;
     try {
       const snap = row.snapshot_json as unknown as ShipmentSnapshot;
-      const base = ratesFor(snap.dest_country ?? "MY");
-      const merged = mergeRates(snap.fta_claim === false ? withoutFta(base) : base, ...manualLinesOf(snap).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
-      const res = computeShipment(buildShipment(snap), merged);
+      const res = computeShipment(buildShipment(snap), tablesFor(snap));
       const newTotal = res.totals.landed;
       const oldTotal = row.landed_total ?? newTotal;
       const delta = newTotal - oldTotal;

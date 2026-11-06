@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { computeShipment, manualRates, mergeRates, ratesFor, type Shipment } from "@landedmy/engine";
+import { computeShipment, type Shipment } from "@landedmy/engine";
+import { tablesFor } from "@/lib/shipment";
 import { fetchFx } from "@/lib/api";
 import { COUNTRIES, fxDefault, fxFromBnm, localChargesFor, type DestCountry } from "@/lib/country";
 import { FX_DEFAULT } from "@/lib/lanes";
@@ -12,6 +13,7 @@ import { Card, rm } from "./ui";
  * rate tables, FX and default local charges. Freight is kept as entered (same lane length).
  */
 export function CompareDest({ state, shipment, manualRateLines, onSwitch }: { state: AppState; shipment: Shipment; manualRateLines: { hs_code: string; name: string; duty_pct: number; sst_pct: number }[]; onSwitch: (c: DestCountry) => void }) {
+  // Compare with the home market (Malaysia), or Singapore when already in Malaysia.
   const other: DestCountry = state.dest_country === "MY" ? "SG" : "MY";
   const [rates, setRates] = useState<Record<string, number> | null>(null);
   useEffect(() => {
@@ -22,12 +24,12 @@ export function CompareDest({ state, shipment, manualRateLines, onSwitch }: { st
     const fx = (rates ? fxFromBnm(other, rates, state.currency) : undefined) ?? fxDefault(other, state.currency, FX_DEFAULT);
     const s: Shipment = { ...shipment, dest_country: other, dest_port: COUNTRIES[other].ports[0].code, fx_rate: fx, local_charges_myr: localChargesFor(other, state.equipment, state.pallets) };
     try {
-      const merged = mergeRates(ratesFor(other), ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
-      return { fx, r: computeShipment(s, merged) };
+      void manualRateLines;
+      return { fx, r: computeShipment(s, tablesFor({ ...state, dest_country: other })) };
     } catch {
       return null;
     }
-  }, [rates, other, shipment, state.currency, state.equipment, state.pallets, manualRateLines]);
+  }, [rates, other, shipment, state, manualRateLines]);
 
   if (!res) return null;
   const o = COUNTRIES[other];

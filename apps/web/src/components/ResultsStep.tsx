@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
-import { computeShipment, manualRates, mergeRates, preferenceNote, ratesFor, withoutFta, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
-import { COUNTRIES, fxDefault, localChargesFor } from "@/lib/country";
+import { computeShipment, preferenceNote, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
+import { tablesFor } from "@/lib/shipment";
+import { COUNTRIES, TIER_LABEL, fxDefault, localChargesFor } from "@/lib/country";
 import { FX_DEFAULT } from "@/lib/lanes";
 import { CompareDest } from "./CompareDest";
 import type { AppState } from "@/lib/state";
@@ -107,13 +108,11 @@ export function ResultsStep({
   const [quote, setQuote] = useState(false);
   const result = useMemo<ShipmentResult | { error: string }>(() => {
     try {
-      const base = state.fta_claim ? ratesFor(state.dest_country) : withoutFta(ratesFor(state.dest_country));
-      const merged = mergeRates(base, ...manualRateLines.map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
-      return computeShipment(shipment, merged);
+      return computeShipment(shipment, tablesFor(state));
     } catch (e) {
       return { error: (e as Error).message };
     }
-  }, [shipment, manualRateLines, state.fta_claim, state.dest_country]);
+  }, [shipment, state]);
 
   if ("error" in result) {
     return (
@@ -122,7 +121,13 @@ export function ResultsStep({
         <div className="p-5">
           <Card>
             <div className="text-sm font-semibold">Can’t price this shipment yet</div>
-            <p className="mt-1 text-sm text-muted">{result.error}</p>
+            <p className="mt-1 text-sm text-muted">
+              {/excise/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
+                ? `Alcohol into ${COUNTRIES[state.dest_country].name} isn't priced yet: its excise rates haven't been loaded, and we don't guess them. Choose Malaysia or Singapore as the destination, or remove the alcohol lines.`
+                : /No effective tariff/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
+                  ? `Enter the import duty % for every product (step 2) — ${COUNTRIES[state.dest_country].name} has no default rate we can safely apply.`
+                  : result.error}
+            </p>
           </Card>
         </div>
         <Footer>
@@ -185,7 +190,7 @@ export function ResultsStep({
         <div className="mx-5 mt-3 flex items-start gap-2 rounded-[10px] bg-amber-tint px-3 py-2.5 text-[12px] leading-snug text-amber">
           <span aria-hidden="true">⚠</span>
           <span>
-            <strong>{COUNTRIES[state.dest_country].name} rates: verify.</strong> {COUNTRIES[state.dest_country].verify_note}
+            <strong>{TIER_LABEL[COUNTRIES[state.dest_country].tier]}{COUNTRIES[state.dest_country].tier === "indicative" ? "" : " · verify"}.</strong> {COUNTRIES[state.dest_country].verify_note}
           </span>
         </div>
       )}
@@ -268,7 +273,7 @@ export function ResultsStep({
                 <input type="checkbox" className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-teal" />
                 <span>
                   {r.text}{" "}
-                  <a href={r.url} target="_blank" rel="noreferrer" className="whitespace-nowrap text-[11px] font-semibold text-teal">
+                  <a href={r.url || COUNTRIES[state.dest_country].lookup} target="_blank" rel="noreferrer" className="whitespace-nowrap text-[11px] font-semibold text-teal">
                     {r.authority} →
                   </a>
                 </span>

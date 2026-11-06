@@ -2,9 +2,12 @@
  * Destination-country presentation: currency symbol, tax name, ports, default local charges,
  * verification status. Rates themselves live in the engine (ratesFor(country)).
  */
+import { DESTINATIONS, type Destination } from "@landedmy/engine";
 import type { Equipment } from "./lanes";
 
-export type DestCountry = "MY" | "SG";
+/** ISO-2 destination code; "MY" and "SG" have national schedules, the rest are indicative. */
+export type DestCountry = string;
+export type Tier = "verified" | "official" | "indicative";
 
 export interface CountryInfo {
   code: DestCountry;
@@ -13,8 +16,14 @@ export interface CountryInfo {
   symbol: string;
   tax_name: string;
   tax_desc: string;
+  tax_pct: number;
+  tier: Tier;
   /** K1 / permit verified against real declarations. */
   verified: boolean;
+  /** Official tariff lookup for this country. */
+  lookup: string;
+  duty_default_pct?: number;
+  region: string;
   verify_note: string;
   customs_name: string;
   ports: { code: string; label: string }[];
@@ -22,7 +31,7 @@ export interface CountryInfo {
   fx_note: string;
 }
 
-export const COUNTRIES: Record<DestCountry, CountryInfo> = {
+const NATIONAL: Record<"MY" | "SG", CountryInfo> = {
   MY: {
     code: "MY",
     name: "Malaysia",
@@ -30,6 +39,10 @@ export const COUNTRIES: Record<DestCountry, CountryInfo> = {
     symbol: "RM",
     tax_name: "SST",
     tax_desc: "SST 10% on CIF + duty + excise",
+    tax_pct: 10,
+    tier: "verified",
+    lookup: "https://ezhs.customs.gov.my/",
+    region: "ASEAN",
     verified: true,
     verify_note: "Verified line by line against real RMCD K1 declarations.",
     customs_name: "Royal Malaysian Customs Department (RMCD)",
@@ -54,6 +67,10 @@ export const COUNTRIES: Record<DestCountry, CountryInfo> = {
     symbol: "S$",
     tax_name: "GST",
     tax_desc: "GST 9% on CIF + customs duty + excise",
+    tax_pct: 9,
+    tier: "official",
+    lookup: "https://www.customs.gov.sg/businesses/valuation-duties-taxes-fees/duties-and-dutiable-goods/list-of-dutiable-goods",
+    region: "ASEAN",
     verified: false,
     verify_note: "From Singapore Customs' published List of Dutiable Goods. Not yet checked against a real import permit — treat as verify.",
     customs_name: "Singapore Customs",
@@ -66,15 +83,62 @@ export const COUNTRIES: Record<DestCountry, CountryInfo> = {
   },
 };
 
-export const DEST_COUNTRIES: DestCountry[] = ["MY", "SG"];
+function fromRegistry(d: Destination): CountryInfo {
+  return {
+    code: d.code,
+    name: d.name,
+    currency: d.currency,
+    symbol: d.symbol,
+    tax_name: d.tax_name === "none" ? "Tax" : d.tax_name,
+    tax_desc: d.tax_note,
+    tax_pct: d.tax_pct,
+    tier: d.tier,
+    lookup: d.lookup,
+    duty_default_pct: d.duty_default_pct,
+    region: d.region,
+    verified: false,
+    verify_note: `${d.tax_name === "none" ? "no import VAT/GST" : `${d.tax_name} ${d.tax_pct}%`} is applied from the standard rate; import duty is the % you enter per product${d.duty_default_pct != null ? ` (default ${d.duty_default_pct}%)` : ""}. Verify at ${d.customs} before you commit.`,
+    customs_name: d.customs,
+    ports: [
+      { code: `${d.code}SEA`, label: `${d.name} · main seaport` },
+      { code: `${d.code}AIR`, label: `${d.name} · airport (air freight)` },
+    ],
+    rates_note: `${d.tax_note}.${d.extra_note ? ` ${d.extra_note}` : ""}${d.de_minimis ? ` De minimis: ${d.de_minimis}.` : ""}`,
+    fx_note: `Cross rate via Bank Negara Malaysia (currency → MYR ÷ ${d.currency} → MYR). Customs may use its own weekly rate; overwrite if you have it.`,
+  };
+}
+
+/** Every destination the app can price, keyed by ISO-2. MY and SG keep their hand-written entries. */
+export const COUNTRIES: Record<DestCountry, CountryInfo> = Object.fromEntries(
+  DESTINATIONS.map((d) => [d.code, d.code === "MY" || d.code === "SG" ? NATIONAL[d.code as "MY" | "SG"] : fromRegistry(d)]),
+) as Record<DestCountry, CountryInfo>;
+
+export const DEST_COUNTRIES: DestCountry[] = DESTINATIONS.map((d) => d.code);
+export const EXACT_COUNTRIES: DestCountry[] = DEST_COUNTRIES.filter((c) => COUNTRIES[c].tier !== "indicative");
+export const INDICATIVE_COUNTRIES: DestCountry[] = DEST_COUNTRIES.filter((c) => COUNTRIES[c].tier === "indicative");
+export const TIER_LABEL: Record<Tier, string> = { verified: "Verified", official: "Official", indicative: "Indicative" };
 
 export function countryOfPort(code: string): DestCountry {
-  return code.startsWith("SG") ? "SG" : "MY";
+  const c = code.slice(0, 2).toUpperCase();
+  return COUNTRIES[c] ? c : "MY";
 }
 
 /** Default local charges by destination, in the destination currency. Editable by the user. */
 export function localChargesFor(country: DestCountry, equipment: Equipment, pallets: number): Record<string, number> {
   const n = Math.max(1, pallets);
+  if (country !== "MY" && country !== "SG") {
+    // Indicative destinations: Malaysian-level charges converted at the default cross rate, rounded.
+    const f = (fxDefault("MY", COUNTRIES[country].currency, FX_MYR) || 1);
+    const conv = (rm: number) => Math.round(rm / f);
+    const sea = equipment === "pallet";
+    const base = equipment === "40hc" ? 1.5 : 1;
+    return {
+      "Port and terminal handling": conv(sea ? 350 + 250 * n : 1200 * base),
+      "Customs broker and declaration": conv(sea ? 400 : 600),
+      "Delivery to warehouse": conv(sea ? 300 + 100 * n : 900 * base),
+      Unstuffing: conv(sea ? 100 * n : 300 * base),
+    };
+  }
   if (country === "SG") {
     if (equipment === "pallet") {
       return {
@@ -109,20 +173,34 @@ export function localChargesFor(country: DestCountry, equipment: Equipment, pall
   };
 }
 
-/** Indicative FX when the live feed is unavailable: destination currency per 1 unit. */
-export function fxDefault(country: DestCountry, currency: string, myrDefaults: Record<string, number>): number {
-  const toMyr = myrDefaults[currency] ?? 1;
-  if (country === "MY") return toMyr;
-  const sgdToMyr = myrDefaults.SGD ?? 3.3;
-  return +(toMyr / sgdToMyr).toFixed(4);
+/** Rough MYR per 1 unit, used only when the live feed has no rate (Nov 2026 order of magnitude). */
+export const FX_MYR: Record<string, number> = {
+  MYR: 1, SGD: 3.28, EUR: 4.93, USD: 4.2, GBP: 5.6, AUD: 2.8, NZD: 2.5, JPY: 0.028, KRW: 0.003, CNY: 0.59, HKD: 0.54, TWD: 0.135, INR: 0.048, PKR: 0.015, BDT: 0.035, LKR: 0.014,
+  IDR: 0.00026, THB: 0.125, VND: 0.00016, PHP: 0.072, BND: 3.28, KHR: 0.00103, LAK: 0.00019, MMK: 0.002, AED: 1.14, SAR: 1.12, QAR: 1.15, OMR: 10.9, BHD: 11.1, KWD: 13.7,
+  TRY: 0.1, EGP: 0.085, ZAR: 0.24, NGN: 0.0027, KES: 0.0325, PLN: 1.15, SEK: 0.44, DKK: 0.66, NOK: 0.41, CHF: 5.3, CAD: 3.05, MXN: 0.23, BRL: 0.78, CLP: 0.0044, ARS: 0.003,
+};
+
+function destCurrency(country: DestCountry): string {
+  return COUNTRIES[country]?.currency ?? "MYR";
 }
 
-/** Live FX: BNM gives MYR per unit; for Singapore divide by MYR per SGD. */
+/** Indicative FX when the live feed is unavailable: destination currency per 1 unit of `currency`. */
+export function fxDefault(country: DestCountry, currency: string, myrDefaults: Record<string, number>): number {
+  const toMyr = myrDefaults[currency] ?? FX_MYR[currency] ?? 1;
+  const dest = destCurrency(country);
+  if (dest === "MYR") return toMyr;
+  const destToMyr = myrDefaults[dest] ?? FX_MYR[dest] ?? 1;
+  return +(toMyr / destToMyr).toFixed(dest === "IDR" || dest === "VND" || dest === "KRW" || dest === "LAK" || dest === "KHR" ? 2 : 4);
+}
+
+/** Live FX: BNM gives MYR per unit; for other destinations divide by MYR per destination currency (BNM publishes most of them). */
 export function fxFromBnm(country: DestCountry, rates: Record<string, number>, currency: string): number | undefined {
   const toMyr = rates[currency];
   if (toMyr == null) return undefined;
-  if (country === "MY") return toMyr;
-  if (currency === "SGD") return 1;
-  if (!rates.SGD) return undefined;
-  return +(toMyr / rates.SGD).toFixed(4);
+  const dest = destCurrency(country);
+  if (dest === "MYR") return toMyr;
+  if (currency === dest) return 1;
+  const destToMyr = rates[dest];
+  if (!destToMyr) return undefined;
+  return +(toMyr / destToMyr).toFixed(4);
 }

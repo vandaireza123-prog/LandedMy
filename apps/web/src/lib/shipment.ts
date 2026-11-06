@@ -1,4 +1,4 @@
-import type { Shipment, ShipmentLine } from "@landedmy/engine";
+import { genericRates, manualRates, mergeRates, ratesFor, withoutFta, type RateTables, type Shipment, type ShipmentLine } from "@landedmy/engine";
 import type { Category } from "./products";
 import type { Equipment } from "./lanes";
 import type { DestCountry } from "./country";
@@ -61,8 +61,31 @@ export function buildShipment(state: ShipmentSnapshot): Shipment {
       cases: p.cases,
       unit_cost: p.unit_cost,
       cases_per_pallet: p.cases_per_pallet,
+      duty_pct: p.manual_duty_pct,
     })),
   };
+}
+
+export function isExactDestination(country?: string): boolean {
+  return country === undefined || country === "MY" || country === "SG";
+}
+
+/**
+ * The rate tables for a snapshot: national schedule (+ user-entered lines) for MY/SG,
+ * indicative tables (standard tax + per-line duty %) for every other registered destination.
+ */
+export function tablesFor(state: ShipmentSnapshot): RateTables {
+  const country = state.dest_country ?? "MY";
+  let t: RateTables;
+  if (isExactDestination(country)) {
+    t = mergeRates(ratesFor(country), ...manualLinesOf(state).map((m) => manualRates(m.hs_code, m.name, m.duty_pct, m.sst_pct)));
+  } else {
+    t = genericRates(
+      country,
+      state.products.map((p) => ({ hs_code: p.category === "general" && (!p.hs_code || p.hs_code === "MANUAL") ? `MANUAL-${p.id}` : p.hs_code, name: p.name, duty_pct: p.manual_duty_pct })),
+    );
+  }
+  return state.fta_claim === false ? withoutFta(t) : t;
 }
 
 export function manualLinesOf(state: { products: ProductRow[] }) {
