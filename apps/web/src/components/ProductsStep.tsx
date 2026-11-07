@@ -10,6 +10,7 @@ import { SENSITIVE_CHAPTERS, searchHs, type HsHit } from "@/lib/hs/search";
 import { useEffect } from "react";
 import { COUNTRIES } from "@/lib/country";
 import { fetchWorldRate } from "@/lib/api";
+import { isManualLine } from "@/lib/shipment";
 import { useT } from "@/lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
@@ -58,7 +59,7 @@ function fromHs(h: HsHit, name: string, indicative = false): ProductRow {
     cases: 100,
     unit_cost: 0,
     hs_confirmed: !!line,
-    manual_duty_pct: line ? line.duty_pct : indicative ? undefined : 0,
+    manual_duty_pct: line ? line.duty_pct : undefined,
     manual_sst_pct: line ? line.sst_pct : 10,
   };
 }
@@ -99,13 +100,24 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   const rows = state.products;
   const country = COUNTRIES[state.dest_country];
   const indicative = country.tier === "indicative";
+  const DutyNotes = ({ r }: { r: ProductRow }) =>
+    r.duty_notes && r.duty_notes.length ? (
+      <div className="rounded-lg bg-amber-tint px-2.5 py-2 text-[11px] leading-snug text-amber">
+        <strong>Additional duties for this origin (not in the rate above):</strong>
+        <ul className="mt-0.5 list-disc pl-4">
+          {r.duty_notes.slice(0, 4).map((n, i) => (
+            <li key={i}>{n}</li>
+          ))}
+          {r.duty_notes.length > 4 && <li>…and {r.duty_notes.length - 4} more — check HTS chapter 99</li>}
+        </ul>
+      </div>
+    ) : null;
 
   const setRows = (next: ProductRow[]) => update({ products: next });
 
   // Indicative destinations: pre-fill duty % from the world rates database for lines that have an HS-6 and no user-entered duty.
   useEffect(() => {
-    if (!indicative) return;
-    const todo = rows.filter((r) => r.category === "general" && r.hs6 && r.manual_duty_pct == null && !r.duty_source);
+    const todo = rows.filter((r) => r.category === "general" && r.hs6 && (indicative || isManualLine(r)) && r.manual_duty_pct == null && !r.duty_source);
     if (!todo.length) return;
     let live = true;
     Promise.all(todo.map((r) => fetchWorldRate(state.dest_country, r.hs6!, state.origin_iso).then((w) => [r.id, w] as const))).then((res) => {
@@ -115,9 +127,10 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
         products: rows.map((r) => {
           const w = byId.get(r.id);
           if (w === undefined) return r;
-          if (!w || !w.rate || w.rate.value == null) return { ...r, duty_source: "none" };
-          const label = `${w.rate.origin === "MFN" ? "MFN" : `${w.rate.origin} preferential`} ${w.rate.year ?? ""} · ${w.source?.name?.split(" (")[0] ?? w.rate.source_id} · ${w.rate.tier}${w.rate.rate_type === "compound" ? " · average, some lines specific" : ""}`;
-          return { ...r, manual_duty_pct: w.rate.value, duty_source: label };
+          const notes = (w?.additional ?? []).map((a) => `${a.text} (${a.heading})`);
+          if (!w || !w.rate || w.rate.value == null) return { ...r, duty_source: w?.rate ? `${w.note.split(" · ")[0]} — enter the % after checking the specific rate` : "none", duty_notes: notes };
+          const label = `${w.rate.origin === "MFN" ? "MFN" : `${w.rate.origin} preferential`} ${w.rate.year ?? ""} · ${w.source?.name?.split(" (")[0] ?? w.rate.source_id} · ${w.rate.tier}${w.rate.rate_type === "range" ? ` · ${w.rate.value}–${w.rate.value_max}% range, lowest used` : w.rate.rate_type === "compound" ? " · average, some lines specific" : ""}`;
+          return { ...r, manual_duty_pct: w.rate.value, duty_source: label, duty_notes: notes };
         }),
       });
     });
@@ -343,11 +356,13 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                   </select>
                 </label>
                 )}
-                {!indicative && r.hs_code === "MANUAL" && (
+                <DutyNotes r={r} />
+                {!indicative && isManualLine(r) && (
                   <div className="grid grid-cols-2 gap-2">
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">Import duty % of CIF</span>
-                      <input type="number" step="0.5" className={smallInputCls} value={r.manual_duty_pct ?? 0} onChange={(e) => patchRow(r.id, { manual_duty_pct: Number(e.target.value) || 0 })} />
+                      <input type="number" step="0.5" className={smallInputCls} value={r.manual_duty_pct ?? ""} placeholder="e.g. 5" onChange={(e) => patchRow(r.id, { manual_duty_pct: e.target.value === "" ? undefined : Number(e.target.value) || 0, duty_source: "you" })} />
+                      {r.duty_source && r.duty_source !== "none" && r.duty_source !== "you" && <span className="text-[10px] leading-snug text-muted">Pre-filled: {r.duty_source}</span>}
                     </label>
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">{country.tax_name}{state.dest_country === "MY" ? " %" : ""}</span>

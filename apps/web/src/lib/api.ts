@@ -103,10 +103,12 @@ export async function submitLead(fields: Record<string, string>): Promise<boolea
 
 // ---- World duty rates ----
 export interface WorldRate {
-  rate: { hs_code: string; hs_level: number; origin: string; rate_type: string; value: number | null; compound_text: string | null; source_id: string; tier: string; year: number | null } | null;
+  rate: { hs_code: string; hs_level: number; origin: string; rate_type: string; value: number | null; value_max?: number | null; compound_text: string | null; source_id: string; tier: string; year: number | null; description?: string | null } | null;
   source: { id: string; name: string; url: string; tier: string } | null;
   tier: string | null;
   note: string;
+  /** US chapter-99 additional duties in force for this origin, when any. */
+  additional?: { heading: string; pct: number | null; text: string; scope: string }[] | null;
 }
 const rateCache = new Map<string, Promise<WorldRate | null>>();
 /** Best known duty for dest + HS-6 (+ origin). Null when the API is unreachable. */

@@ -5,6 +5,7 @@
  * Alcohol/tobacco/fuel into non-schedule countries still needs excise: the caller shows that.
  */
 import type { Config, Context } from "@netlify/functions";
+import { lookup } from "../lib/world-rates";
 
 export const config: Config = { path: "/api/rates" };
 
@@ -19,6 +20,19 @@ export default async (req: Request, _ctx: Context) => {
   const date = u.searchParams.get("date") ?? new Date().toISOString().slice(0, 10);
   if (!/^[A-Z]{2}$/.test(dest) || hs.length !== 6) return json(400, { error: "dest (ISO-2) and hs (6 digits) required" }, "no-store");
 
+  // 1. Bundled open datasets (US HTS, EU TARIC, Thai Customs) — no database needed.
+  const w = lookup(dest, hs, origin);
+  if (w) {
+    return json(200, {
+      rate: { hs_code: w.hs_code, hs_level: w.hs_level, origin: w.origin, rate_type: w.rate_type, value: w.value, value_max: w.value_max ?? null, compound_text: w.rate_type === "ad_valorem" ? null : w.text, source_id: w.source_id, tier: w.tier, year: Number(w.as_of.slice(0, 4)), description: w.description ?? null },
+      source: { id: w.source_id, name: w.source_name, url: w.source_url, tier: w.tier, as_of: w.as_of },
+      tier: w.tier,
+      note: [w.text, w.note].filter(Boolean).join(" · "),
+      additional: w.additional ?? null,
+    });
+  }
+
+  // 2. World rates database (Supabase), when configured.
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_ANON_KEY;
   if (!url || !key) return json(200, { rate: null, source: null, tier: null, note: "World rates database not configured on this deployment" }, "no-store");

@@ -19,6 +19,8 @@ export interface ProductRow extends ShipmentLine {
   hs6_desc?: string;
   /** Where the duty % came from when pre-filled ("WTO MFN 2024 · indicative"); cleared when the user types. */
   duty_source?: string;
+  /** Extra duties flagged by the rates API (e.g. US chapter 99 for this origin) — shown, not priced. */
+  duty_notes?: string[];
 }
 
 /** Everything the engine needs, without UI-only fields. */
