@@ -101,8 +101,8 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
     };
   }
   if (dest === "BR") {
-    type Temp = { annex: string; ex: string | number; g: number | null; quota: string | null; d: string; from?: string | null; to?: string | null; ato?: string; obs?: string };
-    const lines = BR.lines as Record<string, { d: string; tec: number | null; gt: string; g: number | null; bk?: string; basis?: string; temp?: Temp[] }>;
+    type Temp = { annex: string; ex: string | number | null; g: number | null; quota: string | null; d: string; from?: string | null; to?: string | null; ato?: string; obs?: string };
+    const lines = BR.lines as unknown as Record<string, { d: string; tec: number | null; gt: string; g: number | null; bk?: string; basis?: string; temp?: Temp[] }>;
     const code = lines[hs.slice(0, 8)] ? hs.slice(0, 8) : Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 6)));
     if (!code) return null;
     const l = lines[code];
@@ -111,8 +111,9 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
     const live = (t: Temp) => (!t.from || t.from <= today) && (!t.to || t.to >= today);
     const temps = (l.temp ?? []).filter(live);
     // A whole-NCM exception (Ex "-") without a quota replaces the rate; Ex-numbered or quota entries are shown as notes.
-    const whole = temps.find((t) => String(t.ex) === "-" && !t.quota && t.g != null);
-    const notes = temps.filter((t) => t !== whole).map((t) => `${t.annex}${String(t.ex) !== "-" ? ` Ex ${t.ex}` : ""}: ${t.g}%${t.quota ? ` within quota ${t.quota}` : ""} — ${t.d}${t.to ? ` (until ${t.to})` : ""}`);
+    const isWhole = (t: Temp) => t.ex == null || String(t.ex).trim() === "-" || String(t.ex).trim() === "";
+    const whole = temps.find((t) => isWhole(t) && !t.quota && t.g != null);
+    const notes = temps.filter((t) => t !== whole).map((t) => `${t.annex}${!isWhole(t) ? ` Ex ${t.ex}` : ""}: ${t.g}%${t.quota ? ` within quota ${t.quota}` : ""} — ${t.d}${t.to ? ` (until ${t.to})` : ""}`);
     const MERCOSUR = ["AR", "PY", "UY"];
     const intra = MERCOSUR.includes(origin) && !/^(17|87)/.test(code);
     const value = intra ? 0 : whole ? whole.g : l.g;
