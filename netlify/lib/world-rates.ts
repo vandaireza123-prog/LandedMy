@@ -70,13 +70,15 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
   if (dest === "EU" || EU27.includes(dest)) {
     const e = (EU.lines as Record<string, Record<string, EuEntry>>)[hs.slice(0, 6)];
     if (!e) return null;
-    const pref = e[origin];
+    // a "preference" that is identical to the MFN entry is no preference
+    const samePref = (a?: EuEntry, b?: EuEntry) => !!a && !!b && a.lo === b.lo && a.hi === b.hi && a.lot === b.lot && a.hit === b.hit;
+    const pref = origin !== "MFN" && e[origin] && !samePref(e[origin], e.MFN) ? e[origin] : undefined;
     const use = pref ?? e.MFN;
     if (!use) return null;
     const meta = EU._meta;
     // MFN: narrow to the 10-digit TARIC lines under the code the user gave (6, 8 or 10 digits) when we have them
     if (!pref && EU10) {
-      const l10 = EU10.lines as Record<string, [string, string | null]>;
+      const l10 = EU10.lines as unknown as Record<string, [string, string | null]>;
       const prefix = hs.slice(0, Math.min(10, hs.length));
       const exact = l10[prefix.padEnd(10, "0")] && prefix.length >= 8 ? [prefix.padEnd(10, "0")] : Object.keys(l10).filter((k) => k.startsWith(prefix));
       if (exact.length) {

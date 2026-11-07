@@ -284,7 +284,7 @@ function parseUsRate(t) {
   if (existsSync(p)) {
     const src = JSON.parse(readFileSync(p, "utf8"));
     const map = {};
-    for (const [code, [d, mfn]] of Object.entries(src.lines)) map[code] = [d, mfn == null ? null : String(mfn).replace(/\s+/g, " ").trim()];
+    for (const [code, [d, mfn]] of Object.entries(src.lines)) map[code] = [d, mfn == null ? null : String(mfn).replace(/\s+/g, " ").replace(/(\d+)\.00 %/g, "$1%").replace(/(\d+\.\d*[1-9])0* %/g, "$1%").replace(/\.00 EUR/g, " EUR").trim()];
     writeFileSync(join(OUT, "EU10.json"), JSON.stringify({ _meta: { country: "EU", level: 10, source_id: "eu-taric", as_of: src.pulled, licence: "TARIC data as republished under the Open Government Licence v3.0 by HMRC's Northern Ireland Online Tariff", url: "https://www.trade-tariff.service.gov.uk/xi/find_commodity", note: "Third-country (erga omnes) duty per 10-digit TARIC line. Preferences by origin come from the HS-6 map." }, lines: map }));
     console.log("EU10", Object.keys(map).length, "lines");
   }
