@@ -5,6 +5,9 @@
 import US from "../data/world/US.json";
 import EU from "../data/world/EU.json";
 import TH from "../data/world/TH.json";
+import CN from "../data/world/CN.json";
+import EG from "../data/world/EG.json";
+import NP from "../data/world/NP.json";
 
 export const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
@@ -76,13 +79,19 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
       note: (use.ad ? "Anti-dumping or countervailing duty may apply to this origin. " : "") + (range ? "Pick the exact CN line on TARIC to narrow the range." : ""),
     };
   }
-  if (dest === "TH") {
-    const lines = TH.lines as Record<string, ThLine>;
-    const code = lines[hs.slice(0, 8)] ? hs.slice(0, 8) : Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 6)));
+  const simple: Record<string, { _meta: { country: string; level: number; source_id: string; as_of: string; url: string; note?: string; licence?: string; tier?: "official" | "indicative" }; lines: Record<string, ThLine & { vat?: number | null; other?: string; saarc?: number }> }> = { TH, CN, EG, NP } as never;
+  const s = simple[dest];
+  if (s) {
+    const lines = s.lines;
+    const lvl = s._meta.level;
+    const exact = hs.slice(0, lvl);
+    const code = lines[exact] ? exact : Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 8))) ?? Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 6)));
     if (!code) return null;
     const l = lines[code];
-    const meta = TH._meta;
-    return { hs_code: code, hs_level: 8, origin: "MFN", rate_type: l.g != null ? "ad_valorem" : "specific", value: l.g, text: l.gt, description: l.d, source_id: "th-itd", source_name: `Thai Customs tariff (${l.src})`, source_url: meta.url, as_of: meta.as_of, tier: "official", note: meta.note };
+    const meta = s._meta;
+    const names: Record<string, string> = { TH: "Thai Customs tariff", CN: "China Import and Export Tariff 2026", EG: "Egyptian Customs Tariff (Nafeza)", NP: "Nepal Customs Tariff 2026/27" };
+    const extra = [l.src ? `(${l.src})` : "", l.vat != null ? `VAT ${l.vat}% on this line` : "", l.other ? `Other charges: ${l.other}` : "", l.saarc != null ? `SAARC rate ${l.saarc}%` : ""].filter(Boolean).join(" · ");
+    return { hs_code: code, hs_level: code.length, origin: "MFN", rate_type: l.g != null ? "ad_valorem" : "specific", value: l.g, text: l.gt, description: l.d, source_id: meta.source_id, source_name: `${names[dest]} ${extra}`.trim(), source_url: meta.url, as_of: meta.as_of, tier: meta.tier ?? "official", note: meta.note };
   }
   return null;
 }

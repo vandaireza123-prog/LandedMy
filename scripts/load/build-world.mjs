@@ -90,3 +90,51 @@ function parseUsRate(t) {
   writeFileSync(join(OUT, "TH.json"), JSON.stringify({ _meta: { country: "TH", level: 8, source_id: "th-itd", as_of: "2022-01-01", licence: "Thai Customs Department open data (via Soe-Moe/thai-customs-tariff-json, ISC)", url: "https://itd.customs.go.th/", note: "Master file version 2022-01-01; wine (2204) overridden to 0% per the Feb 2024 notification. Check later notifications for other chapters." }, lines: map }));
   console.log("TH", Object.keys(map).length, "lines");
 }
+
+// ---------- China (8-digit, 2026 Import and Export Tariff) ----------
+{
+  const rows = JSON.parse(readFileSync(join(DATA, "dcd887_hs-code-assistant/data/hs_codes_full.json"), "utf8"));
+  const map = {};
+  let miss = 0;
+  for (const r of rows) {
+    const code = String(r.hs_code).replace(/\./g, "").slice(0, 8);
+    // The mirror appended the MFN rate to the name ("麦芽酿造的啤酒 0", "威士忌酒 10"); recover it.
+    const m = String(r.name ?? "").match(/\s(\d+(?:\.\d+)?)(?:[∆△]\d+)?\s*[①-⑳]*\s*$/);
+    if (!m) { miss++; continue; }
+    const pct = Number(m[1]);
+    map[code] = { d: String(r.name).replace(/\s\d+(?:\.\d+)?(?:[∆△]\d+)?\s*[①-⑳]*\s*$/, "").slice(0, 120), g: pct, gt: `${pct}%`, src: r.basis ?? "2026 tariff" };
+  }
+  writeFileSync(join(OUT, "CN.json"), JSON.stringify({ _meta: { country: "CN", level: 8, source_id: "cn-tariff-2026", as_of: "2026-01-01", licence: "Compiled from the 2026 Import and Export Tariff of the PRC (via dcd887/hs-code-assistant); verify on the GACC schedule", url: "http://www.customs.gov.cn/", note: "MFN rate. China VAT 13% (9% for food, books, agricultural goods) and consumption tax on alcohol, tobacco, cosmetics, fuel and cars are applied separately." }, lines: map }));
+  console.log("CN", Object.keys(map).length, "lines;", miss, "without a parsable rate");
+}
+
+// ---------- Egypt (official, Nafeza / Decree 218/2022) ----------
+{
+  const rows = parseCsv(readFileSync(join(DATA, "Mohamed-Reda1010_egypt-customs-tariff/egypt_customs_tariff.csv"), "utf8").replace(/^﻿/, ""));
+  const map = {};
+  const pct = (t) => { const m = (t ?? "").match(/(\d+(?:\.\d+)?)\s*%/); return m ? Number(m[1]) : null; };
+  for (const r of rows) {
+    const code = String(r["كود_البند"] ?? "").replace(/\D/g, "");
+    if (code.length < 8) continue;
+    const duty = pct(r["ضريبة_الوارد_الجمارك"]);
+    if (duty == null) continue;
+    const vat = pct(r["ضريبة_القيمة_المضافة"]);
+    map[code.slice(0, 10)] = { d: String(r["مسمى_الصنف_ووصفه"] ?? "").slice(0, 120), g: duty, gt: `${duty}%`, vat, other: r["ضرائب_ورسوم_أخرى"] || undefined };
+  }
+  writeFileSync(join(OUT, "EG.json"), JSON.stringify({ _meta: { country: "EG", level: 10, source_id: "eg-nafeza", as_of: "2025-01-01", tier: "indicative", licence: "CC-BY 4.0 — Egyptian Customs Authority / Nafeza single window, Presidential Decree 218/2022 as amended (via Mohamed-Reda1010/egypt-customs-tariff)", url: "https://www.nafeza.gov.eg/", note: "Duty and VAT per tariff line as published on Nafeza; 2,375 lines carry no rate in the export (incl. alcohol) and some apparel lines read 0% — confirm on Nafeza before you commit." }, lines: map }));
+  console.log("EG", Object.keys(map).length, "lines");
+}
+
+// ---------- Nepal (Customs Tariff 2026/27) ----------
+{
+  const rows = parseCsv(readFileSync(join(DATA, "sabinevolve-hue_nepal-hs-code-finder/data/nepal-customs-tariff-2026-27.csv"), "utf8").replace(/^﻿/, ""));
+  const map = {};
+  for (const r of rows) {
+    const code = String(r.hs_code ?? "").replace(/\D/g, "");
+    const g = Number(r.duty_general);
+    if (code.length < 8 || Number.isNaN(g)) continue;
+    map[code.slice(0, 8)] = { d: `${r.heading_description} > ${r.description}`.slice(0, 120), g, gt: `${g}%`, saarc: r.duty_saarc ? Number(r.duty_saarc) : undefined };
+  }
+  writeFileSync(join(OUT, "NP.json"), JSON.stringify({ _meta: { country: "NP", level: 8, source_id: "np-customs-2026", as_of: "2026-07-17", licence: "Department of Customs, Nepal — Customs Tariff 2026/27 (via sabinevolve-hue/nepal-hs-code-finder)", url: "https://customs.gov.np/", note: "General rate; SAARC preferential rate where one exists." }, lines: map }));
+  console.log("NP", Object.keys(map).length, "lines");
+}
