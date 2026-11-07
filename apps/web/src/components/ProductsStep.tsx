@@ -129,7 +129,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
           if (w === undefined) return r;
           const notes = (w?.additional ?? []).map((a) => `${a.text} (${a.heading})`);
           if (!w || !w.rate || w.rate.value == null) return { ...r, duty_source: w?.rate ? `${w.note.split(" · ")[0]} — enter the % after checking the specific rate` : "none", duty_notes: notes };
-          const label = `${w.rate.origin === "MFN" ? "MFN" : `${w.rate.origin} preferential`} ${w.rate.year ?? ""} · ${w.source?.name?.split(" (")[0] ?? w.rate.source_id} · ${w.rate.tier}${w.rate.rate_type === "range" ? ` · ${w.rate.value}–${w.rate.value_max}% range, lowest used` : w.rate.rate_type === "compound" ? " · average, some lines specific" : ""}`;
+          const label = `${w.rate.origin === "MFN" ? "MFN" : `${w.rate.origin} preferential`} ${w.rate.year ?? ""} · ${w.source?.name?.split(" (")[0] ?? w.rate.source_id} · ${w.rate.tier}${w.rate.rate_type === "range" ? ` · ${w.rate.value}–${w.rate.value_max}% range, lowest used` : w.rate.rate_type === "compound" ? " · average, some lines specific" : w.rate.source_id === "wits-trains" ? " · average of national lines at HS-6, check the exact line" : ""}`;
           return { ...r, manual_duty_pct: w.rate.value, duty_source: label, duty_notes: notes };
         }),
       });

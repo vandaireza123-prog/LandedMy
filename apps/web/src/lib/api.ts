@@ -119,8 +119,43 @@ export function fetchWorldRate(dest: string, hs6: string, origin: string): Promi
       k,
       fetch(`/api/rates?dest=${dest}&hs=${hs6}&origin=${origin}`)
         .then((r) => (r.ok ? (r.json() as Promise<WorldRate>) : null))
-        .catch(() => null),
+        .catch(() => null)
+        .then(async (w) => (w?.rate ? w : (await witsRate(dest, hs6)) ?? w)),
     );
   }
   return rateCache.get(k)!;
+}
+
+// ---- WITS / UNCTAD TRAINS fallback: MFN applied, simple average at HS-6, one static file per country ----
+interface WitsFile {
+  iso2: string;
+  year: number;
+  n: number;
+  source: string;
+  rates: Record<string, number>;
+}
+const witsCache = new Map<string, Promise<WitsFile | null>>();
+function witsFile(dest: string): Promise<WitsFile | null> {
+  if (!witsCache.has(dest)) {
+    witsCache.set(
+      dest,
+      fetch(`/data/wits/${dest}.json`)
+        .then((r) => (r.ok ? (r.json() as Promise<WitsFile>) : null))
+        .catch(() => null),
+    );
+  }
+  return witsCache.get(dest)!;
+}
+export const WITS_SOURCE = { id: "wits-trains", name: "WITS / UNCTAD TRAINS", url: "https://wits.worldbank.org/", tier: "indicative" };
+async function witsRate(dest: string, hs6: string): Promise<WorldRate | null> {
+  const f = await witsFile(dest);
+  if (!f) return null;
+  const v = f.rates[hs6.replace(/\D/g, "").slice(0, 6)];
+  if (v == null) return { rate: null, source: WITS_SOURCE, tier: "indicative", note: `${WITS_SOURCE.name} ${f.year}: no MFN line reported for ${hs6}` };
+  return {
+    rate: { hs_code: hs6, hs_level: 6, origin: "MFN", rate_type: "ad_valorem", value: v, compound_text: null, source_id: WITS_SOURCE.id, tier: "indicative", year: f.year },
+    source: WITS_SOURCE,
+    tier: "indicative",
+    note: `MFN applied ${f.year}, simple average of ${dest}'s national lines under HS ${hs6} · ${WITS_SOURCE.name} · indicative`,
+  };
 }

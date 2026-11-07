@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { COUNTRIES, EXACT_COUNTRIES, INDICATIVE_COUNTRIES, TIER_LABEL, type DestCountry } from "@/lib/country";
+import { COUNTRIES, EXACT_COUNTRIES, INDICATIVE_COUNTRIES, TIER_LABEL, dutyCoverage, SCHEDULE_COUNTRIES, WITS_COUNTRIES, type DestCountry } from "@/lib/country";
 import { useT } from "@/lib/i18n";
 
 const BADGE: Record<string, string> = {
@@ -11,6 +11,14 @@ const BADGE: Record<string, string> = {
 
 export function TierBadge({ tier }: { tier: keyof typeof TIER_LABEL }) {
   return <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${BADGE[tier]}`}>{TIER_LABEL[tier]}</span>;
+}
+
+/** How duty gets filled for this destination: full national schedule, WITS HS-6 averages, or you type it. */
+function Coverage({ c }: { c: string }) {
+  const cov = dutyCoverage(c);
+  if (cov.kind === "schedule") return <span className="text-teal"> · duty by HS line</span>;
+  if (cov.kind === "wits") return <span> · duty MFN avg {cov.year}</span>;
+  return <span> · you enter duty</span>;
 }
 
 /** Searchable destination picker: exact (national schedule) countries first, then indicative ones. */
@@ -46,10 +54,13 @@ export function CountryPicker({ value, onChange }: { value: DestCountry; onChang
         {i.tier === "indicative" ? (
           <span className="shrink-0 text-[12px] text-muted">
             {i.tax_name === "Tax" ? "no VAT" : `${i.tax_name} ${i.tax_pct}%`}
-            {i.duty_default_pct != null ? ` · duty ${i.duty_default_pct}%` : ""}
+            <Coverage c={c} />
           </span>
         ) : (
-          <TierBadge tier={i.tier} />
+          <span className="flex shrink-0 items-center gap-1.5 text-[12px] text-muted">
+            <Coverage c={c} />
+            <TierBadge tier={i.tier} />
+          </span>
         )}
       </button>
     );
@@ -89,7 +100,7 @@ export function CountryPicker({ value, onChange }: { value: DestCountry; onChang
             {exact.length + indicative.length === 0 && <div className="px-3 py-3 text-[13px] text-muted">No destination matches. {Object.keys(COUNTRIES).length} are available; more are added on request.</div>}
           </div>
           <div className="bg-ground px-3 py-2 text-[11px] leading-snug text-muted">
-            {Object.keys(COUNTRIES).length} destinations. Indicative results use the country&apos;s standard import tax and the duty % you enter; alcohol needs the exact categories (Malaysia and Singapore only, for now).
+            {Object.keys(COUNTRIES).length} destinations. Duty is pre-filled from the national tariff line in {SCHEDULE_COUNTRIES.size} countries and from WITS MFN averages at HS-6 in {Object.keys(WITS_COUNTRIES).filter((c) => !SCHEDULE_COUNTRIES.has(c)).length} more; elsewhere you enter it. Alcohol excise is exact in the {EXACT_COUNTRIES.length} countries with a national schedule.
           </div>
         </div>
       )}

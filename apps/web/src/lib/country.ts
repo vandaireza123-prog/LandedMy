@@ -215,3 +215,17 @@ export function fxFromBnm(country: DestCountry, rates: Record<string, number>, c
   if (!destToMyr) return undefined;
   return +(toMyr / destToMyr).toFixed(4);
 }
+
+// ---- Duty coverage: which destinations pre-fill a duty % for any HS-6 ----
+import witsIndex from "./wits-index.json";
+const EU27_DEST = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
+/** National schedule bundled on the server (8-digit lines, official). */
+export const SCHEDULE_COUNTRIES = new Set<string>(["US", "TH", "CN", "VN", "EG", "NP", ...EU27_DEST]);
+/** MFN applied averages at HS-6 from WITS / UNCTAD TRAINS (indicative). */
+export const WITS_COUNTRIES: Record<string, { year: number; n: number }> = witsIndex as Record<string, { year: number; n: number }>;
+export type DutyCoverage = { kind: "schedule" } | { kind: "wits"; year: number } | { kind: "none" };
+export function dutyCoverage(c: string): DutyCoverage {
+  if (SCHEDULE_COUNTRIES.has(c)) return { kind: "schedule" };
+  if (WITS_COUNTRIES[c]) return { kind: "wits", year: WITS_COUNTRIES[c].year };
+  return { kind: "none" };
+}
