@@ -166,3 +166,38 @@ function parseUsRate(t) {
   writeFileSync(new URL("../../packages/engine/data/vn-ch22.json", import.meta.url), JSON.stringify({ _meta: { ...vn._meta, scope: "Chapter 22 subset for the engine" }, lines: ch22 }, null, 1));
   console.log("VN ch22", Object.keys(ch22).length);
 }
+
+// ---------- Brazil (NCM 8-digit — Resolução Gecex 272/2021 Anexos I–X, MDIC workbook of 04-11-2026) ----------
+// Anexo I = TEC; Anexo II = Brazilian applied rate where it differs (Decision CMC 08/22 10% cut etc.);
+// Anexos IV/V/VI/VIII/IX/X = temporary exceptions (LETEC, LEBIT/BK, shortages, WTO quotas, DCC surcharges, ACE-14 autos).
+{
+  const src = JSON.parse(readFileSync(new URL("../../packages/engine/data/raw/br_tec_2026-11-04.json", import.meta.url), "utf8"));
+  const key = (ncm) => String(ncm).replace(/\D/g, "");
+  const xl = (n) => (typeof n === "number" && n > 20000 ? new Date(Date.UTC(1899, 11, 30) + n * 86400000).toISOString().slice(0, 10) : null);
+  const rate = (v) => { if (v == null || v === "") return { g: null, flag: "" }; const s = String(v).trim(); const m = s.match(/^(\d+(?:[.,]\d+)?)\s*([A-Z/]*)$/); return m ? { g: Number(m[1].replace(",", ".")), flag: m[2] } : { g: null, flag: s }; };
+  const map = {};
+  for (const [ncm, [d, tec]] of Object.entries(src.I)) {
+    const r = rate(tec);
+    map[key(ncm)] = { d: d.replace(/^-+\s*/, "").slice(0, 120), tec: r.g, gt: r.g != null ? `${r.g}%` : String(tec ?? ""), bk: r.flag || undefined };
+  }
+  for (const [ncm, tec, flag, cmc, applied, basis] of src.II) {
+    const e = map[key(ncm)];
+    if (!e) continue;
+    if (applied != null && applied !== e.tec) { e.g = applied; e.basis = basis || (cmc != null ? "Anexo III Decisão CMC 08/22" : "Anexo II"); }
+  }
+  for (const e of Object.values(map)) if (e.g == null) e.g = e.tec;
+  // temporary annexes: only whole-NCM entries (Ex = "-") become candidate rates; Ex-numbered ones are notes
+  const temp = {};
+  const push = (ncm, t) => { const k = key(ncm); (temp[k] ??= []).push(t); };
+  for (const [ncm, ex, d, g, quota, unit, ato] of src.IV) push(ncm, { annex: "IV shortage quota", ex, g, quota: quota !== "-" ? `${quota} ${unit}` : null, d: String(d).slice(0, 100), ato });
+  for (const [ncm, ex, g, d, quota, unit, from, to] of src.V) push(ncm, { annex: "V LETEC", ex, g, quota: quota !== "-" ? `${quota} ${unit}` : null, d: String(d).slice(0, 100), from: xl(from), to: xl(to) });
+  for (const [ncm, ex, d, g, quota, unit, ato, from] of src.VI) push(ncm, { annex: "VI LEBIT/BK", ex, g, quota: quota !== "-" ? `${quota} ${unit}` : null, d: String(d).slice(0, 100), ato, from: xl(from) });
+  for (const [ncm, ex, g, d, quota, unit, obs] of src.VIII) push(ncm, { annex: "VIII WTO quota", ex, g, quota: quota !== "-" ? `${quota} ${unit}` : null, d: String(d).slice(0, 100), obs });
+  for (const [ncm, ex, g, d, quota, unit, from, to] of src.IX) push(ncm, { annex: "IX DCC surcharge", ex, g, quota: quota !== "-" ? `${quota} ${unit}` : null, d: String(d).slice(0, 100), from: xl(from), to: xl(to) });
+  for (const [ncm, ex, g, d, quota, unit, from, to] of src.X) push(ncm, { annex: "X ACE-14 autos", ex, g, quota: quota !== "-" ? `${quota} ${unit}` : null, d: String(d).slice(0, 100), from: xl(from), to: xl(to) });
+  let n = 0;
+  for (const [k, list] of Object.entries(temp)) { if (map[k]) { map[k].temp = list; n += list.length; } }
+  const meta = src.meta;
+  writeFileSync(join(OUT, "BR.json"), JSON.stringify({ _meta: { country: "BR", level: 8, source_id: "br-tec-gecex-272", as_of: "2026-11-04", licence: "MDIC / Camex — Resolução Gecex nº 272/2021 Anexos I a X, workbook published 04-11-2026 (public sector information)", url: "https://www.gov.br/mdic/pt-br/assuntos/camex/se-camex/strat/tarifas/vigentes", updates: meta, note: "Imposto de Importação only. IPI, PIS/COFINS-Importação and state ICMS are charged on top and are not in this rate. Mercosur origin (AR/PY/UY) is duty-free under ACE-18 except sugar and automotive goods under their own regimes." }, lines: map }));
+  console.log("BR", Object.keys(map).length, "lines,", n, "temporary entries");
+}

@@ -9,6 +9,7 @@ import CN from "../data/world/CN.json";
 import EG from "../data/world/EG.json";
 import NP from "../data/world/NP.json";
 import VN from "../data/world/VN.json";
+import BR from "../data/world/BR.json";
 
 export const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
@@ -97,6 +98,30 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
       text: pref ? `${pref.v}% under ${pref.agr.toUpperCase()} (MFN ${l.gt})` : l.gt, description: l.d,
       source_id: meta.source_id, source_name: `Vietnam tariff schedule (Decree 26/2023 as amended)${l.vat != null ? ` · VAT ${l.vat}%` : ""}${l.sct != null ? ` · special consumption tax ${l.sct}%` : ""}${l.xk != null ? ` · export duty ${l.xk}%` : ""}`,
       source_url: meta.url, as_of: meta.as_of, tier: "official", note: l.vatnote ?? meta.note,
+    };
+  }
+  if (dest === "BR") {
+    type Temp = { annex: string; ex: string | number; g: number | null; quota: string | null; d: string; from?: string | null; to?: string | null; ato?: string; obs?: string };
+    const lines = BR.lines as Record<string, { d: string; tec: number | null; gt: string; g: number | null; bk?: string; basis?: string; temp?: Temp[] }>;
+    const code = lines[hs.slice(0, 8)] ? hs.slice(0, 8) : Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 6)));
+    if (!code) return null;
+    const l = lines[code];
+    const meta = BR._meta;
+    const today = new Date().toISOString().slice(0, 10);
+    const live = (t: Temp) => (!t.from || t.from <= today) && (!t.to || t.to >= today);
+    const temps = (l.temp ?? []).filter(live);
+    // A whole-NCM exception (Ex "-") without a quota replaces the rate; Ex-numbered or quota entries are shown as notes.
+    const whole = temps.find((t) => String(t.ex) === "-" && !t.quota && t.g != null);
+    const notes = temps.filter((t) => t !== whole).map((t) => `${t.annex}${String(t.ex) !== "-" ? ` Ex ${t.ex}` : ""}: ${t.g}%${t.quota ? ` within quota ${t.quota}` : ""} — ${t.d}${t.to ? ` (until ${t.to})` : ""}`);
+    const MERCOSUR = ["AR", "PY", "UY"];
+    const intra = MERCOSUR.includes(origin) && !/^(17|87)/.test(code);
+    const value = intra ? 0 : whole ? whole.g : l.g;
+    return {
+      hs_code: code, hs_level: 8, origin: intra ? origin : "MFN", rate_type: "ad_valorem", value,
+      text: intra ? `0% intra-Mercosur (ACE-18); TEC ${l.gt}` : whole ? `${whole.g}% (${whole.annex}${whole.to ? ` until ${whole.to}` : ""}; TEC ${l.gt})` : l.g !== l.tec ? `${l.g}% applied (${l.basis}; TEC ${l.gt})` : l.gt,
+      description: l.d,
+      source_id: meta.source_id, source_name: `Brazil TEC/NCM — Resolução Gecex 272/2021 Anexos I–X${l.bk ? ` · ${l.bk}` : ""}`, source_url: meta.url, as_of: meta.as_of, tier: "official",
+      note: [meta.note, ...notes].join(" · "),
     };
   }
   const simple: Record<string, { _meta: { country: string; level: number; source_id: string; as_of: string; url: string; note?: string; licence?: string; tier?: "official" | "indicative" }; lines: Record<string, ThLine & { vat?: number | null; other?: string; saarc?: number }> }> = { TH, CN, EG, NP } as never;
