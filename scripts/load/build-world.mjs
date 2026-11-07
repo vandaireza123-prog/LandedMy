@@ -138,3 +138,31 @@ function parseUsRate(t) {
   writeFileSync(join(OUT, "NP.json"), JSON.stringify({ _meta: { country: "NP", level: 8, source_id: "np-customs-2026", as_of: "2026-07-17", licence: "Department of Customs, Nepal — Customs Tariff 2026/27 (via sabinevolve-hue/nepal-hs-code-finder)", url: "https://customs.gov.np/", note: "General rate; SAARC preferential rate where one exists." }, lines: map }));
   console.log("NP", Object.keys(map).length, "lines");
 }
+
+// ---------- Vietnam (8-digit, Biểu thuế XNK 2025 — Decree 26/2023 as amended by 144/2024; MFN, VAT, SCT, export duty, FTAs) ----------
+{
+  const src = JSON.parse(readFileSync(new URL("../../packages/engine/data/raw/vn_bt2025.json", import.meta.url), "utf8"));
+  const num = (v) => { if (v == null) return null; const s = String(v).trim(); if (s === "" || s === "*" || /^[A-ZĐ]/.test(s)) return null; const m = s.match(/^(\d+(?:[.,]\d+)?)/); return m ? Number(m[1].replace(",", ".")) : null; };
+  const FTA = ["acfta", "atiga", "ajcep", "vjepa", "akfta", "aanz", "aifta", "vkfta", "vcfta", "eaeu", "cptpp", "ahk", "evfta", "ukv", "lao", "vifta", "rcep"];
+  const map = {};
+  for (const [code, r] of Object.entries(src)) {
+    const mfn = num(r.mfn);
+    if (mfn == null && num(r.ord) == null) continue;
+    const e = { d: r.d, g: mfn, gt: mfn != null ? `${mfn}%` : String(r.mfn ?? ""), vat: num(r.vat), sct: num(r.ttdb), xk: num(r.xk) };
+    const p = {};
+    for (const k of FTA) { const v = num(r[k]); if (v != null) p[k] = v; }
+    if (Object.keys(p).length) e.p = p;
+    if (r.vat === "8") e.vatnote = "8% reduced VAT (Resolution 174/2024) — standard 10%";
+    map[code] = e;
+  }
+  writeFileSync(join(OUT, "VN.json"), JSON.stringify({ _meta: { country: "VN", level: 8, source_id: "vn-bieu-thue-2025", as_of: "2025-01-01", licence: "Vietnam Ministry of Finance / General Department of Customs tariff schedule (Decree 26/2023/NĐ-CP as amended by 144/2024/NĐ-CP), Excel as republished by MISA", url: "https://www.customs.gov.vn/", note: "MFN preferential rate (NK ưu đãi). FTA rates by agreement where the origin qualifies with a certificate of origin. VAT and special consumption tax per line." }, lines: map }));
+  console.log("VN", Object.keys(map).length, "lines");
+}
+
+// Chapter-22 subset for the engine (Vietnam national tables: MFN duty, special consumption tax, VAT per line).
+{
+  const vn = JSON.parse(readFileSync(join(OUT, "VN.json"), "utf8"));
+  const ch22 = Object.fromEntries(Object.entries(vn.lines).filter(([c]) => c.startsWith("22")));
+  writeFileSync(new URL("../../packages/engine/data/vn-ch22.json", import.meta.url), JSON.stringify({ _meta: { ...vn._meta, scope: "Chapter 22 subset for the engine" }, lines: ch22 }, null, 1));
+  console.log("VN ch22", Object.keys(ch22).length);
+}

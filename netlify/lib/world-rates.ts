@@ -8,6 +8,7 @@ import TH from "../data/world/TH.json";
 import CN from "../data/world/CN.json";
 import EG from "../data/world/EG.json";
 import NP from "../data/world/NP.json";
+import VN from "../data/world/VN.json";
 
 export const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
@@ -77,6 +78,25 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
       value: use.lo, value_max: use.hi, text: use.lo == null ? `${use.lot}${use.hit && use.hit !== use.lot ? ` to ${use.hit}` : ""}` : range ? `${use.lo}% to ${use.hi}% depending on the 8-digit line` : `${use.lo}%`,
       source_id: "eu-taric", source_name: "EU Common Customs Tariff / TARIC", source_url: meta.url, as_of: meta.as_of, tier: "official",
       note: (use.ad ? "Anti-dumping or countervailing duty may apply to this origin. " : "") + (range ? "Pick the exact CN line on TARIC to narrow the range." : ""),
+    };
+  }
+  if (dest === "VN") {
+    const lines = VN.lines as Record<string, { d: string; g: number | null; gt: string; vat: number | null; sct: number | null; xk: number | null; p?: Record<string, number>; vatnote?: string }>;
+    const code = lines[hs.slice(0, 8)] ? hs.slice(0, 8) : Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 6)));
+    if (!code) return null;
+    const l = lines[code];
+    // origin → agreement column (first match wins; certificate of origin required)
+    const ASEAN = ["BN", "KH", "ID", "LA", "MM", "MY", "PH", "SG", "TH"];
+    const CPTPP = ["AU", "BN", "CA", "CL", "JP", "MY", "MX", "NZ", "PE", "SG", "GB"];
+    const EAEU = ["RU", "BY", "KZ", "AM", "KG"];
+    const agr = ASEAN.includes(origin) ? "atiga" : origin === "CN" ? "acfta" : origin === "JP" ? "vjepa" : origin === "KR" ? "vkfta" : origin === "AU" || origin === "NZ" ? "aanz" : origin === "IN" ? "aifta" : origin === "CL" ? "vcfta" : EAEU.includes(origin) ? "eaeu" : EU27.includes(origin) ? "evfta" : origin === "GB" ? "ukv" : origin === "HK" ? "ahk" : origin === "IL" ? "vifta" : CPTPP.includes(origin) ? "cptpp" : null;
+    const pref = agr && l.p && l.p[agr] != null ? { agr, v: l.p[agr] } : null;
+    const meta = VN._meta;
+    return {
+      hs_code: code, hs_level: 8, origin: pref ? origin : "MFN", rate_type: "ad_valorem", value: pref ? pref.v : l.g,
+      text: pref ? `${pref.v}% under ${pref.agr.toUpperCase()} (MFN ${l.gt})` : l.gt, description: l.d,
+      source_id: meta.source_id, source_name: `Vietnam tariff schedule (Decree 26/2023 as amended)${l.vat != null ? ` · VAT ${l.vat}%` : ""}${l.sct != null ? ` · special consumption tax ${l.sct}%` : ""}${l.xk != null ? ` · export duty ${l.xk}%` : ""}`,
+      source_url: meta.url, as_of: meta.as_of, tier: "official", note: l.vatnote ?? meta.note,
     };
   }
   const simple: Record<string, { _meta: { country: string; level: number; source_id: string; as_of: string; url: string; note?: string; licence?: string; tier?: "official" | "indicative" }; lines: Record<string, ThLine & { vat?: number | null; other?: string; saarc?: number }> }> = { TH, CN, EG, NP } as never;

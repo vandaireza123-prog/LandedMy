@@ -72,11 +72,33 @@
       "symbol": "₫",
       "tax_name": "VAT",
       "tax_pct": 10,
-      "tax_note": "VAT 10% standard (8% reduced rate extended through 2026 for most goods except some categories) on CIF + duty + special consumption tax",
-      "tier": "indicative",
-      "lookup": "https://www.customs.gov.vn/index.jsp?pageId=7&cid=1&LinhVuc=23",
+      "tax_note": "VAT 10% (8% reduced on most goods through 2026) on CIF + duty + special consumption tax; SCT ad valorem on alcohol (beer 65%, wine 35%), cars, tobacco",
+      "tier": "official",
+      "lookup": "https://www.customs.gov.vn/",
       "customs": "Vietnam Customs",
-      "region": "ASEAN"
+      "region": "ASEAN",
+      "ports": [
+        {
+          "code": "VNSGN",
+          "label": "Ho Chi Minh City (Cat Lai)"
+        },
+        {
+          "code": "VNCMT",
+          "label": "Cai Mep"
+        },
+        {
+          "code": "VNHPH",
+          "label": "Hai Phong"
+        },
+        {
+          "code": "VNDAD",
+          "label": "Da Nang"
+        },
+        {
+          "code": "VNSGNA",
+          "label": "Tan Son Nhat (air freight)"
+        }
+      ]
     },
     {
       "code": "PH",

@@ -14,6 +14,7 @@ import au from "../data/au.json";
 import jp from "../data/jp.json";
 import us from "../data/us.json";
 import kr from "../data/kr.json";
+import vn from "../data/vn-ch22.json";
 
 export const EXCISE_V2_EFFECTIVE: ISODate = "2025-11-01";
 const EXCISE_V1_EFFECTIVE: ISODate = "2022-06-01";
@@ -320,6 +321,26 @@ export function buildKrRateTables(): RateTables {
   return { country: "KR", tax_name: "VAT", tier: "indicative", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
 }
 
+/**
+ * Vietnam: MFN duty, special consumption tax (ad valorem on CIF + duty) and VAT per line from the national
+ * tariff schedule (Decree 26/2023 as amended). Preferential FTA rates are in the world map, not here.
+ */
+export function buildVnRateTables(): RateTables {
+  const tariff_lines: TariffLine[] = [];
+  const excise_lines: ExciseLine[] = [];
+  const sst_rates: SstRate[] = [];
+  const lines = vn.lines as Record<string, { d: string; g: number | null; vat: number | null; sct: number | null }>;
+  for (const l of chapter22.lines) {
+    const key = l.hs_code.replace(/\./g, "").slice(0, 8);
+    const v = lines[key] ?? lines[Object.keys(lines).find((k) => k.startsWith(key.slice(0, 6))) ?? ""];
+    if (!v || v.g == null) continue;
+    tariff_lines.push({ hs_code: l.hs_code, description: l.description, unit: "l", duty: { type: "ad_valorem", value: v.g }, effective_from: vn._meta.as_of, effective_to: null, source_doc: `Vietnam tariff schedule — MFN ${v.g}% (${v.d.slice(0, 60)})`, source_url: vn._meta.url });
+    excise_lines.push({ hs_code: l.hs_code, description: l.description, excise: { type: "ad_valorem", value: v.sct ?? 0 }, effective_from: vn._meta.as_of, effective_to: null, source_doc: `Special consumption tax ${v.sct ?? 0}% on CIF + duty`, source_url: vn._meta.url });
+    sst_rates.push({ hs_code: l.hs_code, description: l.description, rate_pct: v.vat ?? 10, effective_from: vn._meta.as_of, effective_to: null, source_doc: `VAT ${v.vat ?? 10}% on CIF + duty + SCT`, source_url: vn._meta.url });
+  }
+  return { country: "VN", tax_name: "VAT", tier: "official", tariff_lines, excise_lines, sst_rates, fta_rates: [] };
+}
+
 export const COUNTRY_META: Record<string, { currency: string; symbol: string; tax_name: string; verified: boolean }> = {
   MY: { currency: "MYR", symbol: "RM", tax_name: "SST", verified: true },
   SG: { currency: "SGD", symbol: "S$", tax_name: "GST", verified: false },
@@ -329,10 +350,11 @@ export const COUNTRY_META: Record<string, { currency: string; symbol: string; ta
   JP: { currency: "JPY", symbol: "¥", tax_name: "Consumption tax", verified: false },
   US: { currency: "USD", symbol: "US$", tax_name: "Tax", verified: false },
   KR: { currency: "KRW", symbol: "₩", tax_name: "VAT", verified: false },
+  VN: { currency: "VND", symbol: "₫", tax_name: "VAT", verified: false },
 };
 
 /** Rate tables by destination country. Malaysia is K1-verified; Singapore is from the published list, not yet permit-checked. */
-const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables, US: buildUsRateTables, KR: buildKrRateTables };
+const REGISTRY: Partial<Record<CountryCode, () => RateTables>> = { MY: buildRateTables, SG: buildSgRateTables, GB: buildUkRateTables, CA: buildCaRateTables, AU: buildAuRateTables, JP: buildJpRateTables, US: buildUsRateTables, KR: buildKrRateTables, VN: buildVnRateTables };
 /** Countries with a national schedule loaded (exact duty rows). */
 export const SUPPORTED_COUNTRIES: CountryCode[] = Object.keys(REGISTRY) as CountryCode[];
 export function ratesFor(country: CountryCode = "MY"): RateTables {

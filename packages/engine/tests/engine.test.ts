@@ -345,6 +345,21 @@ describe("South Korea", () => {
   });
 });
 
+describe("Vietnam", () => {
+  it("wine: MFN 50%, SCT 35% on CIF + duty, VAT 8%; beer 35% / 65%", async () => {
+    const { ratesFor } = await import("../src/index.js");
+    const t = ratesFor("VN");
+    const base: Shipment = { ...fixtures[0].shipment, dest_country: "VN", dest_port: "VNSGN", currency: "VND", fx_rate: 1, freight: 1000000, insurance: { amount: 0 }, local_charges_myr: {}, lines: [] };
+    const w = computeShipment({ ...base, lines: [{ id: "w", name: "Wine", hs_code: "2204.21.11", volume_ml: 750, abv: 13, units_per_case: 12, cases: 60, unit_cost: 100000 }] }, t).lines[0];
+    expect(w.duty).toBe(73000000 * 0.5);
+    expect(w.excise).toBeCloseTo(73000000 * 1.5 * 0.35, 2);
+    expect(w.rates_used.sst_pct).toBe(8);
+    const b = computeShipment({ ...base, lines: [{ id: "b", name: "Lager", hs_code: "2203.00.91", volume_ml: 330, abv: 5, units_per_case: 24, cases: 100, unit_cost: 20000 }] }, t).lines[0];
+    expect(b.rates_used.duty.value).toBe(35);
+    expect(b.rates_used.excise!.value).toBe(65);
+  });
+});
+
 describe("any destination (indicative)", () => {
   it("prices general goods into Thailand with user duty % and VAT 7%, refuses alcohol, applies SA uplift", async () => {
     const { ratesForShipment, DESTINATIONS, destination } = await import("../src/index.js");
@@ -374,7 +389,7 @@ describe("any destination (indicative)", () => {
 describe("multi-country groundwork", () => {
   it("MY tables are tagged and the registry serves them", async () => {
     const { ratesFor, SUPPORTED_COUNTRIES } = await import("../src/index.js");
-    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP", "US", "KR"]);
+    expect(SUPPORTED_COUNTRIES).toEqual(["MY", "SG", "GB", "CA", "AU", "JP", "US", "KR", "VN"]);
     expect(ratesFor("MY").country).toBe("MY");
     expect(ratesFor("SG").country).toBe("SG");
     expect(() => ratesFor("TH")).toThrow(/No rate tables/);
