@@ -276,3 +276,16 @@ function parseUsRate(t) {
   writeFileSync(join(OUT, "GB.json"), JSON.stringify({ _meta: { country: "GB", level: 10, source_id: "uk-global-tariff", as_of: "2026-11-07", version: src.version, licence: "Open Government Licence v3.0 — Department for Business and Trade, UK Tariff data API", url: "https://www.trade-tariff.service.gov.uk/", note: "UK Global Tariff third-country duty (ERGA OMNES). Preferences need proof of origin; 'Q:' marks a tariff-rate quota. Import VAT 20% (0%/5% for some goods) and alcohol, tobacco and fuel excise are charged separately." }, groups, lists, lines: map }));
   console.log("GB", Object.keys(map).length, "lines;", Object.keys(groups).length, "geo groups;", lists.length, "geo lists");
 }
+
+// ---------- EU 10-digit third-country duty (TARIC via the Northern Ireland Online Tariff API, heading overview measures) ----------
+// Raw pull: packages/engine/data/raw/eu_taric10.json {pulled, lines:{code10:[description, dutyExpressionBase|null]}}
+{
+  const p = new URL("../../packages/engine/data/raw/eu_taric10.json", import.meta.url);
+  if (existsSync(p)) {
+    const src = JSON.parse(readFileSync(p, "utf8"));
+    const map = {};
+    for (const [code, [d, mfn]] of Object.entries(src.lines)) map[code] = [d, mfn == null ? null : String(mfn).replace(/\s+/g, " ").trim()];
+    writeFileSync(join(OUT, "EU10.json"), JSON.stringify({ _meta: { country: "EU", level: 10, source_id: "eu-taric", as_of: src.pulled, licence: "TARIC data as republished under the Open Government Licence v3.0 by HMRC's Northern Ireland Online Tariff", url: "https://www.trade-tariff.service.gov.uk/xi/find_commodity", note: "Third-country (erga omnes) duty per 10-digit TARIC line. Preferences by origin come from the HS-6 map." }, lines: map }));
+    console.log("EU10", Object.keys(map).length, "lines");
+  }
+}

@@ -11,6 +11,7 @@ import NP from "../data/world/NP.json";
 import VN from "../data/world/VN.json";
 import BR from "../data/world/BR.json";
 import GB from "../data/world/GB.json";
+import EU10 from "../data/world/EU10.json";
 
 export const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
@@ -73,6 +74,31 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
     const use = pref ?? e.MFN;
     if (!use) return null;
     const meta = EU._meta;
+    // MFN: narrow to the 10-digit TARIC lines under the code the user gave (6, 8 or 10 digits) when we have them
+    if (!pref && EU10) {
+      const l10 = EU10.lines as Record<string, [string, string | null]>;
+      const prefix = hs.slice(0, Math.min(10, hs.length));
+      const exact = l10[prefix.padEnd(10, "0")] && prefix.length >= 8 ? [prefix.padEnd(10, "0")] : Object.keys(l10).filter((k) => k.startsWith(prefix));
+      if (exact.length) {
+        const pct = (x: string | null) => { const m = (x ?? "").match(/^(\d+(?:\.\d+)?)\s*%$/); return m ? Number(m[1]) : null; };
+        const vals = exact.map((k) => l10[k][1]);
+        const nums = vals.map(pct);
+        const allNum = nums.every((n) => n != null);
+        const lo = allNum ? Math.min(...(nums as number[])) : null;
+        const hi = allNum ? Math.max(...(nums as number[])) : null;
+        const one = exact.length === 1;
+        const same = new Set(vals).size === 1;
+        return {
+          hs_code: one ? exact[0] : prefix, hs_level: one ? 10 : prefix.length, origin: "MFN",
+          rate_type: same && pct(vals[0]) != null ? "ad_valorem" : same ? (/%/.test(vals[0] ?? "") && /\+/.test(vals[0] ?? "") ? "compound" : "specific") : allNum && lo !== hi ? "range" : "range",
+          value: same ? pct(vals[0]) : lo, value_max: same ? undefined : hi,
+          text: same ? `${vals[0]}` : allNum ? `${lo}% to ${hi}% across ${exact.length} TARIC lines under ${prefix}` : `${exact.length} TARIC lines under ${prefix} with mixed duties (${[...new Set(vals)].slice(0, 3).join("; ")}${new Set(vals).size > 3 ? "; …" : ""})`,
+          description: one ? l10[exact[0]][0] : undefined,
+          source_id: "eu-taric", source_name: "EU Common Customs Tariff / TARIC (10-digit)", source_url: `https://www.trade-tariff.service.gov.uk/xi/commodities/${one ? exact[0] : prefix.padEnd(10, "0")}`, as_of: EU10._meta.as_of, tier: "official",
+          note: (e.MFN?.ad || use.ad ? "Anti-dumping or countervailing duty may apply to this origin. " : "") + (one ? "" : "Pick the exact TARIC line to narrow it. ") + "EU VAT and excise of the destination member state are applied separately.",
+        };
+      }
+    }
     const range = use.lo != null && use.hi != null && use.lo !== use.hi;
     return {
       hs_code: hs.slice(0, 6), hs_level: 6, origin: pref ? origin : "MFN",

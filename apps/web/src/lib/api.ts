@@ -156,6 +156,6 @@ async function witsRate(dest: string, hs6: string): Promise<WorldRate | null> {
     rate: { hs_code: hs6, hs_level: 6, origin: "MFN", rate_type: "ad_valorem", value: v, compound_text: null, source_id: WITS_SOURCE.id, tier: "indicative", year: f.year },
     source: WITS_SOURCE,
     tier: "indicative",
-    note: `MFN applied ${f.year}, simple average of ${dest}'s national lines under HS ${hs6} · ${WITS_SOURCE.name} · indicative`,
+    note: `MFN applied ${f.year}, simple average of ${dest}'s national lines under HS ${hs6}; specific (per-unit) duties are not reflected · ${WITS_SOURCE.name} · indicative`,
   };
 }
