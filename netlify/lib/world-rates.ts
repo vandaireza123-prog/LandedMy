@@ -46,7 +46,10 @@ function usSpecial(s: string | undefined, origin: string): { text: string } | nu
   return null;
 }
 
+/** Territories that apply another customs territory's tariff. */
+export const DUTY_ALIAS: Record<string, string> = { PR: "US", MC: "FR", SM: "IT", VA: "IT", GG: "GB", JE: "GB", IM: "GB" };
 export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit | null {
+  dest = DUTY_ALIAS[dest] ?? dest;
   const hs = hsDigits.replace(/\D/g, "");
   if (dest === "US") {
     const lines = US.lines as Record<string, UsLine>;

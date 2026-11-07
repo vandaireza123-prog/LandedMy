@@ -224,7 +224,9 @@ export const SCHEDULE_COUNTRIES = new Set<string>(["US", "TH", "CN", "VN", "EG",
 /** MFN applied averages at HS-6 from WITS / UNCTAD TRAINS (indicative). */
 export const WITS_COUNTRIES: Record<string, { year: number; n: number }> = witsIndex as Record<string, { year: number; n: number }>;
 export type DutyCoverage = { kind: "schedule" } | { kind: "wits"; year: number } | { kind: "none" };
-export function dutyCoverage(c: string): DutyCoverage {
+export const DUTY_ALIAS: Record<string, string> = { PR: "US", MC: "FR", SM: "IT", VA: "IT", GG: "GB", JE: "GB", IM: "GB" };
+export function dutyCoverage(c0: string): DutyCoverage {
+  const c = DUTY_ALIAS[c0] ?? c0;
   if (SCHEDULE_COUNTRIES.has(c)) return { kind: "schedule" };
   if (WITS_COUNTRIES[c]) return { kind: "wits", year: WITS_COUNTRIES[c].year };
   return { kind: "none" };
