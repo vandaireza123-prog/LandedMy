@@ -10,6 +10,7 @@ import EG from "../data/world/EG.json";
 import NP from "../data/world/NP.json";
 import VN from "../data/world/VN.json";
 import BR from "../data/world/BR.json";
+import GB from "../data/world/GB.json";
 
 export const EU27 = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 
@@ -98,6 +99,48 @@ export function lookup(dest: string, hsDigits: string, origin = "MFN"): WorldHit
       text: pref ? `${pref.v}% under ${pref.agr.toUpperCase()} (MFN ${l.gt})` : l.gt, description: l.d,
       source_id: meta.source_id, source_name: `Vietnam tariff schedule (Decree 26/2023 as amended)${l.vat != null ? ` · VAT ${l.vat}%` : ""}${l.sct != null ? ` · special consumption tax ${l.sct}%` : ""}${l.xk != null ? ` · export duty ${l.xk}%` : ""}`,
       source_url: meta.url, as_of: meta.as_of, tier: "official", note: l.vatnote ?? meta.note,
+    };
+  }
+  if (dest === "GB") {
+    type GbLine = { d: string; mfn: string | null; mfnac?: Record<string, string>; p?: Record<string, number>; ad?: string[] };
+    const lines = GB.lines as unknown as Record<string, GbLine>;
+    const lists = GB.lists as string[][];
+    const groups = GB.groups as unknown as Record<string, { d: string; m: string[] }>;
+    const code = lines[hs.slice(0, 10)] ? hs.slice(0, 10) : Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 8))) ?? Object.keys(lines).find((k) => k.startsWith(hs.slice(0, 6)));
+    if (!code) return null;
+    const l = lines[code];
+    const meta = GB._meta;
+    const inGeo = (g: string) => g === origin || (groups[g]?.m.includes(origin) ?? false);
+    // preference: a country-specific entry beats a group; a quota-only entry is reported but not applied
+    let pref: { expr: string; geo: string; quota: boolean } | null = null;
+    if (origin !== "MFN" && l.p) {
+      for (const [raw, li] of Object.entries(l.p)) {
+        const [exprPart, exPart] = raw.split("|x:");
+        const excluded = exPart ? exPart.split(",") : [];
+        if (excluded.includes(origin)) continue;
+        const quota = exprPart.startsWith("Q:");
+        const expr = quota ? exprPart.slice(2) : exprPart;
+        const hit = lists[li].includes(origin) ? origin : lists[li].find(inGeo);
+        if (!hit) continue;
+        const specific = hit === origin;
+        if (!pref || (pref.quota && !quota) || (specific && pref.geo !== origin && pref.quota === quota)) pref = { expr, geo: hit, quota };
+      }
+    }
+    const parse = (expr: string | null) => {
+      if (expr == null) return { type: "specific" as const, value: null, text: "see tariff" };
+      const m = expr.match(/^(\d+(?:\.\d+)?)\s*%$/);
+      if (m) return { type: "ad_valorem" as const, value: Number(m[1]), text: expr };
+      return { type: /%/.test(expr) && /\+/.test(expr) ? ("compound" as const) : ("specific" as const), value: null, text: expr };
+    };
+    const use = pref && !pref.quota ? parse(pref.expr) : parse(l.mfn);
+    const ad = (l.ad ?? []).some(inGeo);
+    const geoName = pref ? (groups[pref.geo]?.d ?? pref.geo) : "";
+    return {
+      hs_code: code, hs_level: 10, origin: pref && !pref.quota ? origin : "MFN", rate_type: use.type, value: use.value,
+      text: pref && !pref.quota ? `${use.text} preferential (${geoName}; UKGT ${l.mfn})` : pref?.quota ? `${l.mfn} (${pref.expr} within tariff quota for ${geoName})` : l.mfn ?? "see tariff",
+      description: l.d,
+      source_id: meta.source_id, source_name: "UK Global Tariff (Online Trade Tariff)", source_url: `https://www.trade-tariff.service.gov.uk/commodities/${code}`, as_of: meta.as_of, tier: "official",
+      note: [meta.note, ad ? `Anti-dumping or countervailing duty applies to ${origin} on this line — check the commodity page.` : "", l.mfnac ? "Additional-code rates exist on this line (e.g. Meursing or anti-dumping codes)." : ""].filter(Boolean).join(" "),
     };
   }
   if (dest === "BR") {

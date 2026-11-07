@@ -220,7 +220,7 @@ export function fxFromBnm(country: DestCountry, rates: Record<string, number>, c
 import witsIndex from "./wits-index.json";
 const EU27_DEST = ["AT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "HU", "IE", "IT", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"];
 /** National schedule bundled on the server (8-digit lines, official). */
-export const SCHEDULE_COUNTRIES = new Set<string>(["US", "TH", "CN", "VN", "EG", "NP", "BR", ...EU27_DEST]);
+export const SCHEDULE_COUNTRIES = new Set<string>(["US", "TH", "CN", "VN", "EG", "NP", "BR", "GB", ...EU27_DEST]);
 /** MFN applied averages at HS-6 from WITS / UNCTAD TRAINS (indicative). */
 export const WITS_COUNTRIES: Record<string, { year: number; n: number }> = witsIndex as Record<string, { year: number; n: number }>;
 export type DutyCoverage = { kind: "schedule" } | { kind: "wits"; year: number } | { kind: "none" };

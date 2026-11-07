@@ -240,3 +240,39 @@ function parseUsRate(t) {
   writeFileSync(join(OUT, "BR.json"), JSON.stringify({ _meta: { country: "BR", level: 8, source_id: "br-tec-gecex-272", as_of: "2026-11-04", licence: "MDIC / Camex — Resolução Gecex nº 272/2021 Anexos I a X, workbook published 04-11-2026 (public sector information)", url: "https://www.gov.br/mdic/pt-br/assuntos/camex/se-camex/strat/tarifas/vigentes", updates: meta, note: "Imposto de Importação only. IPI, PIS/COFINS-Importação and state ICMS are charged on top and are not in this rate. Mercosur origin (AR/PY/UY) is duty-free under ACE-18 except sugar and automotive goods under their own regimes." }, lines: map }));
   console.log("BR", Object.keys(map).length, "lines,", n, "temporary entries");
 }
+
+// ---------- United Kingdom (UK Global Tariff — DBT Tariff data API, measures on declarable commodities; 10-digit) ----------
+// Raw pull: packages/engine/data/raw/uk_tariff.json {version, lines:{code10:{d, mfn, mfnac?, p:{geo: "expr" | "Q:expr" | "expr|x:EX,EX"}, ad:[geo]}}}
+// Geo membership: packages/engine/data/raw/uk_geo_areas.json {geoId:{d, m:[ISO2...]}} from the Online Trade Tariff API.
+{
+  const src = JSON.parse(readFileSync(new URL("../../packages/engine/data/raw/uk_tariff.json", import.meta.url), "utf8"));
+  const geo = JSON.parse(readFileSync(new URL("../../packages/engine/data/raw/uk_geo_areas.json", import.meta.url), "utf8"));
+  const map = {};
+  const usedGeo = new Set();
+  // dictionary of geo lists (the same 40-odd partner list repeats on most lines)
+  const lists = [];
+  const listIdx = new Map();
+  const listId = (gs) => { const k = gs.slice().sort().join(","); if (!listIdx.has(k)) { listIdx.set(k, lists.length); lists.push(gs.slice().sort()); } return listIdx.get(k); };
+  for (const [code, e] of Object.entries(src.lines)) {
+    const o = { d: e.d, mfn: e.mfn ?? null };
+    if (e.mfnac) o.mfnac = e.mfnac;
+    if (e.p) {
+      // invert: expression → list of geo ids, dropping preferences that do not beat MFN
+      const inv = {};
+      for (const [g, expr] of Object.entries(e.p)) {
+        if (expr === e.mfn) continue;
+        (inv[expr] ??= []).push(g);
+        usedGeo.add(g);
+      }
+      if (Object.keys(inv).length) o.p = Object.fromEntries(Object.entries(inv).map(([expr, gs]) => [expr, listId(gs)]));
+    }
+    if (e.ad) o.ad = e.ad;
+    map[code] = o;
+  }
+  // only the groups actually referenced, with their members
+  const groups = {};
+  for (const g of usedGeo) if (/^\d/.test(g) && geo[g]) groups[g] = { d: geo[g].d, m: geo[g].m };
+  for (const g of Object.keys(geo)) if (/^\d/.test(g) && geo[g].m.length && Object.values(map).some((o) => o.ad && o.ad.includes(g))) groups[g] = { d: geo[g].d, m: geo[g].m };
+  writeFileSync(join(OUT, "GB.json"), JSON.stringify({ _meta: { country: "GB", level: 10, source_id: "uk-global-tariff", as_of: "2026-11-07", version: src.version, licence: "Open Government Licence v3.0 — Department for Business and Trade, UK Tariff data API", url: "https://www.trade-tariff.service.gov.uk/", note: "UK Global Tariff third-country duty (ERGA OMNES). Preferences need proof of origin; 'Q:' marks a tariff-rate quota. Import VAT 20% (0%/5% for some goods) and alcohol, tobacco and fuel excise are charged separately." }, groups, lists, lines: map }));
+  console.log("GB", Object.keys(map).length, "lines;", Object.keys(groups).length, "geo groups;", lists.length, "geo lists");
+}
