@@ -22,24 +22,63 @@ function parseUsRate(t) {
 }
 
 // ---------- United States ----------
+// Primary source: the live USITC HTS export (reststop/exportList, all chapters) pulled through the browser into
+// packages/engine/data/raw/us_hts.json  {revision, as_of, rows:[htsno, indent, description, units, general, special, other, additionalDuties, footnotes]}.
+// Falls back to the checkdutyrates mirror CSV when the raw export is absent. Chapter-99 origin surcharges are read from
+// the 9903 headings of the same export ("...applicable subheading + N%" for articles the product of <country>).
 {
-  const rows = parseCsv(readFileSync(join(DATA, "checkdutyrates_us-tariff-data/data/hts.csv"), "utf8"));
+  const rawPath = new URL("../../packages/engine/data/raw/us_hts.json", import.meta.url);
   const map = {};
-  // Rates sit on the line named in rate_source (8-digit, or 10-digit when the 8-digit level is the stat line itself).
-  for (const r of rows) {
-    if (!r.general_rate || !r.rate_source) continue;
-    const code = r.rate_source.replace(/\./g, "").slice(0, 8);
-    if (map[code]) continue;
-    const g = parseUsRate(r.general_rate);
-    if (!g) continue;
-    map[code] = { d: r.description.slice(0, 120), g: g.pct, gt: g.text, s: r.special_rate || undefined, c2: r.column2_rate || undefined };
+  let add = [];
+  let revision, asOf;
+  if (existsSync(rawPath)) {
+    const raw = JSON.parse(readFileSync(rawPath, "utf8"));
+    revision = raw.revision; asOf = raw.as_of;
+    for (const [htsno, , desc, , general, special, other] of raw.rows) {
+      if (!htsno || !general) continue;
+      const code = htsno.replace(/\./g, "").slice(0, 8);
+      if (code.length < 8 || map[code]) continue;
+      const g = parseUsRate(general);
+      if (!g) continue;
+      map[code] = { d: String(desc).slice(0, 120), g: g.pct, gt: g.text, s: special || undefined, c2: other || undefined };
+    }
+    // Chapter 99: prefer the curated "in force" list from the checkdutyrates mirror when present (status is a legal
+    // assessment the raw schedule does not carry); otherwise derive candidates from the 9903 headings.
+    const addCsv = join(DATA, "checkdutyrates_us-tariff-data/data/additional_duties.csv");
+    const seen = new Set();
+    if (existsSync(addCsv)) {
+      add = parseCsv(readFileSync(addCsv, "utf8"))
+        .filter((r) => r.status === "in force")
+        .map((r) => ({ country: r.country, heading: r.heading, pct: Number(r.added_percent) || null, text: r.rate_text, scope: r.description.slice(0, 160) }));
+      for (const h of add) seen.add(h.heading);
+    }
+    for (const [htsno, , desc, , general] of raw.rows) {
+      if (add.length && seen.size) break; // curated list in use
+      if (!htsno || !htsno.startsWith("9903") || !general) continue;
+      const m = String(general).match(/applicable subheading\s*\+\s*(\d+(?:\.\d+)?)%/i);
+      const c = String(desc).match(/products? of ([A-Z][A-Za-z' .-]+?)(?:,| as provided| \(|\)|$| that| which| and| imported| classified| under| except)/);
+      if (!m || !c || seen.has(htsno)) continue;
+      seen.add(htsno);
+      add.push({ country: c[1].trim(), heading: htsno, pct: Number(m[1]), text: String(general).slice(0, 120), scope: String(desc).slice(0, 160) });
+    }
+  } else {
+    const rows = parseCsv(readFileSync(join(DATA, "checkdutyrates_us-tariff-data/data/hts.csv"), "utf8"));
+    for (const r of rows) {
+      if (!r.general_rate || !r.rate_source) continue;
+      const code = r.rate_source.replace(/\./g, "").slice(0, 8);
+      if (map[code]) continue;
+      const g = parseUsRate(r.general_rate);
+      if (!g) continue;
+      map[code] = { d: r.description.slice(0, 120), g: g.pct, gt: g.text, s: r.special_rate || undefined, c2: r.column2_rate || undefined };
+    }
+    add = parseCsv(readFileSync(join(DATA, "checkdutyrates_us-tariff-data/data/additional_duties.csv"), "utf8"))
+      .filter((r) => r.status === "in force")
+      .map((r) => ({ country: r.country, heading: r.heading, pct: Number(r.added_percent) || null, text: r.rate_text, scope: r.description.slice(0, 160) }));
+    const ver = JSON.parse(readFileSync(join(DATA, "checkdutyrates_us-tariff-data/data/VERSION.json"), "utf8"));
+    revision = ver.hts_revision; asOf = ver.hts_export_date;
   }
-  const add = parseCsv(readFileSync(join(DATA, "checkdutyrates_us-tariff-data/data/additional_duties.csv"), "utf8"))
-    .filter((r) => r.status === "in force")
-    .map((r) => ({ country: r.country, heading: r.heading, pct: Number(r.added_percent) || null, text: r.rate_text, scope: r.description.slice(0, 160) }));
-  const ver = JSON.parse(readFileSync(join(DATA, "checkdutyrates_us-tariff-data/data/VERSION.json"), "utf8"));
-  writeFileSync(join(OUT, "US.json"), JSON.stringify({ _meta: { country: "US", level: 8, source_id: "us-hts", revision: ver.hts_revision, as_of: ver.hts_export_date, licence: "CC0 (USITC public domain)", url: "https://hts.usitc.gov/" }, lines: map, additional: add }));
-  console.log("US", Object.keys(map).length, "lines;", add.length, "additional-duty rows in force");
+  writeFileSync(join(OUT, "US.json"), JSON.stringify({ _meta: { country: "US", level: 8, source_id: "us-hts", revision, as_of: asOf, licence: "CC0 (USITC public domain)", url: "https://hts.usitc.gov/" }, lines: map, additional: add }));
+  console.log("US", revision, Object.keys(map).length, "lines;", add.length, "chapter-99 origin surcharge rows");
 }
 
 // ---------- European Union (HS-6, by origin) ----------
