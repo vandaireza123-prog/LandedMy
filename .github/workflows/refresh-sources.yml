@@ -90,8 +90,5 @@ jobs:
           rm -f data/wits/wits_part*.json
           git add -A netlify/data/world apps/web/public/data/wits apps/web/src/lib/wits-index.json packages/engine/data/raw
           if git diff --cached --quiet; then echo "No source changes"; exit 0; fi
-          git commit -m "data: refresh tariff sources $(date -u +%F)
-
-Sources: ${{ steps.src.outputs.sources }}
-Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          git commit -m "data: refresh tariff sources $(date -u +%F)" -m "Sources: ${{ steps.src.outputs.sources }}" -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           git push
