@@ -3,6 +3,11 @@
   command = "npm run build"
   publish = "apps/web/out"
 
+[build.environment]
+  # The Supabase project URL and publishable key are public by design (they ship in the browser bundle);
+  # only the service-role key is a secret. Keep the secret scanner from failing builds on the URL.
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
+
 [[headers]]
   for = "/*"
   [headers.values]
