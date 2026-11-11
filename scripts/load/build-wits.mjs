@@ -8,8 +8,7 @@
 import { readFileSync, writeFileSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const dir = process.env.WITS_DIR;
-if (!dir) throw new Error("WITS_DIR required");
+const dir = process.env.WITS_DIR ?? new URL("../../data/wits/", import.meta.url).pathname;
 const out = join(process.cwd(), "apps/web/public/data/wits");
 mkdirSync(out, { recursive: true });
 
@@ -18,9 +17,11 @@ const m49 = Object.fromEntries(iso.map((x) => [x["country-code"], x["alpha-2"]])
 // WITS uses a few non-standard reporter codes
 Object.assign(m49, { "918": "EU", "490": "TW", "729": "SD", "736": "SD", "891": "RS", "890": "RS", "280": "DE" });
 
+const parts = readdirSync(dir).filter((f) => /^wits_part\d*\.json$/.test(f));
+if (!parts.length) { console.log("WITS: no wits_part*.json in", dir, "— keeping existing files"); process.exit(0); }
 const index = {};
 let rows = 0;
-for (const f of readdirSync(dir).filter((f) => /^wits_part\d*\.json$/.test(f))) {
+for (const f of parts) {
   const part = JSON.parse(readFileSync(join(dir, f), "utf8"));
   for (const [code, v] of Object.entries(part)) {
     const iso2 = m49[code];

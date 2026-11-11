@@ -1,0 +1,97 @@
+name: Refresh tariff sources
+
+# Re-pulls the official schedules and open mirrors, rebuilds the bundled duty maps and commits the result.
+# Netlify redeploys from the commit. Runs weekly; WITS (slow) runs monthly. Any source that fails is skipped
+# and the previous data for it stays in place.
+on:
+  schedule:
+    - cron: "17 3 * * 1"   # Mondays 03:17 UTC — weekly: US, UK, EU, Brazil, mirrors
+    - cron: "41 2 3 * *"   # 3rd of the month 02:41 UTC — monthly: + WITS
+  workflow_dispatch:
+    inputs:
+      sources:
+        description: "Comma-separated: us,uk,eu,br,wits,mirrors (default: all but wits)"
+        default: "us,uk,eu,br,mirrors"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-sources
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts
+
+      - name: Decide sources
+        id: src
+        run: |
+          S="${{ github.event.inputs.sources }}"
+          if [ -z "$S" ]; then
+            if [ "${{ github.event.schedule }}" = "41 2 3 * *" ]; then S="us,uk,eu,br,mirrors,wits"; else S="us,uk,eu,br,mirrors"; fi
+          fi
+          echo "sources=,$S," >> "$GITHUB_OUTPUT"
+          echo "Sources: $S"
+
+      - name: Clone open mirrors
+        if: contains(steps.src.outputs.sources, ',mirrors,')
+        run: |
+          mkdir -p /tmp/ghdata && cd /tmp/ghdata
+          for r in checkdutyrates/us-tariff-data Soe-Moe/thai-customs-tariff-json dcd887/hs-code-assistant Mohamed-Reda1010/egypt-customs-tariff sabinevolve-hue/nepal-hs-code-finder; do
+            d="${r/\//_}"; git clone --depth 1 "https://github.com/$r" "$d" || echo "clone failed: $r"
+          done
+          echo "DATA_DIR=/tmp/ghdata" >> "$GITHUB_ENV"
+
+      - name: United States (USITC)
+        if: contains(steps.src.outputs.sources, ',us,')
+        continue-on-error: true
+        run: node scripts/refresh/us.mjs
+
+      - name: United Kingdom (DBT tariff API)
+        if: contains(steps.src.outputs.sources, ',uk,')
+        continue-on-error: true
+        run: node scripts/refresh/uk.mjs
+
+      - name: Brazil (MDIC TEC workbook)
+        if: contains(steps.src.outputs.sources, ',br,')
+        continue-on-error: true
+        run: node scripts/refresh/br.mjs
+
+      - name: European Union (TARIC via NI Online Tariff)
+        if: contains(steps.src.outputs.sources, ',eu,')
+        continue-on-error: true
+        run: node scripts/refresh/eu.mjs
+
+      - name: WITS / UNCTAD TRAINS (all reporters)
+        if: contains(steps.src.outputs.sources, ',wits,')
+        continue-on-error: true
+        run: node scripts/refresh/wits.mjs
+
+      - name: Rebuild bundled duty maps
+        run: |
+          node scripts/load/build-world.mjs
+          node scripts/load/build-wits.mjs
+
+      - name: Engine tests
+        run: npx vitest run
+
+      - name: Commit and push
+        run: |
+          git config user.name "landedmy-refresh[bot]"
+          git config user.email "refresh@landedmy.netlify.app"
+          rm -f data/wits/wits_part*.json
+          git add -A netlify/data/world apps/web/public/data/wits apps/web/src/lib/wits-index.json packages/engine/data/raw
+          if git diff --cached --quiet; then echo "No source changes"; exit 0; fi
+          git commit -m "data: refresh tariff sources $(date -u +%F)
+
+Sources: ${{ steps.src.outputs.sources }}
+Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          git push
