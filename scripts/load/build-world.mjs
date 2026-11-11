@@ -273,7 +273,7 @@ try {
   const groups = {};
   for (const g of usedGeo) if (/^\d/.test(g) && geo[g]) groups[g] = { d: geo[g].d, m: geo[g].m };
   for (const g of Object.keys(geo)) if (/^\d/.test(g) && geo[g].m.length && Object.values(map).some((o) => o.ad && o.ad.includes(g))) groups[g] = { d: geo[g].d, m: geo[g].m };
-  writeFileSync(join(OUT, "GB.json"), JSON.stringify({ _meta: { country: "GB", level: 10, source_id: "uk-global-tariff", as_of: "2026-11-07", version: src.version, licence: "Open Government Licence v3.0 — Department for Business and Trade, UK Tariff data API", url: "https://www.trade-tariff.service.gov.uk/", note: "UK Global Tariff third-country duty (ERGA OMNES). Preferences need proof of origin; 'Q:' marks a tariff-rate quota. Import VAT 20% (0%/5% for some goods) and alcohol, tobacco and fuel excise are charged separately." }, groups, lists, lines: map }));
+  writeFileSync(join(OUT, "GB.json"), JSON.stringify({ _meta: { country: "GB", level: 10, source_id: "uk-global-tariff", as_of: src.pulled ?? "2026-11-07", version: src.version, licence: "Open Government Licence v3.0 — Department for Business and Trade, UK Tariff data API", url: "https://www.trade-tariff.service.gov.uk/", note: "UK Global Tariff third-country duty (ERGA OMNES). Preferences need proof of origin; 'Q:' marks a tariff-rate quota. Import VAT 20% (0%/5% for some goods) and alcohol, tobacco and fuel excise are charged separately." }, groups, lists, lines: map }));
   console.log("GB", Object.keys(map).length, "lines;", Object.keys(groups).length, "geo groups;", lists.length, "geo lists");
 }
 
