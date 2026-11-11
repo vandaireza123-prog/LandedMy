@@ -91,4 +91,6 @@ jobs:
           git add -A netlify/data/world apps/web/public/data/wits apps/web/src/lib/wits-index.json packages/engine/data/raw
           if git diff --cached --quiet; then echo "No source changes"; exit 0; fi
           git commit -m "data: refresh tariff sources $(date -u +%F)" -m "Sources: ${{ steps.src.outputs.sources }}" -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          # main may have moved while the pull ran; replay our data commit on top, our files win on conflict
+          git pull --rebase -X theirs origin main
           git push
