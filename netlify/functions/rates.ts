@@ -6,6 +6,7 @@
  */
 import type { Config, Context } from "@netlify/functions";
 import { lookup } from "../lib/world-rates";
+import { sbHeaders } from "../lib/sb";
 
 export const config: Config = { path: "/api/rates" };
 
@@ -38,7 +39,7 @@ export default async (req: Request, _ctx: Context) => {
   if (!url || !key) return json(200, { rate: null, source: null, tier: null, note: "World rates database not configured on this deployment" }, "no-store");
 
   const call = async (path: string, body?: unknown) =>
-    fetch(`${url}/rest/v1/${path}`, { method: body ? "POST" : "GET", headers: { apikey: key, authorization: `Bearer ${key}`, "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    fetch(`${url}/rest/v1/${path}`, { method: body ? "POST" : "GET", headers: sbHeaders(key), body: body ? JSON.stringify(body) : undefined });
 
   const r = await call("rpc/best_duty", { p_dest: dest, p_hs6: hs, p_origin: origin, p_date: date });
   if (!r.ok) return json(502, { error: `rates lookup failed (${r.status})` }, "no-store");

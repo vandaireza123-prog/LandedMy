@@ -4,6 +4,7 @@
  * maintainer can review descriptions and add synonyms. Also reports which rate sources are stale (>400 days).
  */
 import type { Config } from "@netlify/functions";
+import { sbHeaders } from "../lib/sb";
 
 export const config: Config = { schedule: "@weekly" };
 
@@ -24,7 +25,7 @@ function parseCsv(text: string) {
 export default async () => {
   const url = process.env.SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return new Response("not configured", { status: 200 });
-  const h = { apikey: key, authorization: `Bearer ${key}`, "content-type": "application/json" };
+  const h = sbHeaders(key);
   const csv = await (await fetch(SRC)).text();
   const incoming = parseCsv(csv).filter((r) => r.level === "6");
   const have = new Set(((await (await fetch(`${url}/rest/v1/hs_codes?select=code&level=eq.6&retired_at=is.null`, { headers: h })).json()) as { code: string }[]).map((x) => x.code));

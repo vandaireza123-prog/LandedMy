@@ -12,6 +12,7 @@
  */
 import type { Config, Context } from "@netlify/functions";
 import { DESTINATION_CODES, computeShipment, destination, manualRates, mergeRates, ratesForShipment, withoutFta, RateNotFoundError, type CountryCode, type Shipment } from "../../packages/engine/src/index";
+import { sbHeaders } from "../lib/sb";
 const buckets = new Map<string, { n: number; reset: number }>();
 
 function limited(ip: string, max: number): boolean {
@@ -35,7 +36,7 @@ async function validateKey(key: string): Promise<{ user_id: string; key_id: stri
   try {
     const r = await fetch(`${url}/rest/v1/rpc/touch_api_key`, {
       method: "POST",
-      headers: { apikey: srk, authorization: `Bearer ${srk}`, "content-type": "application/json" },
+      headers: sbHeaders(srk),
       body: JSON.stringify({ p_hash: hash }),
     });
     if (!r.ok) return null;
