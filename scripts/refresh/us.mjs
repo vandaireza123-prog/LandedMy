@@ -1,7 +1,7 @@
 // United States: live USITC HTS export, all chapters → raw/us_hts.json
 import { RAW, get, save, sleep, today } from "./_util.mjs";
 const rows = [];
-let revision = "current release";
+let revision = `HTS current release (pulled ${today()})`;
 try {
   const html = await (await get("https://hts.usitc.gov/")).text();
   const m = html.match(/(\d{4})\s+(?:HTS\s+)?Revision\s+(\d+)/i) ?? html.match(/Revision\s+(\d+)/i);
