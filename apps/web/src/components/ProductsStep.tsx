@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { AppState, ProductRow } from "@/lib/state";
 import { CATEGORY_HS, CATEGORY_LABEL, hsForCategory, searchLibrary, type Category, type LibraryProduct } from "@/lib/products";
 import { Card, Footer, PrimaryButton, Progress, Title, smallInputCls } from "./ui";
@@ -15,6 +15,13 @@ import { isManualLine } from "@/lib/shipment";
 import { useT } from "@/lib/i18n";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
+
+const DRINK_WORDS = /\b(beer|lager|ale|stout|porter|ipa|pilsner|wine|champagne|prosecco|cava|cider|perry|whisky|whiskey|gin|vodka|rum|brandy|cognac|tequila|mezcal|liqueur|sake|soju|spirit|spirits|mead)\b/i;
+
+/** A non-drink product with no customs code yet: the card asks for one. */
+function blankGoods(name: string): ProductRow {
+  return { id: uid(), name, category: "general", general_group: "other", hs_code: "MANUAL", volume_ml: 0, abv: 0, units_per_case: 1, cases: 100, unit_cost: 0, hs_confirmed: false, manual_sst_pct: 10 };
+}
 
 function blankRow(): ProductRow {
   return {
@@ -230,8 +237,21 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
     );
 
   const add = (p?: LibraryProduct) => {
-    setRows([...rows, p ? fromLibrary(p) : blankRow()]);
+    const name = q.trim();
+    setRows([...rows, p ? fromLibrary(p) : DRINK_WORDS.test(name) ? { ...blankRow(), name } : blankGoods(name)]);
     setQ("");
+  };
+  /** Enter in the search box: best drink match, else best part, else best HS line, else a new named product. */
+  const addBest = () => {
+    if (hits[0]) return add(hits[0]);
+    if (partHits[0]) return addPart(partHits[0]);
+    if (hsHits[0]) return addHs(hsHits[0]);
+    if (q.trim()) add();
+  };
+  const searchRef = useRef<HTMLInputElement>(null);
+  const focusSearch = () => {
+    searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    searchRef.current?.focus({ preventScroll: true });
   };
   const addHs = (h: HsHit) => {
     setRows([...rows, fromHs(h, q.trim(), indicative)]);
@@ -249,6 +269,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
     if (!h) return;
     const base = fromHs(h, "", indicative);
     patchRow(id, {
+      name: "part" in pick ? pick.part.item.n : base.name,
       hs6: base.hs6, hs6_desc: base.hs6_desc, hs_code: base.hs_code, hs_confirmed: base.hs_confirmed, general_group: base.general_group,
       manual_duty_pct: base.manual_duty_pct, manual_sst_pct: base.manual_sst_pct ?? 10, duty_source: undefined, duty_notes: undefined,
       ...("part" in pick ? codeFields(pick.part) : { code_source: undefined, code_note: undefined, code_check: undefined }),
@@ -273,12 +294,13 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
             <path d="m20 20-3.5-3.5" />
           </svg>
           <input
+            ref={searchRef}
             className="flex-1 bg-transparent text-[15px] outline-none"
-            placeholder={t("Search product, e.g. Duvel 330ml")}
+            placeholder={t("Search any product, part or HS code")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") add(hits[0]);
+              if (e.key === "Enter") addBest();
             }}
           />
         </div>
@@ -536,8 +558,8 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
             </div>
           </Card>
         ))}
-        <button type="button" onClick={() => add()} className="h-12 rounded-xl border border-dashed border-[#B8BAB2] text-sm font-semibold text-teal hover:bg-teal-tint">
-          {t("+ Add another product")}
+        <button type="button" onClick={focusSearch} className="h-12 rounded-xl border border-dashed border-[#B8BAB2] text-sm font-semibold text-teal hover:bg-teal-tint">
+          {rows.length ? t("+ Add another product") : t("+ Add a product")}
         </button>
       </div>
 
