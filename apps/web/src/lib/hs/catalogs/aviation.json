@@ -1,0 +1,2888 @@
+{
+  "_meta": {
+    "id": "aviation",
+    "name": "Aircraft and helicopter parts",
+    "as_of": "2026-11-12",
+    "basis": "HS 2022 nomenclature; Section XVII Note 2 (parts of general use, engines, electrical equipment, instruments and seats are classified in their own headings, not as aircraft parts); WCO Explanatory Notes to headings 88.02, 88.06 and 88.07.",
+    "rule": "A part is classified under 8807 (parts of aircraft) only when it is identifiable as suitable solely or principally for aircraft AND it is not excluded by Section XVII Note 2. Note 2 sends fasteners, seals, springs, bearings, engines and their parts, pumps, valves, electrical equipment, instruments, lighting and seats to their own chapters, whatever they are fitted to. That is why a screw is a screw (73.18) even when it holds a helicopter together.",
+    "duty_note": "Civil aircraft and most civil-aircraft parts are duty-free in the signatories of the WTO Agreement on Trade in Civil Aircraft (US column 'C' free; EU end-use relief under Regulation 2018/581 with an EASA Form 1 / FAA 8130-3; UK, Canada, Japan similar). Malaysia and Singapore charge 0% duty on 8802/8807; SST or GST still applies. Military aircraft parts, used/serviceable parts and dual-use items need export licences from the origin country.",
+    "confidence_legend": {
+      "high": "settled classification",
+      "check": "defensible but origin/destination rulings vary — confirm with a binding ruling or the airworthiness documents"
+    }
+  },
+  "groups": [
+    {
+      "id": "aircraft",
+      "name": "Complete aircraft",
+      "items": [
+        {
+          "n": "Helicopter, unladen weight up to 2,000 kg (Robinson R44, Bell 505, H125 class)",
+          "hs": "880211",
+          "aliases": [
+            "light helicopter",
+            "R44",
+            "R66",
+            "H125",
+            "Bell 505"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Helicopter, unladen weight over 2,000 kg (H145, AW139, S-92, Bell 412)",
+          "hs": "880212",
+          "aliases": [
+            "medium helicopter",
+            "heavy helicopter",
+            "AW139",
+            "H145",
+            "S-92"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Aeroplane, unladen weight up to 2,000 kg (Cessna 172, Piper, light sport)",
+          "hs": "880220",
+          "aliases": [
+            "light aircraft",
+            "Cessna 172",
+            "trainer aircraft",
+            "light sport aircraft"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Aeroplane, 2,000–15,000 kg (King Air, PC-12, Citation, Phenom, ATR 42)",
+          "hs": "880230",
+          "aliases": [
+            "turboprop aircraft",
+            "business jet",
+            "private jet",
+            "King Air",
+            "PC-12",
+            "Citation"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Aeroplane over 15,000 kg (A320, 737, ATR 72, Gulfstream G650)",
+          "hs": "880240",
+          "aliases": [
+            "airliner",
+            "A320",
+            "737",
+            "wide-body",
+            "narrow-body"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Glider, hang glider, balloon, airship (non-powered)",
+          "hs": "880100",
+          "aliases": [
+            "sailplane",
+            "paraglider wing",
+            "hot air balloon",
+            "blimp"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Drone up to 250 g, remote-controlled",
+          "hs": "880621",
+          "aliases": [
+            "mini drone",
+            "DJI Mini"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Drone 250 g–7 kg, remote-controlled",
+          "hs": "880622",
+          "aliases": [
+            "camera drone",
+            "DJI Mavic",
+            "quadcopter"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Drone 7–25 kg, remote-controlled",
+          "hs": "880623",
+          "aliases": [
+            "agricultural drone",
+            "survey drone"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Drone 25–150 kg, remote-controlled",
+          "hs": "880624",
+          "aliases": [
+            "heavy-lift drone"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Drone over 150 kg, remote-controlled",
+          "hs": "880629",
+          "aliases": [
+            "cargo drone"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Passenger-carrying unmanned aircraft (eVTOL air taxi)",
+          "hs": "880610",
+          "aliases": [
+            "eVTOL",
+            "air taxi"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Satellite or spacecraft",
+          "hs": "880260",
+          "aliases": [
+            "cubesat",
+            "launch vehicle"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "airframe",
+      "name": "Airframe and structure (ATA 51–57)",
+      "items": [
+        {
+          "n": "Fuselage section, barrel or skin panel",
+          "hs": "880730",
+          "aliases": [
+            "fuselage",
+            "skin panel",
+            "frame",
+            "stringer",
+            "bulkhead",
+            "pressure bulkhead",
+            "longeron",
+            "keel beam"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Wing, wing box or wing spar",
+          "hs": "880730",
+          "aliases": [
+            "wing",
+            "spar",
+            "rib",
+            "wing skin",
+            "winglet",
+            "sharklet",
+            "wingtip"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Flight control surface: aileron, flap, slat, spoiler, elevator, rudder",
+          "hs": "880730",
+          "aliases": [
+            "aileron",
+            "flap",
+            "slat",
+            "spoiler",
+            "elevator",
+            "rudder",
+            "trim tab",
+            "flaperon",
+            "airbrake"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Tail / empennage: horizontal or vertical stabiliser, tail cone, tail boom",
+          "hs": "880730",
+          "aliases": [
+            "stabiliser",
+            "stabilizer",
+            "fin",
+            "tailplane",
+            "tail boom",
+            "tail cone",
+            "empennage"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Door, hatch, cargo door, emergency exit, door hinge or latch mechanism (aircraft-specific)",
+          "hs": "880730",
+          "aliases": [
+            "cabin door",
+            "cargo door",
+            "emergency exit",
+            "door actuator",
+            "door hinge"
+          ],
+          "c": "high",
+          "note": "Generic hinges and locks of base metal are parts of general use → 8302.10 / 8301."
+        },
+        {
+          "n": "Radome",
+          "hs": "880730",
+          "aliases": [
+            "nose cone",
+            "radome"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cockpit windshield or window of laminated safety glass",
+          "hs": "700721",
+          "aliases": [
+            "windshield",
+            "windscreen",
+            "cockpit window",
+            "heated windshield"
+          ],
+          "c": "high",
+          "note": "Glass specially shaped for aircraft is classified as glass (70.07), not as an aircraft part."
+        },
+        {
+          "n": "Cabin window pane of acrylic / stretched PMMA",
+          "hs": "880730",
+          "aliases": [
+            "cabin window",
+            "passenger window",
+            "acrylic window"
+          ],
+          "c": "check",
+          "note": "Shaped aircraft windows of plastics are usually accepted in 8807.30; some administrations take 3926.90."
+        },
+        {
+          "n": "Engine pylon or engine mount",
+          "hs": "880730",
+          "aliases": [
+            "pylon",
+            "engine mount",
+            "engine strut"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Nacelle, cowling, inlet or thrust reverser",
+          "hs": "880730",
+          "aliases": [
+            "nacelle",
+            "cowling",
+            "cowl",
+            "thrust reverser",
+            "inlet cowl",
+            "fan cowl"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Fairing, access panel, wing-to-body fairing",
+          "hs": "880730",
+          "aliases": [
+            "fairing",
+            "access panel",
+            "belly fairing"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Structural fitting, bracket or lug machined for one aircraft type",
+          "hs": "880730",
+          "aliases": [
+            "bracket",
+            "fitting",
+            "lug",
+            "machined fitting",
+            "titanium fitting"
+          ],
+          "c": "check",
+          "note": "Only when identifiable as an aircraft part; a generic bracket of base metal is 7326.90 (steel) or 7616.99 (aluminium)."
+        },
+        {
+          "n": "Float or ski (seaplane / snow)",
+          "hs": "880730",
+          "aliases": [
+            "float",
+            "amphibious float",
+            "ski"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Static discharger (static wick)",
+          "hs": "880730",
+          "aliases": [
+            "static wick",
+            "static discharger"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Windshield wiper assembly for aircraft",
+          "hs": "880730",
+          "aliases": [
+            "wiper",
+            "windshield wiper"
+          ],
+          "c": "check",
+          "note": "8512.40 covers wipers for motor vehicles only."
+        }
+      ]
+    },
+    {
+      "id": "rotor",
+      "name": "Rotors, propellers and drive (ATA 61–65)",
+      "items": [
+        {
+          "n": "Main rotor blade",
+          "hs": "880710",
+          "aliases": [
+            "rotor blade",
+            "main rotor",
+            "blade"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Tail rotor blade or tail rotor assembly",
+          "hs": "880710",
+          "aliases": [
+            "tail rotor",
+            "fenestron",
+            "anti-torque rotor"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Rotor hub, rotor head, swashplate, pitch link, pitch horn, blade grip",
+          "hs": "880710",
+          "aliases": [
+            "rotor hub",
+            "rotor head",
+            "swashplate",
+            "pitch link",
+            "blade grip",
+            "elastomeric bearing",
+            "lead-lag damper"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Rotor mast / main rotor shaft",
+          "hs": "880710",
+          "aliases": [
+            "rotor mast",
+            "rotor shaft"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Propeller, propeller blade, hub or spinner",
+          "hs": "880710",
+          "aliases": [
+            "propeller",
+            "prop",
+            "propeller blade",
+            "spinner",
+            "prop hub",
+            "Hartzell",
+            "McCauley"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Propeller governor / pitch control",
+          "hs": "880710",
+          "aliases": [
+            "propeller governor",
+            "prop governor",
+            "pitch change unit"
+          ],
+          "c": "check",
+          "note": "Governor integral to the propeller system → 8807.10; a stand-alone speed governor can fall in 8481.80 or 9032.89."
+        },
+        {
+          "n": "Main gearbox / transmission (helicopter)",
+          "hs": "880730",
+          "aliases": [
+            "main gearbox",
+            "MGB",
+            "transmission",
+            "intermediate gearbox",
+            "tail rotor gearbox",
+            "TRGB"
+          ],
+          "c": "check",
+          "note": "Gearboxes not integral to the engine stay in Section XVII (Note 2(e) excludes 84.83 articles only when they are engine parts), so 8807.30 rather than 8483.40."
+        },
+        {
+          "n": "Tail rotor drive shaft, hanger bearing, flexible coupling",
+          "hs": "880730",
+          "aliases": [
+            "drive shaft",
+            "tail rotor drive shaft",
+            "hanger bearing",
+            "Thomas coupling"
+          ],
+          "c": "check",
+          "note": "The ball or roller bearing inside a hanger bearing is 8482 on its own."
+        },
+        {
+          "n": "Rotor brake",
+          "hs": "880730",
+          "aliases": [
+            "rotor brake"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Freewheel / sprag clutch unit",
+          "hs": "880730",
+          "aliases": [
+            "freewheel unit",
+            "sprag clutch"
+          ],
+          "c": "check",
+          "note": "Clutches of 8483.60 are excluded only as integral engine parts; the helicopter freewheel sits between engine and gearbox."
+        }
+      ]
+    },
+    {
+      "id": "engine",
+      "name": "Engines and power (ATA 70–80)",
+      "items": [
+        {
+          "n": "Turbofan / turbojet engine, thrust up to 25 kN",
+          "hs": "841111",
+          "aliases": [
+            "turbojet",
+            "small turbofan",
+            "Williams FJ44",
+            "PW600"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Turbofan / turbojet engine, thrust over 25 kN (CFM56, LEAP, PW1000G, Trent)",
+          "hs": "841112",
+          "aliases": [
+            "turbofan",
+            "jet engine",
+            "CFM56",
+            "LEAP",
+            "Trent",
+            "GEnx",
+            "PW1100G"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Turboprop engine up to 1,100 kW (PT6A, TPE331)",
+          "hs": "841121",
+          "aliases": [
+            "turboprop",
+            "PT6",
+            "PT6A",
+            "TPE331"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Turboprop engine over 1,100 kW (PW150, AE2100)",
+          "hs": "841122",
+          "aliases": [
+            "large turboprop",
+            "PW150"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Turboshaft engine for helicopters up to 5,000 kW (Arriel, PW200, RR300, CT7)",
+          "hs": "841181",
+          "aliases": [
+            "turboshaft",
+            "helicopter engine",
+            "Arriel",
+            "Arrius",
+            "PW206",
+            "RR300",
+            "CT7",
+            "T700"
+          ],
+          "c": "high",
+          "note": "Turboshafts are 'other gas turbines' (8411.81/82), not turbojets."
+        },
+        {
+          "n": "Turboshaft engine over 5,000 kW",
+          "hs": "841182",
+          "aliases": [
+            "large turboshaft"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Auxiliary power unit (APU)",
+          "hs": "841181",
+          "aliases": [
+            "APU",
+            "auxiliary power unit",
+            "Honeywell 131-9"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Piston aero-engine, spark-ignition (Lycoming, Continental, Rotax 912)",
+          "hs": "840710",
+          "aliases": [
+            "piston engine",
+            "Lycoming",
+            "Continental",
+            "Rotax 912",
+            "aero engine"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Part of turbojet or turboprop: fan blade, compressor blade, turbine blade, disc, vane, combustor, nozzle guide vane, engine case, seal segment",
+          "hs": "841191",
+          "aliases": [
+            "fan blade",
+            "turbine blade",
+            "compressor blade",
+            "HPT blade",
+            "combustor",
+            "combustion liner",
+            "nozzle guide vane",
+            "turbine disc",
+            "engine case",
+            "stator vane",
+            "shroud"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Part of turboshaft / APU (same components, 'other gas turbine' parts)",
+          "hs": "841199",
+          "aliases": [
+            "turboshaft part",
+            "APU part",
+            "power turbine",
+            "gas generator"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Part of piston aero-engine: cylinder, piston, crankshaft, camshaft, valve",
+          "hs": "840910",
+          "aliases": [
+            "cylinder",
+            "piston",
+            "crankshaft",
+            "exhaust valve",
+            "cylinder kit"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Engine bearing (ball or roller)",
+          "hs": "848210",
+          "aliases": [
+            "main shaft bearing",
+            "ball bearing",
+            "roller bearing"
+          ],
+          "c": "high",
+          "note": "Ball bearings 8482.10; cylindrical roller 8482.50; tapered roller 8482.20 — always their own heading."
+        },
+        {
+          "n": "Engine fuel pump, oil pump, scavenge pump",
+          "hs": "841330",
+          "aliases": [
+            "fuel pump",
+            "oil pump",
+            "scavenge pump",
+            "engine-driven pump"
+          ],
+          "c": "high",
+          "note": "8413.30 is for internal-combustion piston engines; turbine engine fuel/oil pumps go to 8413.60 (rotary positive-displacement) or 8413.70 (centrifugal)."
+        },
+        {
+          "n": "Fuel nozzle / fuel injector (turbine)",
+          "hs": "841191",
+          "aliases": [
+            "fuel nozzle",
+            "fuel injector",
+            "fuel manifold"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Igniter plug, exciter / ignition unit (turbine)",
+          "hs": "851180",
+          "aliases": [
+            "igniter",
+            "ignition exciter",
+            "ignition lead"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Spark plug (piston engine)",
+          "hs": "851110",
+          "aliases": [
+            "spark plug",
+            "aviation spark plug"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Magneto",
+          "hs": "851120",
+          "aliases": [
+            "magneto",
+            "Slick magneto",
+            "Bendix magneto"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Starter or starter-generator",
+          "hs": "851140",
+          "aliases": [
+            "starter",
+            "starter generator",
+            "air turbine starter"
+          ],
+          "c": "high",
+          "note": "Pneumatic air-turbine starters are 8412.80 (other engines and motors)."
+        },
+        {
+          "n": "Engine control unit / FADEC / EEC",
+          "hs": "903289",
+          "aliases": [
+            "FADEC",
+            "EEC",
+            "engine control unit",
+            "ECU",
+            "engine controller"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Engine oil cooler / fuel-oil heat exchanger",
+          "hs": "841950",
+          "aliases": [
+            "oil cooler",
+            "heat exchanger",
+            "fuel oil heat exchanger",
+            "FOHE"
+          ],
+          "c": "check",
+          "note": "Section XVII Note 2(e) keeps radiators for engines in the vehicle chapter; most administrations classify aircraft oil coolers as heat exchangers 8419.50."
+        },
+        {
+          "n": "Oil filter, fuel filter (turbine)",
+          "hs": "842129",
+          "aliases": [
+            "oil filter",
+            "fuel filter",
+            "filter element"
+          ],
+          "c": "high",
+          "note": "Filters for piston engines: 8421.23."
+        },
+        {
+          "n": "Exhaust stack, tailpipe, exhaust nozzle",
+          "hs": "880730",
+          "aliases": [
+            "exhaust",
+            "tailpipe",
+            "exhaust nozzle",
+            "jet pipe"
+          ],
+          "c": "check",
+          "note": "Engine exhaust parts can also be taken as engine parts (8411.91/99); nozzle parts of the engine itself are 8411."
+        },
+        {
+          "n": "Engine mount vibration isolator (rubber-metal)",
+          "hs": "401699",
+          "aliases": [
+            "vibration isolator",
+            "engine mount bushing",
+            "Lord mount"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Engine ground-run / test cell equipment",
+          "hs": "903110",
+          "aliases": [
+            "balancing machine",
+            "engine test stand"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "gear",
+      "name": "Landing gear, wheels and brakes (ATA 32)",
+      "items": [
+        {
+          "n": "Landing gear leg, oleo strut, shock absorber, trunnion, drag brace, torque link",
+          "hs": "880720",
+          "aliases": [
+            "landing gear",
+            "undercarriage",
+            "oleo",
+            "shock strut",
+            "nose gear",
+            "main gear",
+            "torque link",
+            "drag brace",
+            "trunnion",
+            "side brace"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Landing gear retraction actuator (hydraulic)",
+          "hs": "841221",
+          "aliases": [
+            "retraction actuator",
+            "gear actuator",
+            "uplock actuator"
+          ],
+          "c": "high",
+          "note": "Hydraulic cylinders/actuators are 8412.21 (linear) or 8412.29 whatever they move."
+        },
+        {
+          "n": "Nose-wheel steering actuator",
+          "hs": "841221",
+          "aliases": [
+            "steering actuator"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Wheel (aircraft wheel assembly, rim halves)",
+          "hs": "880720",
+          "aliases": [
+            "aircraft wheel",
+            "wheel assembly",
+            "wheel half",
+            "rim"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Brake assembly (carbon or steel multi-disc)",
+          "hs": "880720",
+          "aliases": [
+            "brake",
+            "carbon brake",
+            "brake assembly",
+            "brake disc",
+            "heat pack",
+            "brake stator",
+            "brake rotor"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Brake control valve / anti-skid valve",
+          "hs": "848120",
+          "aliases": [
+            "brake valve",
+            "anti-skid valve",
+            "brake metering valve"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Anti-skid controller / brake control unit",
+          "hs": "903289",
+          "aliases": [
+            "anti-skid controller",
+            "BCU",
+            "brake control unit"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Aircraft tyre (new)",
+          "hs": "401130",
+          "aliases": [
+            "tyre",
+            "tire",
+            "aircraft tyre",
+            "main wheel tyre",
+            "nose wheel tyre"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Retreaded aircraft tyre",
+          "hs": "401213",
+          "aliases": [
+            "retread tyre",
+            "retreaded tire"
+          ],
+          "c": "high",
+          "note": "Retreads of a kind used on aircraft: 4012.13; many administrations use 4012.13 — check."
+        },
+        {
+          "n": "Inner tube",
+          "hs": "401390",
+          "aliases": [
+            "inner tube"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Wheel bearing (tapered roller)",
+          "hs": "848220",
+          "aliases": [
+            "wheel bearing",
+            "tapered roller bearing"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Helicopter landing skid, skid shoe, ground-handling wheel",
+          "hs": "880720",
+          "aliases": [
+            "skid",
+            "landing skid",
+            "skid shoe",
+            "ground handling wheels"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Wheel chock, towbar (ground equipment, not an aircraft part)",
+          "hs": "871690",
+          "aliases": [
+            "towbar",
+            "wheel chock"
+          ],
+          "c": "check",
+          "note": "Towbars: 8716.90 or 7326.90 depending on construction; chocks of rubber 4016.99, of wood 4421.99."
+        }
+      ]
+    },
+    {
+      "id": "controls",
+      "name": "Flight controls and hydraulics (ATA 27, 29)",
+      "items": [
+        {
+          "n": "Hydraulic flight-control actuator / servo actuator / PCU",
+          "hs": "841221",
+          "aliases": [
+            "servo actuator",
+            "flight control actuator",
+            "PCU",
+            "power control unit",
+            "aileron actuator",
+            "rudder actuator",
+            "elevator actuator",
+            "hydraulic servo"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Electromechanical actuator (flap, slat, trim)",
+          "hs": "850131",
+          "aliases": [
+            "electromechanical actuator",
+            "EMA",
+            "flap actuator",
+            "trim actuator",
+            "flap drive motor"
+          ],
+          "c": "check",
+          "note": "Classified by the motor's output: DC motors 8501.31–34, AC 8501.40–53; a complete geared actuator can also be 8412.80/8501 by rulings."
+        },
+        {
+          "n": "Control column, yoke, rudder pedal, cyclic / collective stick, throttle quadrant",
+          "hs": "880730",
+          "aliases": [
+            "yoke",
+            "control column",
+            "rudder pedals",
+            "cyclic",
+            "collective",
+            "throttle quadrant",
+            "sidestick"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Control cable (steel wire rope) and turnbuckle",
+          "hs": "731210",
+          "aliases": [
+            "control cable",
+            "wire rope",
+            "turnbuckle",
+            "cable assembly"
+          ],
+          "c": "high",
+          "note": "Turnbuckles are parts of general use: 7318.19 / 7326.90."
+        },
+        {
+          "n": "Pulley, bellcrank, pushrod, control rod end",
+          "hs": "880730",
+          "aliases": [
+            "pulley",
+            "bellcrank",
+            "pushrod",
+            "push-pull rod",
+            "rod end"
+          ],
+          "c": "check",
+          "note": "Rod-end spherical bearings are 8483.30 / 8482.10 on their own."
+        },
+        {
+          "n": "Hydraulic pump (engine-driven or electric)",
+          "hs": "841350",
+          "aliases": [
+            "hydraulic pump",
+            "EDP",
+            "engine driven pump",
+            "electric motor pump",
+            "EMP",
+            "ACMP"
+          ],
+          "c": "high",
+          "note": "Reciprocating piston pumps 8413.50; rotary 8413.60."
+        },
+        {
+          "n": "Hydraulic valve: selector, priority, pressure relief, shuttle, check valve",
+          "hs": "848120",
+          "aliases": [
+            "hydraulic valve",
+            "selector valve",
+            "priority valve",
+            "shuttle valve",
+            "check valve",
+            "relief valve",
+            "solenoid valve"
+          ],
+          "c": "high",
+          "note": "Pressure-reducing valves 8481.10; safety/relief 8481.40; others 8481.80."
+        },
+        {
+          "n": "Hydraulic reservoir (aircraft-specific)",
+          "hs": "880730",
+          "aliases": [
+            "hydraulic reservoir",
+            "hydraulic tank"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Hydraulic accumulator",
+          "hs": "847989",
+          "aliases": [
+            "accumulator",
+            "hydraulic accumulator",
+            "nitrogen accumulator"
+          ],
+          "c": "check",
+          "note": "Rulings split between 8479.89 and 8412.21; EU practice tends to 8479.89."
+        },
+        {
+          "n": "Hydraulic hose assembly (rubber, with fittings)",
+          "hs": "400932",
+          "aliases": [
+            "hydraulic hose",
+            "hose assembly",
+            "Teflon hose",
+            "Aeroquip hose"
+          ],
+          "c": "high",
+          "note": "PTFE-lined hose with steel braid: 3917.39 or 8307.10 depending on construction."
+        },
+        {
+          "n": "Rigid hydraulic / fuel tube with fittings (aluminium, titanium, stainless)",
+          "hs": "880730",
+          "aliases": [
+            "rigid tube",
+            "hydraulic line",
+            "fuel line",
+            "tube assembly"
+          ],
+          "c": "check",
+          "note": "Plain tube stock is 7608 (aluminium), 7304 (steel), 8108.90 (titanium); only shaped aircraft tube assemblies go to 8807.30."
+        },
+        {
+          "n": "Tube fitting, union, elbow (AN/MS fittings)",
+          "hs": "730799",
+          "aliases": [
+            "AN fitting",
+            "MS fitting",
+            "union",
+            "elbow",
+            "tube fitting",
+            "bulkhead fitting"
+          ],
+          "c": "high",
+          "note": "Steel 7307; aluminium 7609.00; titanium 8108.90."
+        },
+        {
+          "n": "Hydraulic filter",
+          "hs": "842129",
+          "aliases": [
+            "hydraulic filter",
+            "filter bowl",
+            "filter element"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Hydraulic fluid (Skydrol, MIL-PRF-5606, MIL-PRF-83282)",
+          "hs": "381900",
+          "aliases": [
+            "hydraulic fluid",
+            "Skydrol",
+            "5606",
+            "83282"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Flight control computer / fly-by-wire computer",
+          "hs": "903289",
+          "aliases": [
+            "flight control computer",
+            "FCC",
+            "fly-by-wire",
+            "FBW computer"
+          ],
+          "c": "check",
+          "note": "Also accepted as 8471.50 or 9014.20 depending on function; most rulings take 9032.89 as an automatic regulating apparatus."
+        }
+      ]
+    },
+    {
+      "id": "fuel",
+      "name": "Fuel system (ATA 28)",
+      "items": [
+        {
+          "n": "Fuel tank, bladder cell, auxiliary / ferry tank (aircraft-specific)",
+          "hs": "880730",
+          "aliases": [
+            "fuel tank",
+            "bladder tank",
+            "fuel cell",
+            "ferry tank",
+            "external tank"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Fuel boost pump / transfer pump (electric, in tank)",
+          "hs": "841370",
+          "aliases": [
+            "boost pump",
+            "fuel boost pump",
+            "transfer pump",
+            "jet pump",
+            "ejector pump"
+          ],
+          "c": "high",
+          "note": "Centrifugal 8413.70; ejector (no moving parts) 8413.81."
+        },
+        {
+          "n": "Fuel valve: shutoff, crossfeed, refuel/defuel, drain",
+          "hs": "848180",
+          "aliases": [
+            "fuel valve",
+            "shutoff valve",
+            "crossfeed valve",
+            "refuel valve",
+            "fuel drain valve",
+            "fuel selector"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Fuel quantity probe / capacitance probe, fuel quantity indicator",
+          "hs": "902610",
+          "aliases": [
+            "fuel probe",
+            "fuel quantity",
+            "fuel gauge",
+            "FQI",
+            "capacitance probe"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Fuel flow meter / transmitter",
+          "hs": "902610",
+          "aliases": [
+            "fuel flow",
+            "fuel flow transmitter",
+            "flowmeter"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Fuel filter / water separator",
+          "hs": "842129",
+          "aliases": [
+            "fuel filter",
+            "water separator"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Fuel cap, filler neck",
+          "hs": "880730",
+          "aliases": [
+            "fuel cap",
+            "filler cap",
+            "filler neck"
+          ],
+          "c": "check",
+          "note": "A generic metal cap is 8309.90."
+        },
+        {
+          "n": "Jet fuel (Jet A-1)",
+          "hs": "271019",
+          "aliases": [
+            "Jet A-1",
+            "jet fuel",
+            "kerosene jet fuel",
+            "aviation turbine fuel"
+          ],
+          "c": "high",
+          "note": "Excise and specific duty apply; 2710.19 'kerosene-type jet fuel' national lines."
+        },
+        {
+          "n": "Aviation gasoline (Avgas 100LL)",
+          "hs": "271012",
+          "aliases": [
+            "avgas",
+            "100LL",
+            "aviation gasoline"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "electrical",
+      "name": "Electrical power (ATA 24)",
+      "items": [
+        {
+          "n": "AC generator / integrated drive generator (IDG) / variable-frequency generator",
+          "hs": "850162",
+          "aliases": [
+            "generator",
+            "IDG",
+            "integrated drive generator",
+            "VFG",
+            "alternator 115V"
+          ],
+          "c": "high",
+          "note": "Classified by output: 8501.61 up to 75 kVA, 8501.62 75–375 kVA, 8501.63 375–750 kVA."
+        },
+        {
+          "n": "DC generator / alternator (28 V)",
+          "hs": "851150",
+          "aliases": [
+            "alternator",
+            "DC generator",
+            "28V alternator"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Generator control unit (GCU), bus power control unit",
+          "hs": "903289",
+          "aliases": [
+            "GCU",
+            "generator control unit",
+            "BPCU"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Transformer rectifier unit (TRU)",
+          "hs": "850440",
+          "aliases": [
+            "TRU",
+            "transformer rectifier",
+            "static inverter",
+            "converter"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Battery, nickel-cadmium (main ship battery)",
+          "hs": "850730",
+          "aliases": [
+            "NiCd battery",
+            "nickel cadmium battery",
+            "main battery",
+            "Saft battery"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Battery, lead-acid",
+          "hs": "850710",
+          "aliases": [
+            "lead acid battery",
+            "Concorde battery",
+            "Gill battery"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Battery, lithium-ion",
+          "hs": "850760",
+          "aliases": [
+            "lithium battery",
+            "li-ion battery",
+            "True Blue battery"
+          ],
+          "c": "high",
+          "note": "Dangerous goods: UN3480/UN3481 shipping rules apply."
+        },
+        {
+          "n": "Wiring harness / loom (aircraft)",
+          "hs": "854430",
+          "aliases": [
+            "wiring harness",
+            "wire harness",
+            "loom",
+            "cable loom",
+            "wiring set"
+          ],
+          "c": "high",
+          "note": "8544.30 covers wiring sets for vehicles, aircraft and ships."
+        },
+        {
+          "n": "Aircraft wire (single conductor, e.g. M22759, Tefzel)",
+          "hs": "854449",
+          "aliases": [
+            "aircraft wire",
+            "Tefzel wire",
+            "M22759",
+            "hook-up wire"
+          ],
+          "c": "high",
+          "note": "Up to 1,000 V, not fitted with connectors: 8544.49; with connectors 8544.42."
+        },
+        {
+          "n": "Coaxial cable",
+          "hs": "854420",
+          "aliases": [
+            "coax",
+            "coaxial cable",
+            "RG-400"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Circuit breaker",
+          "hs": "853620",
+          "aliases": [
+            "circuit breaker",
+            "CB",
+            "Klixon breaker"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Relay / contactor",
+          "hs": "853641",
+          "aliases": [
+            "relay",
+            "contactor",
+            "power relay"
+          ],
+          "c": "high",
+          "note": "Up to 60 V: 8536.41; above: 8536.49."
+        },
+        {
+          "n": "Connector (D38999, MS3126, ARINC 600)",
+          "hs": "853669",
+          "aliases": [
+            "connector",
+            "D38999",
+            "circular connector",
+            "ARINC 600 connector",
+            "plug",
+            "receptacle"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Switch, toggle or rotary",
+          "hs": "853650",
+          "aliases": [
+            "toggle switch",
+            "switch",
+            "rotary switch"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Terminal, lug, splice",
+          "hs": "853690",
+          "aliases": [
+            "terminal lug",
+            "splice",
+            "terminal",
+            "ring terminal"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Static inverter (DC to AC)",
+          "hs": "850440",
+          "aliases": [
+            "inverter",
+            "static inverter"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Ground power receptacle / external power connector",
+          "hs": "853669",
+          "aliases": [
+            "ground power receptacle",
+            "external power plug"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "avionics",
+      "name": "Avionics, instruments and communications (ATA 22, 23, 31, 34)",
+      "items": [
+        {
+          "n": "Flight display / PFD / MFD / EFIS display unit",
+          "hs": "852852",
+          "aliases": [
+            "PFD",
+            "MFD",
+            "display unit",
+            "EFIS",
+            "glass cockpit",
+            "G1000 display",
+            "GDU"
+          ],
+          "c": "check",
+          "note": "Monitors able to connect to a data-processing machine: 8528.52; some rulings place complete integrated avionics displays in 9014.20."
+        },
+        {
+          "n": "Autopilot computer / flight guidance computer",
+          "hs": "901420",
+          "aliases": [
+            "autopilot",
+            "flight director",
+            "flight guidance",
+            "AFCS"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Attitude and heading reference system (AHRS), inertial reference unit (IRU/IRS), gyro",
+          "hs": "901420",
+          "aliases": [
+            "AHRS",
+            "IRU",
+            "IRS",
+            "inertial reference",
+            "gyro",
+            "attitude indicator",
+            "horizon"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Air data computer (ADC), altimeter, airspeed indicator, vertical speed indicator",
+          "hs": "901420",
+          "aliases": [
+            "air data computer",
+            "ADC",
+            "altimeter",
+            "airspeed indicator",
+            "ASI",
+            "VSI",
+            "variometer"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Pitot tube / pitot-static probe, angle-of-attack vane, static port",
+          "hs": "901490",
+          "aliases": [
+            "pitot",
+            "pitot tube",
+            "pitot probe",
+            "AOA vane",
+            "angle of attack sensor",
+            "static port"
+          ],
+          "c": "check",
+          "note": "As parts of 9014 instruments → 9014.90; some rulings use 9026.80."
+        },
+        {
+          "n": "GPS / GNSS navigator (GTN, GNS), FMS, VOR/ILS/DME/ADF receiver",
+          "hs": "852691",
+          "aliases": [
+            "GPS",
+            "GNSS",
+            "GTN 750",
+            "GNS 430",
+            "FMS",
+            "flight management system",
+            "VOR",
+            "ILS",
+            "DME",
+            "ADF",
+            "nav receiver",
+            "WAAS"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Transponder (Mode S, ADS-B out)",
+          "hs": "852610",
+          "aliases": [
+            "transponder",
+            "ADS-B",
+            "Mode S",
+            "GTX 345"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Weather radar, radio altimeter, TCAS / ACAS, TAWS / EGPWS",
+          "hs": "852610",
+          "aliases": [
+            "weather radar",
+            "radio altimeter",
+            "rad alt",
+            "TCAS",
+            "ACAS",
+            "TAWS",
+            "EGPWS",
+            "terrain awareness"
+          ],
+          "c": "high",
+          "note": "TAWS/EGPWS without a radar transmitter may be taken as 8526.91."
+        },
+        {
+          "n": "VHF / HF communication transceiver",
+          "hs": "852560",
+          "aliases": [
+            "VHF radio",
+            "comm radio",
+            "HF radio",
+            "transceiver",
+            "GTR 225",
+            "VHF-4000"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Satcom / Iridium / datalink unit, ACARS",
+          "hs": "852560",
+          "aliases": [
+            "satcom",
+            "Iridium",
+            "datalink",
+            "ACARS",
+            "CMU"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Emergency locator transmitter (ELT)",
+          "hs": "852560",
+          "aliases": [
+            "ELT",
+            "emergency locator",
+            "Artex",
+            "Kannad"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Antenna (VHF, GPS, transponder, ELT)",
+          "hs": "852910",
+          "aliases": [
+            "antenna",
+            "aerial",
+            "blade antenna",
+            "GPS antenna"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Audio panel, intercom",
+          "hs": "851890",
+          "aliases": [
+            "audio panel",
+            "intercom",
+            "GMA 350"
+          ],
+          "c": "check",
+          "note": "Audio control panels are often ruled 8518.40 (audio amplifiers) or 8517.62; 8518 family."
+        },
+        {
+          "n": "Headset (aviation)",
+          "hs": "851830",
+          "aliases": [
+            "headset",
+            "Bose A30",
+            "David Clark",
+            "aviation headset"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Flight data recorder (FDR)",
+          "hs": "847190",
+          "aliases": [
+            "flight data recorder",
+            "FDR",
+            "black box",
+            "FDAU"
+          ],
+          "c": "check",
+          "note": "Rulings vary: 8471.90 (data recording unit), 8519.81, or 9031.80."
+        },
+        {
+          "n": "Cockpit voice recorder (CVR)",
+          "hs": "851981",
+          "aliases": [
+            "cockpit voice recorder",
+            "CVR"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Engine indication: EGT, ITT, N1/N2, torque, oil pressure, oil temperature gauges",
+          "hs": "902620",
+          "aliases": [
+            "oil pressure gauge",
+            "torque gauge",
+            "manifold pressure gauge",
+            "pressure gauge"
+          ],
+          "c": "high",
+          "note": "Pressure 9026.20; temperature (EGT/ITT/CHT) 9025.19; rotation (tachometer, N1/N2) 9029.20; fuel flow/quantity 9026.10."
+        },
+        {
+          "n": "Temperature probe / thermocouple (EGT, OAT)",
+          "hs": "902519",
+          "aliases": [
+            "thermocouple",
+            "EGT probe",
+            "OAT probe",
+            "temperature sensor",
+            "RTD"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Tachometer, N1/N2 speed sensor",
+          "hs": "902920",
+          "aliases": [
+            "tachometer",
+            "tach",
+            "speed sensor",
+            "N1 sensor",
+            "monopole"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Engine indication and crew alerting system (EICAS / ECAM) computer",
+          "hs": "903289",
+          "aliases": [
+            "EICAS",
+            "ECAM",
+            "engine indication",
+            "EIS"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Magnetic compass",
+          "hs": "901410",
+          "aliases": [
+            "compass",
+            "whiskey compass",
+            "magnetic compass"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Clock / chronometer (cockpit)",
+          "hs": "910400",
+          "aliases": [
+            "cockpit clock",
+            "chronometer",
+            "panel clock"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Electronic flight bag (tablet) and mount",
+          "hs": "847130",
+          "aliases": [
+            "EFB",
+            "electronic flight bag",
+            "iPad mount"
+          ],
+          "c": "high",
+          "note": "Mounts of base metal 8302.49 / 7326.90."
+        },
+        {
+          "n": "Avionics cooling fan",
+          "hs": "841459",
+          "aliases": [
+            "avionics fan",
+            "cooling fan"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "ecs",
+      "name": "Air conditioning, pressurisation, pneumatics, ice protection (ATA 21, 30, 36)",
+      "items": [
+        {
+          "n": "Air cycle machine / pack (ACM)",
+          "hs": "841583",
+          "aliases": [
+            "air cycle machine",
+            "ACM",
+            "pack",
+            "environmental control pack"
+          ],
+          "c": "check",
+          "note": "Air-conditioning machines without a refrigerating unit: 8415.83; vapour-cycle systems with a compressor: 8415.81/82."
+        },
+        {
+          "n": "Vapour-cycle air conditioning compressor / condenser (helicopter, light aircraft)",
+          "hs": "841430",
+          "aliases": [
+            "A/C compressor",
+            "vapour cycle",
+            "condenser",
+            "evaporator"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cabin pressure outflow valve / safety valve",
+          "hs": "848140",
+          "aliases": [
+            "outflow valve",
+            "cabin pressure valve",
+            "safety valve"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cabin pressure controller",
+          "hs": "903281",
+          "aliases": [
+            "cabin pressure controller",
+            "CPC"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Bleed air valve, pressure regulating shutoff valve (PRSOV), anti-ice valve",
+          "hs": "848180",
+          "aliases": [
+            "bleed valve",
+            "PRSOV",
+            "anti-ice valve",
+            "bleed air"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Heat exchanger / precooler",
+          "hs": "841950",
+          "aliases": [
+            "precooler",
+            "heat exchanger",
+            "primary heat exchanger"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cabin fan / recirculation fan / blower",
+          "hs": "841459",
+          "aliases": [
+            "recirc fan",
+            "recirculation fan",
+            "blower",
+            "cabin fan"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Duct (aircraft air distribution)",
+          "hs": "880730",
+          "aliases": [
+            "air duct",
+            "ducting",
+            "cabin duct"
+          ],
+          "c": "check",
+          "note": "Generic plastic duct is 3917.32/39; aluminium duct 7608/7616."
+        },
+        {
+          "n": "Pneumatic de-icing boot (rubber)",
+          "hs": "401699",
+          "aliases": [
+            "de-ice boot",
+            "deice boot",
+            "pneumatic boot"
+          ],
+          "c": "check",
+          "note": "Some rulings place shaped de-icing boots in 8807.30."
+        },
+        {
+          "n": "Electric anti-ice heater mat (blade, windshield, probe heater element)",
+          "hs": "851680",
+          "aliases": [
+            "heater mat",
+            "anti-ice heater",
+            "heating element",
+            "blade heater"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Ice detector",
+          "hs": "903180",
+          "aliases": [
+            "ice detector",
+            "ice detection probe"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Oxygen system: crew mask, passenger mask, regulator",
+          "hs": "902000",
+          "aliases": [
+            "oxygen mask",
+            "crew oxygen mask",
+            "oxygen regulator",
+            "breathing apparatus"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Oxygen cylinder (steel or composite)",
+          "hs": "731100",
+          "aliases": [
+            "oxygen cylinder",
+            "oxygen bottle",
+            "O2 bottle"
+          ],
+          "c": "high",
+          "note": "Aluminium cylinders 7613.00."
+        },
+        {
+          "n": "Chemical oxygen generator (passenger)",
+          "hs": "880730",
+          "aliases": [
+            "oxygen generator",
+            "PSU oxygen generator"
+          ],
+          "c": "check",
+          "note": "Dangerous goods UN3356; classification also seen in 2847/3824 (the chemical) or 9020."
+        },
+        {
+          "n": "Fire extinguisher (portable, Halon / Halotron)",
+          "hs": "842410",
+          "aliases": [
+            "fire extinguisher",
+            "Halon extinguisher"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Engine / APU fire bottle (fixed extinguishing cartridge)",
+          "hs": "842410",
+          "aliases": [
+            "fire bottle",
+            "engine fire extinguisher",
+            "squib",
+            "cartridge"
+          ],
+          "c": "check",
+          "note": "The explosive squib on its own: 3603.60 (igniters)."
+        },
+        {
+          "n": "Fire / overheat detector loop, smoke detector",
+          "hs": "853110",
+          "aliases": [
+            "fire detector",
+            "overheat detector",
+            "fire loop",
+            "smoke detector"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "interior",
+      "name": "Cabin, cockpit and equipment (ATA 25, 33, 35, 38)",
+      "items": [
+        {
+          "n": "Passenger or crew seat (aircraft)",
+          "hs": "940110",
+          "aliases": [
+            "seat",
+            "passenger seat",
+            "crew seat",
+            "pilot seat",
+            "business class seat",
+            "economy seat"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Seat part: cushion, cover, track fitting, recline mechanism",
+          "hs": "940199",
+          "aliases": [
+            "seat cushion",
+            "seat cover",
+            "seat track",
+            "recline mechanism",
+            "seat part"
+          ],
+          "c": "high",
+          "note": "Seat tracks fixed to the floor structure are 8807.30."
+        },
+        {
+          "n": "Seat belt / harness (aircraft)",
+          "hs": "880730",
+          "aliases": [
+            "seat belt",
+            "harness",
+            "lap belt",
+            "shoulder harness",
+            "restraint"
+          ],
+          "c": "check",
+          "note": "Car seat belts are 8708.21; for aircraft most administrations use 8807.30, some 6307.90."
+        },
+        {
+          "n": "Galley, galley insert, trolley / cart",
+          "hs": "880730",
+          "aliases": [
+            "galley",
+            "galley insert",
+            "trolley",
+            "meal cart",
+            "atlas trolley"
+          ],
+          "c": "check",
+          "note": "Galley ovens 8516.60, coffee makers 8516.71, chillers 8418.69; empty trolleys 8716.80 by some rulings."
+        },
+        {
+          "n": "Lavatory module, toilet, vacuum waste system",
+          "hs": "880730",
+          "aliases": [
+            "lavatory",
+            "toilet",
+            "vacuum toilet",
+            "waste tank"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Overhead bin, sidewall panel, ceiling panel, partition, class divider",
+          "hs": "880730",
+          "aliases": [
+            "overhead bin",
+            "stowage bin",
+            "sidewall",
+            "ceiling panel",
+            "partition",
+            "monument",
+            "bulkhead liner"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Floor panel (honeycomb composite)",
+          "hs": "880730",
+          "aliases": [
+            "floor panel",
+            "floor board"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Carpet (aircraft cabin)",
+          "hs": "570331",
+          "aliases": [
+            "carpet",
+            "cabin carpet"
+          ],
+          "c": "high",
+          "note": "Tufted carpet of synthetic fibre; wool 5703.10."
+        },
+        {
+          "n": "Curtain, divider curtain",
+          "hs": "630312",
+          "aliases": [
+            "curtain",
+            "galley curtain"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cabin lighting (LED strip, reading light, lavatory light)",
+          "hs": "940519",
+          "aliases": [
+            "cabin light",
+            "reading light",
+            "mood lighting",
+            "LED strip",
+            "cabin lighting"
+          ],
+          "c": "high",
+          "note": "Luminaires designed for LED: 9405.11; other 9405.19."
+        },
+        {
+          "n": "Exterior lighting: landing light, taxi light, navigation / position light, anti-collision strobe",
+          "hs": "940549",
+          "aliases": [
+            "landing light",
+            "taxi light",
+            "nav light",
+            "position light",
+            "strobe",
+            "anti-collision light",
+            "beacon"
+          ],
+          "c": "check",
+          "note": "9405.4x (other electric luminaires); some administrations use 8512.20 by analogy with vehicles, most do not."
+        },
+        {
+          "n": "Signal / emergency lighting (exit sign, floor path marking)",
+          "hs": "940561",
+          "aliases": [
+            "exit sign",
+            "floor path lighting",
+            "emergency lighting"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Life vest / life jacket",
+          "hs": "630720",
+          "aliases": [
+            "life vest",
+            "life jacket"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Life raft (inflatable)",
+          "hs": "890710",
+          "aliases": [
+            "life raft",
+            "slide raft"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Evacuation slide",
+          "hs": "880730",
+          "aliases": [
+            "evacuation slide",
+            "escape slide"
+          ],
+          "c": "check",
+          "note": "Slide/raft combinations are often 8907.10; plain slides 8807.30."
+        },
+        {
+          "n": "Passenger service unit (PSU)",
+          "hs": "880730",
+          "aliases": [
+            "PSU",
+            "passenger service unit"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "In-flight entertainment screen / seatback display",
+          "hs": "852859",
+          "aliases": [
+            "IFE",
+            "in-flight entertainment",
+            "seatback screen"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cabin window shade",
+          "hs": "880730",
+          "aliases": [
+            "window shade",
+            "sunshade"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Cargo net, tie-down strap, cargo restraint",
+          "hs": "560811",
+          "aliases": [
+            "cargo net",
+            "tie-down strap",
+            "cargo strap"
+          ],
+          "c": "high",
+          "note": "Nets of man-made textiles 5608.19; webbing straps with hooks 6307.90 / 8308.90."
+        },
+        {
+          "n": "Cargo loading system: roller, latch, ball mat",
+          "hs": "880730",
+          "aliases": [
+            "cargo roller",
+            "cargo latch",
+            "ball mat",
+            "cargo loading system"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Unit load device (ULD container, pallet)",
+          "hs": "860900",
+          "aliases": [
+            "ULD",
+            "air cargo container",
+            "LD3",
+            "cargo pallet"
+          ],
+          "c": "high",
+          "note": "Air pallets of aluminium: 7616.99 by some rulings."
+        },
+        {
+          "n": "Survival kit, first aid kit",
+          "hs": "300650",
+          "aliases": [
+            "first aid kit",
+            "survival kit"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "hardware",
+      "name": "Fasteners, seals, bearings and standard hardware (never 8807)",
+      "items": [
+        {
+          "n": "Screw or bolt, steel (AN3–AN8, NAS, MS bolts, Hi-Lok of alloy steel)",
+          "hs": "731815",
+          "aliases": [
+            "screw",
+            "bolt",
+            "AN bolt",
+            "NAS bolt",
+            "MS bolt",
+            "Hi-Lok",
+            "hex bolt",
+            "machine screw",
+            "cap screw",
+            "lockbolt",
+            "Hi-Lite"
+          ],
+          "c": "high",
+          "note": "Section XVII Note 2(b): fasteners are parts of general use. Self-tapping screws 7318.14; wood screws 7318.12."
+        },
+        {
+          "n": "Screw or bolt, titanium",
+          "hs": "810890",
+          "aliases": [
+            "titanium bolt",
+            "titanium screw",
+            "titanium fastener",
+            "titanium Hi-Lok"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Screw, bolt or rivet, aluminium",
+          "hs": "761610",
+          "aliases": [
+            "aluminium rivet",
+            "aluminum rivet",
+            "solid rivet",
+            "aluminium bolt",
+            "AN470",
+            "MS20470"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Nut, steel (AN365, MS21042, nutplate / anchor nut, castle nut)",
+          "hs": "731816",
+          "aliases": [
+            "nut",
+            "nutplate",
+            "anchor nut",
+            "castle nut",
+            "lock nut",
+            "self-locking nut",
+            "MS21042",
+            "AN365"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Nut, titanium or aluminium",
+          "hs": "810890",
+          "aliases": [
+            "titanium nut",
+            "aluminium nut"
+          ],
+          "c": "high",
+          "note": "Aluminium nuts 7616.10."
+        },
+        {
+          "n": "Washer, steel (flat, spring, lock)",
+          "hs": "731822",
+          "aliases": [
+            "washer",
+            "flat washer",
+            "AN960",
+            "lock washer",
+            "spring washer"
+          ],
+          "c": "high",
+          "note": "Spring washers and lock washers 7318.21; other washers 7318.22."
+        },
+        {
+          "n": "Rivet, steel or Monel (blind rivet, Cherry rivet, Cherrymax)",
+          "hs": "731823",
+          "aliases": [
+            "rivet",
+            "blind rivet",
+            "Cherry rivet",
+            "CherryMax",
+            "pop rivet",
+            "Monel rivet"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Cotter pin / split pin, clevis pin, roll pin",
+          "hs": "731824",
+          "aliases": [
+            "cotter pin",
+            "split pin",
+            "clevis pin",
+            "roll pin",
+            "spring pin"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Quick-release fastener (Camloc, Dzus, quarter-turn)",
+          "hs": "731829",
+          "aliases": [
+            "Camloc",
+            "Dzus",
+            "quarter-turn fastener",
+            "quick release fastener"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Threaded insert (Helicoil, Keensert)",
+          "hs": "731829",
+          "aliases": [
+            "Helicoil",
+            "Keensert",
+            "threaded insert",
+            "wire thread insert"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Safety wire / lockwire",
+          "hs": "721710",
+          "aliases": [
+            "safety wire",
+            "lockwire",
+            "MS20995"
+          ],
+          "c": "high",
+          "note": "Stainless steel wire 7223.00."
+        },
+        {
+          "n": "Clamp: hose clamp, Adel / cushion clamp, loop clamp",
+          "hs": "732690",
+          "aliases": [
+            "clamp",
+            "hose clamp",
+            "Adel clamp",
+            "cushion clamp",
+            "loop clamp",
+            "MS21919",
+            "P-clip"
+          ],
+          "c": "high",
+          "note": "Stainless worm-drive clamps are also 7326.90 (some administrations 8309.90)."
+        },
+        {
+          "n": "Spring (coil, leaf, torsion), steel",
+          "hs": "732020",
+          "aliases": [
+            "spring",
+            "coil spring",
+            "compression spring",
+            "torsion spring"
+          ],
+          "c": "high",
+          "note": "Leaf springs 7320.10; other springs 7320.90."
+        },
+        {
+          "n": "O-ring, rubber seal, gasket of vulcanised rubber",
+          "hs": "401693",
+          "aliases": [
+            "O-ring",
+            "oring",
+            "seal",
+            "rubber seal",
+            "gasket",
+            "packing",
+            "door seal",
+            "MS28775",
+            "AS3209"
+          ],
+          "c": "high",
+          "note": "Note 2(a): seals and gaskets of any material are parts of general use."
+        },
+        {
+          "n": "Gasket of other material (metal, PTFE, composite, cork)",
+          "hs": "848410",
+          "aliases": [
+            "metal gasket",
+            "spiral wound gasket",
+            "PTFE gasket",
+            "crush washer",
+            "sealing washer",
+            "Stat-O-Seal"
+          ],
+          "c": "high",
+          "note": "Mechanical seals 8484.20; sets of gaskets 8484.90."
+        },
+        {
+          "n": "Ball bearing",
+          "hs": "848210",
+          "aliases": [
+            "ball bearing",
+            "bearing",
+            "deep groove bearing",
+            "angular contact bearing"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Roller bearing (tapered, cylindrical, needle, spherical)",
+          "hs": "848220",
+          "aliases": [
+            "roller bearing",
+            "needle bearing",
+            "spherical roller bearing",
+            "cylindrical roller bearing"
+          ],
+          "c": "high",
+          "note": "Tapered 8482.20; spherical 8482.30; needle 8482.40; cylindrical 8482.50."
+        },
+        {
+          "n": "Plain bearing, bushing, spherical rod-end bearing, self-lubricating liner",
+          "hs": "848330",
+          "aliases": [
+            "bushing",
+            "bush",
+            "plain bearing",
+            "rod end",
+            "spherical bearing",
+            "Heim joint",
+            "uniball",
+            "sleeve bearing",
+            "journal bearing"
+          ],
+          "c": "check",
+          "note": "8483.30 for bearing housings and plain shaft bearings; an aircraft-only machined bushing with no bearing function can be 8807.30 or the base-metal heading."
+        },
+        {
+          "n": "Shim (laminated or solid)",
+          "hs": "732690",
+          "aliases": [
+            "shim",
+            "laminated shim",
+            "peelable shim"
+          ],
+          "c": "high",
+          "note": "Aluminium shims 7616.99; brass 7419.80."
+        },
+        {
+          "n": "Standoff, spacer, grommet (metal)",
+          "hs": "732690",
+          "aliases": [
+            "spacer",
+            "standoff",
+            "grommet"
+          ],
+          "c": "high",
+          "note": "Rubber grommets 4016.99; plastic 3926.90."
+        },
+        {
+          "n": "Cable tie, lacing tape, spiral wrap",
+          "hs": "392690",
+          "aliases": [
+            "cable tie",
+            "zip tie",
+            "lacing tape",
+            "lacing cord",
+            "spiral wrap"
+          ],
+          "c": "high",
+          "note": "Lacing tape of textile 5607/5806."
+        },
+        {
+          "n": "Hose (rubber, fuel/oil, SAE / MIL)",
+          "hs": "400932",
+          "aliases": [
+            "rubber hose",
+            "fuel hose",
+            "oil hose",
+            "MIL-DTL-6000"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Hose (PTFE / plastic)",
+          "hs": "391739",
+          "aliases": [
+            "PTFE hose",
+            "plastic tubing",
+            "Tygon tubing"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Flexible metal hose / bellows",
+          "hs": "830710",
+          "aliases": [
+            "flexible metal hose",
+            "bellows",
+            "flex duct"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Pipe / tube fitting, steel (AN/MS)",
+          "hs": "730799",
+          "aliases": [
+            "fitting",
+            "AN fitting",
+            "pipe fitting",
+            "elbow fitting",
+            "tee fitting"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Pipe / tube fitting, aluminium",
+          "hs": "760900",
+          "aliases": [
+            "aluminium fitting",
+            "AN aluminium fitting",
+            "blue fitting"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Hinge, latch, lock (base metal, general use)",
+          "hs": "830210",
+          "aliases": [
+            "hinge",
+            "piano hinge",
+            "latch",
+            "lock",
+            "Hartwell latch"
+          ],
+          "c": "high",
+          "note": "Hinges 8302.10; other mountings 8302.49; locks 8301."
+        },
+        {
+          "n": "Handle, knob, placard holder (base metal)",
+          "hs": "830249",
+          "aliases": [
+            "handle",
+            "knob",
+            "pull handle"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Key, dowel, retaining ring, circlip, snap ring",
+          "hs": "731829",
+          "aliases": [
+            "circlip",
+            "snap ring",
+            "retaining ring",
+            "E-clip",
+            "dowel pin"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Electrical bonding jumper / bonding strap",
+          "hs": "854442",
+          "aliases": [
+            "bonding jumper",
+            "bonding strap",
+            "bonding lead",
+            "ground strap"
+          ],
+          "c": "high",
+          "note": "Fitted with lugs: 8544.42; bare braid 7413 / 7616."
+        },
+        {
+          "n": "Decal, placard, marking (self-adhesive)",
+          "hs": "491199",
+          "aliases": [
+            "placard",
+            "decal",
+            "sticker",
+            "label"
+          ],
+          "c": "high",
+          "note": "Metal placards 8310.00; plastic 3919.90 / 3926.90."
+        }
+      ]
+    },
+    {
+      "id": "materials",
+      "name": "Materials and consumables (ATA 20, 51)",
+      "items": [
+        {
+          "n": "Aluminium alloy sheet / plate (2024-T3, 7075-T6, clad)",
+          "hs": "760612",
+          "aliases": [
+            "aluminium sheet",
+            "aluminum sheet",
+            "2024-T3",
+            "7075",
+            "alclad",
+            "aluminium plate"
+          ],
+          "c": "high",
+          "note": "Rectangular alloy sheet > 0.2 mm: 7606.12; extrusions 7604.29; bar 7604.21."
+        },
+        {
+          "n": "Aluminium extrusion / bar / angle",
+          "hs": "760429",
+          "aliases": [
+            "aluminium extrusion",
+            "aluminium angle",
+            "aluminium bar",
+            "T-section"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Aluminium tube",
+          "hs": "760820",
+          "aliases": [
+            "aluminium tube",
+            "6061 tube"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Titanium sheet, bar, forging (Ti-6Al-4V)",
+          "hs": "810890",
+          "aliases": [
+            "titanium sheet",
+            "titanium bar",
+            "Ti-6Al-4V",
+            "titanium forging"
+          ],
+          "c": "high",
+          "note": "Unwrought titanium 8108.20; waste 8108.30."
+        },
+        {
+          "n": "Steel: 4130 chromoly tube / sheet, 15-5PH, 300M bar",
+          "hs": "730431",
+          "aliases": [
+            "4130 tube",
+            "chromoly",
+            "15-5PH",
+            "17-4PH",
+            "300M",
+            "alloy steel bar"
+          ],
+          "c": "high",
+          "note": "Cold-drawn seamless alloy tube 7304.51; sheet 7225/7226; stainless bar 7222."
+        },
+        {
+          "n": "Nickel superalloy (Inconel 718, Waspaloy) bar / sheet",
+          "hs": "750512",
+          "aliases": [
+            "Inconel",
+            "Inconel 718",
+            "Waspaloy",
+            "Hastelloy",
+            "nickel alloy"
+          ],
+          "c": "high",
+          "note": "Nickel alloy bars 7505.12; plates/sheets 7506.20."
+        },
+        {
+          "n": "Carbon fibre prepreg (epoxy-impregnated fabric or tape)",
+          "hs": "681513",
+          "aliases": [
+            "prepreg",
+            "carbon prepreg",
+            "carbon fibre fabric",
+            "CFRP",
+            "carbon fiber tape"
+          ],
+          "c": "check",
+          "note": "HS 2022: carbon fibre fabrics 6815.13; uncured prepreg tape is also classified 3921.90 — rulings differ."
+        },
+        {
+          "n": "Glass fibre fabric (E-glass, S-glass)",
+          "hs": "701963",
+          "aliases": [
+            "fibreglass cloth",
+            "fiberglass fabric",
+            "E-glass",
+            "S-glass",
+            "glass fibre"
+          ],
+          "c": "high",
+          "note": "HS 2022 7019.6x–7019.7x for mechanically bonded / closed fabrics; woven of rovings 7019.6x."
+        },
+        {
+          "n": "Aramid (Kevlar / Nomex) fabric",
+          "hs": "540211",
+          "aliases": [
+            "Kevlar",
+            "Nomex fabric",
+            "aramid"
+          ],
+          "c": "high",
+          "note": "High-tenacity aramid yarn 5402.11; woven aramid fabric 5407.10; Nomex paper honeycomb is 4823.90."
+        },
+        {
+          "n": "Honeycomb core (Nomex / aluminium)",
+          "hs": "880730",
+          "aliases": [
+            "honeycomb",
+            "Nomex honeycomb",
+            "aluminium honeycomb",
+            "core"
+          ],
+          "c": "check",
+          "note": "Aluminium honeycomb in sheets: 7616.99; Nomex honeycomb: 3921.19 / 4823.90 — classified as a material, not a part, until shaped for one aircraft."
+        },
+        {
+          "n": "Epoxy resin / adhesive (film adhesive, EA9394, Hysol)",
+          "hs": "350691",
+          "aliases": [
+            "adhesive",
+            "epoxy adhesive",
+            "film adhesive",
+            "Hysol",
+            "EA9394",
+            "structural adhesive"
+          ],
+          "c": "high",
+          "note": "Epoxy resins in primary form 3907.30."
+        },
+        {
+          "n": "Sealant (polysulfide PR-1422, PR-1776, fuel tank sealant)",
+          "hs": "321410",
+          "aliases": [
+            "sealant",
+            "PR-1422",
+            "PR-1776",
+            "polysulfide",
+            "fuel tank sealant",
+            "ProSeal"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Primer / topcoat paint (aerospace polyurethane, chromate primer)",
+          "hs": "320810",
+          "aliases": [
+            "paint",
+            "primer",
+            "topcoat",
+            "polyurethane paint",
+            "chromate primer",
+            "Alodine"
+          ],
+          "c": "high",
+          "note": "Polyester-based 3208.10; acrylic/vinyl 3208.20; other 3208.90. Alodine (chromate conversion) 3824.99."
+        },
+        {
+          "n": "Lubricant / grease (Aeroshell 7, 22, 33; MIL-PRF-23827)",
+          "hs": "340319",
+          "aliases": [
+            "grease",
+            "Aeroshell grease",
+            "lubricant",
+            "MIL-PRF-23827",
+            "Mobilgrease 28"
+          ],
+          "c": "high",
+          "note": "Petroleum-based preparations 3403.19; synthetic 3403.99."
+        },
+        {
+          "n": "Turbine engine oil (Mobil Jet Oil II, Aeroshell 500)",
+          "hs": "271019",
+          "aliases": [
+            "turbine oil",
+            "Mobil Jet",
+            "Aeroshell 500",
+            "engine oil",
+            "MIL-PRF-23699"
+          ],
+          "c": "check",
+          "note": "Synthetic ester turbine oils with no petroleum base are 3403.99 / 3811.21 depending on composition; mineral-based 2710.19."
+        },
+        {
+          "n": "Piston engine oil (Aeroshell W100)",
+          "hs": "271019",
+          "aliases": [
+            "W100",
+            "aviation oil",
+            "piston engine oil"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "De-icing / anti-icing fluid (Type I–IV)",
+          "hs": "382000",
+          "aliases": [
+            "de-icing fluid",
+            "deicing fluid",
+            "Type I fluid",
+            "Type IV fluid",
+            "anti-icing fluid"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Corrosion inhibiting compound (ACF-50, Dinitrol, LPS-3)",
+          "hs": "340399",
+          "aliases": [
+            "ACF-50",
+            "corrosion inhibitor",
+            "Dinitrol",
+            "LPS"
+          ],
+          "c": "check",
+          "note": "Anti-corrosion preparations without petroleum oil 3403.99 / 3824.99."
+        },
+        {
+          "n": "Cleaning solvent (MEK, IPA, aviation degreaser)",
+          "hs": "291412",
+          "aliases": [
+            "MEK",
+            "methyl ethyl ketone",
+            "isopropyl alcohol",
+            "IPA",
+            "degreaser"
+          ],
+          "c": "high",
+          "note": "MEK 2914.12; IPA 2905.12; mixed degreasers 3402.90 / 3814.00."
+        },
+        {
+          "n": "Speed tape / aluminium foil tape",
+          "hs": "760719",
+          "aliases": [
+            "speed tape",
+            "aluminium tape",
+            "foil tape"
+          ],
+          "c": "high",
+          "note": "Backed foil tape 7607.20."
+        },
+        {
+          "n": "Abrasive: Scotch-Brite, sandpaper",
+          "hs": "680520",
+          "aliases": [
+            "Scotch-Brite",
+            "sandpaper",
+            "abrasive pad"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Aircraft cable (stainless steel wire rope, 7x7, 7x19)",
+          "hs": "731210",
+          "aliases": [
+            "aircraft cable",
+            "wire rope",
+            "7x19 cable",
+            "stainless cable"
+          ],
+          "c": "high"
+        }
+      ]
+    },
+    {
+      "id": "gse",
+      "name": "Ground support and maintenance equipment (not aircraft parts)",
+      "items": [
+        {
+          "n": "Aircraft tug / tow tractor",
+          "hs": "870919",
+          "aliases": [
+            "tug",
+            "tow tractor",
+            "pushback tractor"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Ground power unit (GPU, 28 V / 115 V 400 Hz)",
+          "hs": "850220",
+          "aliases": [
+            "GPU",
+            "ground power unit",
+            "400Hz power"
+          ],
+          "c": "high",
+          "note": "Diesel-engine generating sets 8502.13; electric frequency converters 8504.40."
+        },
+        {
+          "n": "Aircraft jack (tripod / axle jack)",
+          "hs": "842549",
+          "aliases": [
+            "aircraft jack",
+            "tripod jack",
+            "axle jack"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Hydraulic mule / test rig",
+          "hs": "841350",
+          "aliases": [
+            "hydraulic mule",
+            "hydraulic test rig"
+          ],
+          "c": "check",
+          "note": "Classified by the pump unit; complete test benches 9031.20."
+        },
+        {
+          "n": "Air start unit / air conditioning cart",
+          "hs": "841480",
+          "aliases": [
+            "air start unit",
+            "ASU",
+            "PCA cart",
+            "air conditioning cart"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Nitrogen / oxygen service cart",
+          "hs": "731100",
+          "aliases": [
+            "nitrogen cart",
+            "oxygen cart"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Maintenance stand / docking",
+          "hs": "730890",
+          "aliases": [
+            "maintenance stand",
+            "work platform",
+            "docking"
+          ],
+          "c": "high",
+          "note": "Self-propelled lifts 8427/8428."
+        },
+        {
+          "n": "Torque wrench, hand tools",
+          "hs": "820420",
+          "aliases": [
+            "torque wrench",
+            "hand tools",
+            "wrench",
+            "socket set"
+          ],
+          "c": "high"
+        },
+        {
+          "n": "Borescope",
+          "hs": "903149",
+          "aliases": [
+            "borescope",
+            "videoscope"
+          ],
+          "c": "check",
+          "note": "Industrial borescopes are 9031.49 (optical instruments) — not the medical 9018; use 9031.49."
+        },
+        {
+          "n": "Engine stand / transport cradle",
+          "hs": "730890",
+          "aliases": [
+            "engine stand",
+            "engine cradle",
+            "transport stand"
+          ],
+          "c": "check"
+        },
+        {
+          "n": "Aircraft cover, engine inlet plug, pitot cover",
+          "hs": "630790",
+          "aliases": [
+            "aircraft cover",
+            "inlet plug",
+            "pitot cover",
+            "canopy cover"
+          ],
+          "c": "high"
+        }
+      ]
+    }
+  ]
+}

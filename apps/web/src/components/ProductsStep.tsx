@@ -6,7 +6,8 @@ import { Card, Footer, PrimaryButton, Progress, Title, smallInputCls } from "./u
 import { ScanSheet } from "./ScanSheet";
 import { FX_DEFAULT } from "@/lib/lanes";
 import { GENERAL_GROUPS, GENERAL_LINES, GENERAL_VERIFY_URL } from "@landedmy/engine";
-import { SENSITIVE_CHAPTERS, searchHs, type HsHit } from "@/lib/hs/search";
+import { SENSITIVE_CHAPTERS, describeHs, searchHs, type HsHit } from "@/lib/hs/search";
+import { searchCatalogs, type CatalogHit } from "@/lib/hs/catalogs";
 import { useEffect } from "react";
 import { COUNTRIES } from "@/lib/country";
 import { fetchWorldRate } from "@/lib/api";
@@ -85,13 +86,18 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   const [scan, setScan] = useState(false);
   const hits = searchLibrary(q);
   const [hsHits, setHsHits] = useState<HsHit[]>([]);
+  const [partHits, setPartHits] = useState<CatalogHit[]>([]);
   useEffect(() => {
     if (q.trim().length < 2) {
       setHsHits([]);
+      setPartHits([]);
       return;
     }
     let live = true;
-    const t = setTimeout(() => searchHs(q, 6).then((r) => live && setHsHits(r)), 120);
+    const t = setTimeout(() => {
+      searchHs(q, 6).then((r) => live && setHsHits(r));
+      searchCatalogs(q, 4).then((r) => live && setPartHits(r));
+    }, 120);
     return () => {
       live = false;
       clearTimeout(t);
@@ -179,6 +185,14 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
     setRows([...rows, fromHs(h, q.trim(), indicative)]);
     setQ("");
   };
+  const addPart = async (p: CatalogHit) => {
+    const h = await describeHs(p.item.hs);
+    if (!h) return;
+    const row = fromHs(h, p.item.n, indicative);
+    const why = `${p.catalog} · ${p.group}${p.item.c === "check" ? " · classification varies by country — confirm" : ""}${p.item.note ? ` · ${p.item.note}` : ""}`;
+    setRows([...rows, { ...row, duty_notes: [why, ...(row.duty_notes ?? [])] }]);
+    setQ("");
+  };
 
   const units = rows.reduce((a, r) => a + r.units_per_case * r.cases, 0);
   const goods = rows.reduce((a, r) => a + r.units_per_case * r.cases * r.unit_cost, 0);
@@ -220,6 +234,23 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                 </span>
               </button>
             ))}
+            {partHits.length > 0 && (
+              <div className="border-t border-line-2">
+                <div className="px-3.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted">{partHits[0].catalog} · part catalogue</div>
+                {partHits.map((p) => (
+                  <button key={p.group + p.item.n} type="button" onClick={() => addPart(p)} className="flex w-full items-start justify-between gap-3 px-3.5 py-2 text-left hover:bg-teal-tint">
+                    <span className="min-w-0">
+                      <span className="block truncate text-[13px] font-medium">{p.item.n}</span>
+                      <span className="block truncate text-[11px] text-muted">
+                        {p.group}
+                        {p.item.c === "check" ? " · rulings vary" : ""}
+                      </span>
+                    </span>
+                    <span className="shrink-0 font-mono text-[12px] text-teal">{p.item.hs.slice(0, 4)}.{p.item.hs.slice(4)}</span>
+                  </button>
+                ))}
+              </div>
+            )}
             {hsHits.length > 0 && (
               <div className="border-t border-line-2">
                 <div className="px-3.5 pb-1 pt-2 text-[10px] font-semibold uppercase tracking-wider text-muted">Any product · world HS code</div>
