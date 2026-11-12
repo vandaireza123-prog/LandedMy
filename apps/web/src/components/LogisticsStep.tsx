@@ -1,6 +1,7 @@
 "use client";
 import type { AppState } from "@/lib/state";
-import { BENCHMARK_AS_OF, EQUIPMENT_LABEL, benchmarkFor } from "@/lib/lanes";
+import { BENCHMARK_AS_OF, MODES, benchmarkFor } from "@/lib/lanes";
+import { modeCount } from "@/lib/shipment";
 import { DEST_PORTS } from "@/lib/ports";
 import { useT } from "@/lib/i18n";
 import { Card, Footer, PrimaryButton, Progress, Title, cs, rm, smallInputCls } from "./ui";
@@ -8,7 +9,8 @@ import { Card, Footer, PrimaryButton, Progress, Title, cs, rm, smallInputCls } f
 export function LogisticsStep({ state, update }: { state: AppState; update: (p: Partial<AppState>) => void }) {
   const t = useT();
   const bench = benchmarkFor(state.origin_port, state.equipment);
-  const units = state.equipment === "pallet" ? state.pallets : 1;
+  const mode = MODES[state.equipment] ?? MODES.pallet;
+  const units = mode.measure === "pallets" || mode.measure === "containers" ? modeCount(state) : 1;
   const benchMid = bench ? Math.round(((bench.low + bench.high) / 2) * units) : 0;
   const destLabel = DEST_PORTS.find((p) => p.code === state.dest_port)?.label.split(" (")[0];
   const localTotal = Object.values(state.local_charges).reduce((a, b) => a + b, 0);
@@ -24,7 +26,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
         <Card>
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">
-              Sea freight, {state.origin_label.split(",")[0]} → {destLabel}
+              {mode.freight}, {state.origin_label.split(",")[0]} → {destLabel}
             </div>
             {!cif && bench && (
               <button type="button" onClick={() => update({ freight: benchMid })} className="text-xs font-semibold text-teal">
@@ -52,8 +54,8 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
               </label>
               <div className="mt-2 text-[11px] text-muted">
                 {bench
-                  ? `Benchmark: ${bench.currency} ${bench.low.toLocaleString()}–${bench.high.toLocaleString()} per ${EQUIPMENT_LABEL[state.equipment].toLowerCase()}${units > 1 ? ` × ${units}` : ""} · ${BENCHMARK_AS_OF}`
-                  : "No benchmark for this lane yet — enter your forwarder's quote. Leaving it at 0 gives a duty-paid price without freight."}
+                  ? `Benchmark: ${bench.currency} ${bench.low.toLocaleString()}–${bench.high.toLocaleString()} per ${mode.measure === "pallets" ? "pallet" : mode.label.toLowerCase()}${units > 1 ? ` × ${units}` : ""} · ${BENCHMARK_AS_OF}`
+                  : `No ${mode.label.toLowerCase()} benchmark for this lane yet — enter your forwarder's quote. Leaving it at 0 gives a duty-paid price without freight.`}
               </div>
             </>
           )}
@@ -82,7 +84,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
             <circle cx="12" cy="12" r="9" />
             <path d="M12 8v5M12 16h.01" />
           </svg>
-          <div className="text-xs leading-snug text-teal">Alcohol needs an import licence and customs tax stamps. We list what you need on the results page; nothing is charged for it.</div>
+          <div className="text-xs leading-snug text-teal">Permits, licences and stamps your products need are listed on the results page; nothing is charged for them.</div>
         </div>
       </div>
       <Footer>

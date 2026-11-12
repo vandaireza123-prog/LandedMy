@@ -3,7 +3,7 @@ import { engineQuantity } from "@/lib/quantity";
 import type { ProductRow } from "@/lib/shipment";
 import { useMemo, useState } from "react";
 import { computeShipment, preferenceNote, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
-import { tablesFor } from "@/lib/shipment";
+import { modeCount, tablesFor } from "@/lib/shipment";
 import { COUNTRIES, TIER_LABEL, fxDefault, localChargesFor } from "@/lib/country";
 import { FX_DEFAULT } from "@/lib/lanes";
 import { CompareDest } from "./CompareDest";
@@ -18,6 +18,7 @@ import { saveShipment } from "@/lib/supabase";
 import { snapshotOf } from "@/lib/state";
 import { QuoteSheet } from "./QuoteSheet";
 import { requirementsFor } from "@/lib/compliance";
+import { DutyEditor, needsDuty } from "./DutyEditor";
 
 
 function Row({ k, v }: { k: string; v: number }) {
@@ -53,7 +54,7 @@ function lineLabels(p?: ProductRow): { unitCost: number; unitLabel?: string; pac
   return { unitCost: q.unit_cost, unitLabel: q.unit_label, packLabel: q.pack_label };
 }
 
-function LineCard({ l, currency, fx, unitCost, originIso, unitLabel, packLabel }: { l: LineResult; currency: string; fx: number; unitCost: number; originIso: string; unitLabel?: string; packLabel?: string }) {
+function LineCard({ l, currency, fx, unitCost, originIso, unitLabel, packLabel, children }: { l: LineResult; currency: string; fx: number; unitCost: number; originIso: string; unitLabel?: string; packLabel?: string; children?: React.ReactNode }) {
   const t = useT();
   const prefNote = preferenceNote(originIso, l.hs_code);
   const [open, setOpen] = useState(false);
@@ -105,6 +106,7 @@ function LineCard({ l, currency, fx, unitCost, originIso, unitLabel, packLabel }
           </div>
         </div>
       )}
+      {children}
     </Card>
   );
 }
@@ -151,15 +153,23 @@ export function ResultsStep({
               {/excise/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
                 ? `Alcohol into ${COUNTRIES[state.dest_country].name} isn't priced yet: its excise rates haven't been loaded, and we don't guess them. Choose Malaysia or Singapore as the destination, or remove the alcohol lines.`
                 : /fx_rate must be/i.test(result.error)
-                  ? `Enter the exchange rate on step 1: how many ${COUNTRIES[state.dest_country].symbol} per 1 ${state.currency}. We have no feed for ${COUNTRIES[state.dest_country].currency} yet.`
+                  ? `Enter the exchange rate on step 2: how many ${COUNTRIES[state.dest_country].symbol} per 1 ${state.currency}. We have no feed for ${COUNTRIES[state.dest_country].currency} yet.`
                   : /No effective tariff/i.test(result.error) && COUNTRIES[state.dest_country].tier === "indicative"
-                  ? `Enter the import duty % for every product (step 2) — ${COUNTRIES[state.dest_country].name} has no default rate we can safely apply.`
+                  ? `Enter the import duty % for the products below — ${COUNTRIES[state.dest_country].name} has no default rate we can safely apply.`
                   : result.error}
             </p>
           </Card>
+          {state.products
+            .filter((p) => p.category === "general" && p.manual_duty_pct == null)
+            .map((p) => (
+              <Card key={p.id} className="mt-2.5">
+                <div className="text-[14px] font-semibold">{p.name}</div>
+                <DutyEditor p={p} state={state} update={update} />
+              </Card>
+            ))}
         </div>
         <Footer>
-          <SecondaryButton onClick={() => update({ step: 2 })}>Back to products</SecondaryButton>
+          <SecondaryButton onClick={() => update({ step: 1 })}>Back to products</SecondaryButton>
         </Footer>
       </>
     );
@@ -222,6 +232,22 @@ export function ResultsStep({
           </span>
         </div>
       )}
+      {(() => {
+        const missing = state.products.filter((p) => needsDuty(p, state.dest_country));
+        if (!missing.length) return null;
+        return (
+          <div className="mx-5 mt-3 rounded-[10px] bg-amber-tint px-3 py-2.5 text-[12px] leading-snug text-amber">
+            <strong>
+              {missing.length} product{missing.length === 1 ? " needs" : "s need"} a duty rate.
+            </strong>{" "}
+            No rate is loaded for {missing.map((p) => (p.hs6 ? `${p.hs6.slice(0, 4)}.${p.hs6.slice(4)}` : p.name)).join(", ")} into {COUNTRIES[state.dest_country].name}.{" "}
+            <button type="button" className="font-semibold underline" onClick={() => document.getElementById(`duty-${missing[0].id}`)?.scrollIntoView({ behavior: "smooth", block: "center" })}>
+              Enter it
+            </button>{" "}
+            — the total updates.
+          </div>
+        );
+      })()}
       <div className="mx-5 mt-3 rounded-2xl bg-teal p-5 text-white">
         <div className="text-xs font-semibold uppercase tracking-wider opacity-85">{t("Shipment landed at your warehouse")} · {COUNTRIES[state.dest_country].name}</div>
         <div className="mt-1.5 font-display text-[40px] font-bold leading-[1.05] tracking-tight">{cs()} {rm(tot.landed, 0)}</div>
@@ -250,7 +276,12 @@ export function ResultsStep({
 
       <div className="flex flex-col gap-2.5 px-5 pt-4">
         {result.lines.map((l) => (
-          <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} originIso={state.origin_iso} {...lineLabels(state.products.find((p) => p.id === l.id))} />
+          <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} originIso={state.origin_iso} {...lineLabels(state.products.find((p) => p.id === l.id))}>
+            {(() => {
+              const p = state.products.find((x) => x.id === l.id);
+              return p && p.category === "general" ? <DutyEditor p={p} state={state} update={update} /> : null;
+            })()}
+          </LineCard>
         ))}
 
         <CompareDest
@@ -263,9 +294,9 @@ export function ResultsStep({
               dest_port: COUNTRIES[c].ports[0].code,
               fx_rate: fxDefault(c, state.currency, FX_DEFAULT),
               fx_source: "",
-              local_charges: localChargesFor(c, state.equipment, state.pallets),
+              local_charges: localChargesFor(c, state.equipment, modeCount(state)),
               local_touched: false,
-              step: 1,
+              step: 2,
             })
           }
         />

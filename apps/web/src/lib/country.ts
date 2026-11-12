@@ -3,7 +3,7 @@
  * verification status. Rates themselves live in the engine (ratesFor(country)).
  */
 import { DESTINATIONS, SUPPORTED_COUNTRIES, type Destination } from "@landedmy/engine";
-import type { Equipment } from "./lanes";
+import { localChargeProfile, type Equipment } from "./lanes";
 
 /** ISO-2 destination code; "MY" and "SG" have national schedules, the rest are indicative. */
 export type DestCountry = string;
@@ -129,53 +129,17 @@ export function countryOfPort(code: string): DestCountry {
 }
 
 /** Default local charges by destination, in the destination currency. Editable by the user. */
-export function localChargesFor(country: DestCountry, equipment: Equipment, pallets: number): Record<string, number> {
-  const n = Math.max(1, pallets);
-  if (country !== "MY" && country !== "SG") {
-    // Indicative destinations: Malaysian-level charges converted at the default cross rate, rounded.
-    const f = (fxDefault("MY", COUNTRIES[country].currency, FX_MYR) || 1);
-    const conv = (rm: number) => Math.round(rm / f);
-    const sea = equipment === "pallet";
-    const base = equipment === "40hc" ? 1.5 : 1;
-    return {
-      "Port and terminal handling": conv(sea ? 350 + 250 * n : 1200 * base),
-      "Customs broker and declaration": conv(sea ? 400 : 600),
-      "Delivery to warehouse": conv(sea ? 300 + 100 * n : 900 * base),
-      Unstuffing: conv(sea ? 100 * n : 300 * base),
-    };
-  }
-  if (country === "SG") {
-    if (equipment === "pallet") {
-      return {
-        "Port and terminal handling": 120 + 90 * n,
-        "Customs permit and declarant": 150,
-        "Delivery within Singapore": 120 + 40 * n,
-        Unstuffing: 40 * n,
-      };
-    }
-    const base = equipment === "40hc" ? 1.5 : 1;
-    return {
-      "Port and terminal handling": Math.round(450 * base),
-      "Customs permit and declarant": 200,
-      "Delivery within Singapore": Math.round(350 * base),
-      Unstuffing: Math.round(120 * base),
-    };
-  }
-  if (equipment === "pallet") {
-    return {
-      "Port and terminal handling": 350 + 250 * n,
-      "Customs agent and K1": 400,
-      "Haulage to Kuala Lumpur": 300 + 100 * n,
-      Unstuffing: 100 * n,
-    };
-  }
-  const base = equipment === "40hc" ? 1.5 : 1;
-  return {
-    "Port and terminal handling": Math.round(1200 * base),
-    "Customs agent and K1": 600,
-    "Haulage to Kuala Lumpur": Math.round(900 * base),
-    Unstuffing: Math.round(300 * base),
-  };
+export function localChargesFor(country: DestCountry, equipment: Equipment, count: number): Record<string, number> {
+  const rm = localChargeProfile(equipment, count);
+  // Name the customs line the way the destination does.
+  const customsName = country === "MY" ? "Customs agent and K1" : country === "SG" ? "Customs permit and declarant" : "Customs broker and declaration";
+  const delivery = country === "MY" ? "Haulage to Kuala Lumpur" : country === "SG" ? "Delivery within Singapore" : "Delivery to warehouse";
+  const named = Object.fromEntries(Object.entries(rm).map(([k, v]) => [k === "Customs clearance" ? customsName : k === "Delivery to warehouse" ? delivery : k, v]));
+  if (country === "MY") return named;
+  // Singapore runs at roughly 0.35× Malaysian ringgit levels in S$; elsewhere Malaysian-level charges at the default cross rate.
+  const f = fxDefault("MY", COUNTRIES[country].currency, FX_MYR) || 1;
+  const conv = (v: number) => Math.max(1, Math.round(country === "SG" ? v * 0.35 : v / f));
+  return Object.fromEntries(Object.entries(named).map(([k, v]) => [k, conv(v)]));
 }
 
 /** Rough MYR per 1 unit, used only when the live feed has no rate (Nov 2026 order of magnitude). */

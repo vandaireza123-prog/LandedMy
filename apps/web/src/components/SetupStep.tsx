@@ -2,7 +2,9 @@
 import { useEffect, useState } from "react";
 import { fetchFx, type FxResponse } from "@/lib/api";
 import type { AppState } from "@/lib/state";
-import { EQUIPMENT_LABEL, FX_AS_OF, FX_DEFAULT, type Equipment } from "@/lib/lanes";
+import { FX_AS_OF, FX_DEFAULT, MODES, MODE_GROUPS, benchmarkFor, type Equipment } from "@/lib/lanes";
+import { modeCount, shipmentKg } from "@/lib/shipment";
+import { suggestModes } from "@/lib/modes";
 import type { Port } from "@/lib/ports";
 import { COUNTRIES, fxDefault, fxFromBnm, localChargesFor, type DestCountry } from "@/lib/country";
 import { CountryPicker } from "./CountryPicker";
@@ -38,20 +40,32 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
       dest_port: COUNTRIES[c].ports[0].code,
       fx_rate: rateFor(state.currency, c),
       fx_source: sourceFor(state.currency, c),
-      local_charges: localChargesFor(c, state.equipment, state.pallets),
+      local_charges: localChargesFor(c, state.equipment, modeCount(state)),
       local_touched: false,
     });
   };
-  const onPort = (p: Port) =>
-    update({ origin_port: p.code, origin_iso: p.iso, origin_label: `${p.name}, ${p.country}`, currency: p.currency, fx_rate: rateFor(p.currency), fx_source: sourceFor(p.currency) });
+  // FX follows the invoice currency picked on step 1.
+  useEffect(() => {
+    if (state.fx_source === "entered by you") return;
+    update({ fx_rate: rateFor(state.currency), fx_source: sourceFor(state.currency) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.currency, state.dest_country, fx]);
+  const kg = shipmentKg(state.products);
+  const suggestions = suggestModes(state.products, kg);
+  const recount = (patch: Partial<AppState>) => {
+    const next = { ...state, ...patch };
+    update({ ...patch, local_charges: state.local_touched ? state.local_charges : localChargesFor(state.dest_country, next.equipment, modeCount(next)) });
+  };
+  // The invoice currency was chosen with the products; picking a port no longer changes it.
+  const onPort = (p: Port) => update({ origin_port: p.code, origin_iso: p.iso, origin_label: `${p.name}, ${p.country}` });
   const onCustomPort = (name: string) => update({ origin_port: "CUSTOM", origin_label: name });
-  const onEquip = (e: Equipment) =>
-    update({ equipment: e, local_charges: state.local_touched ? state.local_charges : localChargesFor(state.dest_country, e, state.pallets) });
+  const onEquip = (e: Equipment) => recount({ equipment: e });
+  const mode = MODES[state.equipment] ?? MODES.pallet;
 
   return (
     <>
-      <Progress step={1} />
-      <Title step={1} title="Where is it going?" sub="Set the lane once. Every product you add next shares it." />
+      <Progress step={2} />
+      <Title step={2} title="From where, to where, how?" sub="Duty and tax are filled for the country you pick." />
       <div className="flex flex-1 flex-col gap-3 p-5">
         <CountryPicker value={state.dest_country} onChange={onCountry} />
         <div className="flex flex-col gap-1.5">
@@ -69,38 +83,81 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
         </Field>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-xs font-semibold text-ink-2">{t("Shipment type")}</span>
-          <div className="grid grid-cols-4 gap-2">
-            {(Object.keys(EQUIPMENT_LABEL) as Equipment[]).map((e) => {
-              const on = state.equipment === e;
-              return (
-                <button
-                  key={e}
-                  type="button"
-                  onClick={() => onEquip(e)}
-                  className={`h-12 rounded-[10px] text-[13px] ${on ? "border-2 border-teal bg-teal-tint font-semibold text-teal" : "border border-line bg-white font-medium text-ink-2"}`}
-                >
-                  {EQUIPMENT_LABEL[e].replace(" (LCL)", "")}
-                </button>
-              );
-            })}
-          </div>
+          <span className="text-xs font-semibold text-ink-2">{t("How is it shipped?")}</span>
+          {suggestions.length > 0 && (
+            <div className="rounded-[10px] bg-teal-tint px-3 py-2 text-[12px] leading-snug text-teal">
+              Suggested for {kg ? `${kg.toLocaleString()} kg, ` : ""}
+              {state.products.length} product{state.products.length === 1 ? "" : "s"}:{" "}
+              {suggestions.map((sg, i) => (
+                <span key={sg.mode}>
+                  {i > 0 ? (i === suggestions.length - 1 ? " or " : ", ") : ""}
+                  <button type="button" onClick={() => onEquip(sg.mode)} className="font-semibold underline decoration-dotted underline-offset-2">
+                    {MODES[sg.mode].label}
+                  </button>
+                  {(() => {
+                    const b = benchmarkFor(state.origin_port, sg.mode);
+                    return b ? ` (≈ ${b.currency} ${b.low.toLocaleString()}–${b.high.toLocaleString()}${MODES[sg.mode].measure === "containers" ? " per container" : MODES[sg.mode].measure === "pallets" ? " per pallet" : ""})` : "";
+                  })()}
+                </span>
+              ))}
+              . {suggestions[0].why}
+            </div>
+          )}
+          {MODE_GROUPS.map((g) => (
+            <div key={g}>
+              <div className="mb-1 mt-1.5 text-[10px] font-bold uppercase tracking-wider text-muted">{g}</div>
+              <div className="flex flex-wrap gap-1.5">
+                {(Object.keys(MODES) as Equipment[])
+                  .filter((e) => MODES[e].group === g)
+                  .map((e) => {
+                    const on = state.equipment === e;
+                    const sug = suggestions.some((x) => x.mode === e);
+                    return (
+                      <button
+                        key={e}
+                        type="button"
+                        onClick={() => onEquip(e)}
+                        aria-pressed={on}
+                        className={`rounded-[9px] px-2.5 py-1.5 text-[12px] ${on ? "border-2 border-teal bg-teal-tint font-semibold text-teal" : `border bg-white font-medium text-ink-2 ${sug ? "border-teal" : "border-line"}`}`}
+                      >
+                        {MODES[e].label}
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
+          ))}
         </div>
 
-        {state.equipment === "pallet" && (
+        {mode.measure === "pallets" && (
           <Field label={t("Number of pallets")}>
+            <input type="number" min={1} className={inputCls} value={state.pallets} onChange={(e) => recount({ pallets: Math.max(1, Number(e.target.value) || 1) })} />
+          </Field>
+        )}
+        {(mode.measure === "containers" || mode.measure === "trucks" || mode.measure === "units") && (
+          <Field label={mode.measure === "containers" ? t("Number of containers") : mode.measure === "trucks" ? t("Number of trucks") : state.equipment === "roro" ? t("Number of vehicles or units") : t("Number of pieces (crates, lifts)")}>
+            <input type="number" min={1} className={inputCls} value={state.mode_qty ?? 1} onChange={(e) => recount({ mode_qty: Math.max(1, Number(e.target.value) || 1) })} />
+          </Field>
+        )}
+        {mode.measure === "cbm" && (
+          <Field label={t("Volume (m³)")}>
+            <input type="number" min={0.1} step="0.1" className={inputCls} value={state.cbm ?? 1} onChange={(e) => recount({ cbm: Math.max(0.1, Number(e.target.value) || 0.1) })} />
+          </Field>
+        )}
+        {mode.measure === "kg" && (
+          <Field label={t("Chargeable weight (kg)")}>
             <input
               type="number"
               min={1}
               className={inputCls}
-              value={state.pallets}
-              onChange={(e) => {
-                const n = Math.max(1, Number(e.target.value) || 1);
-                update({ pallets: n, local_charges: state.local_touched ? state.local_charges : localChargesFor(state.dest_country, "pallet", n) });
-              }}
+              value={state.chargeable_kg ?? kg ?? ""}
+              placeholder="e.g. 450"
+              onChange={(e) => recount({ chargeable_kg: e.target.value === "" ? undefined : Math.max(1, Number(e.target.value) || 1) })}
             />
+            <span className="mt-1 text-[11px] text-muted">{kg ? `Your products weigh ${kg.toLocaleString()} kg. Airlines charge the greater of actual weight and volume weight (L × W × H cm ÷ 6,000).` : "Add a weight per item on step 1 to fill this in."}</span>
           </Field>
         )}
+        {mode.measure === "none" && <p className="text-[12px] leading-snug text-muted">The aircraft is delivered under its own power. Enter the ferry-flight cost (crew, fuel, permits, insurance) on the next step; import duty and tax still apply on arrival.</p>}
 
         <div className="grid grid-cols-2 gap-3">
           <Field label={t("Price basis")}>
@@ -112,18 +169,13 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
               ))}
             </select>
           </Field>
-          <Field label={t("Currency")}>
-            <select
-              className={inputCls}
-              value={state.currency}
-              onChange={(e) => update({ currency: e.target.value, fx_rate: rateFor(e.target.value), fx_source: sourceFor(e.target.value) })}
-            >
-              {[...new Set([...Object.keys(FX_DEFAULT), "MYR", "SGD", "CNY", "JPY", "THB", "IDR", "VND", "INR", "AED"])]
-                .filter((c) => c !== country.currency)
-                .map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-            </select>
+          <Field label={t("Invoice currency")}>
+            <div className={`${inputCls} flex items-center justify-between bg-ground text-muted`}>
+              {state.currency}
+              <button type="button" onClick={() => update({ step: 1 })} className="text-[12px] font-semibold text-teal">
+                {t("Change")}
+              </button>
+            </div>
           </Field>
         </div>
 
@@ -152,9 +204,14 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
         </div>
       </div>
       <Footer>
-        <PrimaryButton onClick={() => update({ step: 2 })} disabled={!(state.fx_rate > 0)}>
-          {t("Add products")}
-        </PrimaryButton>
+        <div className="grid grid-cols-[auto_1fr] gap-2">
+          <button type="button" onClick={() => update({ step: 1 })} className="h-[54px] rounded-xl border border-line bg-white px-5 text-[15px] font-semibold">
+            {t("Back")}
+          </button>
+          <PrimaryButton onClick={() => update({ step: 3 })} disabled={!(state.fx_rate > 0)}>
+            {t("Next: freight and charges")}
+          </PrimaryButton>
+        </div>
       </Footer>
     </>
   );

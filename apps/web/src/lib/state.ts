@@ -5,8 +5,8 @@ import { buildShipment as _build, manualLinesOf as _manual, type ProductRow } fr
 import type { Category } from "./products";
 import type { Lang } from "./i18n";
 import type { Equipment } from "./lanes";
-import { FX_DEFAULT, defaultLocalCharges } from "./lanes";
-import { countryOfPort, type DestCountry } from "./country";
+import { FX_DEFAULT } from "./lanes";
+import { countryOfPort, localChargesFor, type DestCountry } from "./country";
 
 export type { ProductRow } from "./shipment";
 export { buildShipment, manualLinesOf } from "./shipment";
@@ -22,6 +22,12 @@ export interface AppState {
   dest_port: string;
   equipment: Equipment;
   pallets: number;
+  /** Containers, trucks or units for modes counted that way. */
+  mode_qty?: number;
+  /** Cubic metres for LCL by m³. */
+  cbm?: number;
+  /** Chargeable weight for air, courier and post when the user overrides the products' total weight. */
+  chargeable_kg?: number;
   incoterm: Shipment["incoterm"];
   currency: string;
   fx_rate: number;
@@ -67,7 +73,7 @@ export const initialState: AppState = {
   forwarder_quote: 0,
   freight: 0,
   insurance_pct: 0.3,
-  local_charges: defaultLocalCharges("pallet", 1),
+  local_charges: localChargesFor("MY", "pallet", 1),
   local_touched: false,
   products: [],
   sell_price: 0,
@@ -129,6 +135,8 @@ export function useAppState() {
   }, [state, hydrated]);
 
   const update = useCallback((patch: Partial<AppState>) => setState((s) => ({ ...s, ...patch })), []);
+  /** Change products against the latest state (for async work such as rate look-ups). */
+  const patchProducts = useCallback((fn: (rows: ProductRow[]) => ProductRow[]) => setState((s) => ({ ...s, products: fn(s.products) })), []);
   const reset = useCallback(() => {
     setState(initialState);
     try {
@@ -147,5 +155,5 @@ export function useAppState() {
   const shipment: Shipment = useMemo(() => _build(state), [state]);
   const manualRateLines = useMemo(() => _manual(state), [state.products]);
 
-  return { state, update, reset, hydrated, shareUrl, shipment, manualRateLines };
+  return { state, update, patchProducts, reset, hydrated, shareUrl, shipment, manualRateLines };
 }

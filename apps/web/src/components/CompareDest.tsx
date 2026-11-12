@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { computeShipment, type Shipment } from "@landedmy/engine";
-import { tablesFor } from "@/lib/shipment";
+import { modeCount, tablesFor } from "@/lib/shipment";
 import { fetchFx } from "@/lib/api";
 import { COUNTRIES, fxDefault, fxFromBnm, localChargesFor, type DestCountry } from "@/lib/country";
 import { FX_DEFAULT } from "@/lib/lanes";
@@ -22,7 +22,7 @@ export function CompareDest({ state, shipment, manualRateLines, onSwitch }: { st
 
   const res = useMemo(() => {
     const fx = (rates ? fxFromBnm(other, rates, state.currency) : undefined) ?? fxDefault(other, state.currency, FX_DEFAULT);
-    const s: Shipment = { ...shipment, dest_country: other, dest_port: COUNTRIES[other].ports[0].code, fx_rate: fx, local_charges_myr: localChargesFor(other, state.equipment, state.pallets) };
+    const s: Shipment = { ...shipment, dest_country: other, dest_port: COUNTRIES[other].ports[0].code, fx_rate: fx, local_charges_myr: localChargesFor(other, state.equipment, modeCount(state)) };
     try {
       void manualRateLines;
       return { fx, r: computeShipment(s, tablesFor({ ...state, dest_country: other })) };
