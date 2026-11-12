@@ -16,7 +16,7 @@ export async function get(url, { tries = 6, headers = {}, backoff = 8000 } = {})
   let last;
   for (let a = 0; a < tries; a++) {
     try {
-      const r = await fetch(url, { headers: { "user-agent": "LandedMY-refresh/1.0 (+https://landedmy.netlify.app)", ...headers } });
+      const r = await fetch(url, { headers: { "user-agent": "Costavora-refresh/1.0 (+https://costavora.com)", ...headers } });
       if (r.status === 429 || r.status >= 500) { last = new Error(`${r.status} ${url}`); await sleep(backoff * (a + 1)); continue; }
       return r;
     } catch (e) { last = e; await sleep(3000 * (a + 1)); }

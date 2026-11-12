@@ -1,7 +1,7 @@
 "use client";
 import type { AppState } from "@/lib/state";
 import { MODES } from "@/lib/lanes";
-import { FREIGHT_AS_OF, freightFor } from "@/lib/freight";
+import { FREIGHT_AS_OF, FREIGHT_AS_OF_ISO, freightFor } from "@/lib/freight";
 import { freightIsAuto } from "@/lib/useFreightAuto";
 import { DEST_PORTS } from "@/lib/ports";
 import { useT } from "@/lib/i18n";
@@ -59,7 +59,8 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
                     {est.currency} {est.low.toLocaleString()}–{est.high.toLocaleString()}
                     {est.tier === "index" ? " · from published freight indices" : " · rough estimate, get a quote"}
                   </div>
-                  <div className="mt-0.5 opacity-90">{est.basis}. {est.note ?? ""} Market week of {FREIGHT_AS_OF}; excludes destination charges (below).</div>
+                  <div className="mt-0.5 opacity-90">{est.basis}. {est.note ?? ""} Market week of {FREIGHT_AS_OF}
+                    {Date.now() - Date.parse(FREIGHT_AS_OF_ISO) > 21 * 86400000 ? " (more than 3 weeks old: prices may have moved)" : ""}; excludes destination charges (below).</div>
                 </div>
               ) : (
                 <div className="mt-2.5 rounded-lg bg-amber-tint px-3 py-2 text-[11.5px] leading-snug text-amber">{est.reason} Leaving freight at 0 gives a duty-paid price without freight.</div>

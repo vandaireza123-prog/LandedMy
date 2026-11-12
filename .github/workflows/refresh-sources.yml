@@ -7,11 +7,12 @@ on:
   schedule:
     - cron: "17 3 * * 1"   # Mondays 03:17 UTC — weekly: US, UK, EU, Brazil, mirrors
     - cron: "41 2 3 * *"   # 3rd of the month 02:41 UTC — monthly: + WITS
+    - cron: "23 9 * * 5"   # Fridays 09:23 UTC — freight: Drewry WCI is published on Thursdays
   workflow_dispatch:
     inputs:
       sources:
-        description: "Comma-separated: us,uk,eu,br,wits,mirrors (default: all but wits)"
-        default: "us,uk,eu,br,mirrors"
+        description: "Comma-separated: us,uk,eu,br,wits,mirrors,freight (default: all but wits)"
+        default: "us,uk,eu,br,mirrors,freight"
 
 permissions:
   contents: write
@@ -36,7 +37,11 @@ jobs:
         run: |
           S="${{ github.event.inputs.sources }}"
           if [ -z "$S" ]; then
-            if [ "${{ github.event.schedule }}" = "41 2 3 * *" ]; then S="us,uk,eu,br,mirrors,wits"; else S="us,uk,eu,br,mirrors"; fi
+            case "${{ github.event.schedule }}" in
+              "41 2 3 * *") S="us,uk,eu,br,mirrors,wits,freight" ;;
+              "23 9 * * 5") S="freight" ;;
+              *) S="us,uk,eu,br,mirrors,freight" ;;
+            esac
           fi
           echo "sources=,$S," >> "$GITHUB_OUTPUT"
           echo "Sources: $S"
@@ -75,7 +80,13 @@ jobs:
         continue-on-error: true
         run: node scripts/refresh/wits.mjs
 
+      - name: Freight index (Drewry WCI)
+        if: contains(steps.src.outputs.sources, ',freight,')
+        continue-on-error: true
+        run: node scripts/refresh/freight.mjs
+
       - name: Rebuild bundled duty maps
+        if: steps.src.outputs.sources != ',freight,'
         run: |
           node scripts/load/build-world.mjs
           node scripts/load/build-wits.mjs
@@ -85,10 +96,10 @@ jobs:
 
       - name: Commit and push
         run: |
-          git config user.name "landedmy-refresh[bot]"
-          git config user.email "refresh@landedmy.netlify.app"
+          git config user.name "costavora-refresh[bot]"
+          git config user.email "refresh@costavora.com"
           rm -f data/wits/wits_part*.json
-          git add -A netlify/data/world apps/web/public/data/wits apps/web/src/lib/wits-index.json packages/engine/data/raw
+          git add -A netlify/data/world apps/web/public/data/wits apps/web/src/lib/wits-index.json apps/web/src/lib/freight-index.json packages/engine/data/raw
           if git diff --cached --quiet; then echo "No source changes"; exit 0; fi
           git commit -m "data: refresh tariff sources $(date -u +%F)" -m "Sources: ${{ steps.src.outputs.sources }}" -m "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           # main may have moved while the pull ran; replay our data commit on top, our files win on conflict

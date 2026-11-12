@@ -9,6 +9,7 @@
  * Modes with no usable public index (ISO tank, breakbulk, RoRo, on-board courier, ferry flight) get no number.
  */
 import geo from "./freight-geo.json";
+import wci from "./freight-index.json";
 import type { Equipment } from "./lanes";
 import { MODES } from "./lanes";
 
@@ -16,7 +17,16 @@ type Region = "EAS" | "SEA" | "SAS" | "MEG" | "MED" | "NEU" | "NAM" | "CAR" | "S
 type Geo = [number, number, Region, "AFEU" | "AM" | "", 0 | 1];
 const G = geo as unknown as Record<string, Geo>;
 
-export const FREIGHT_AS_OF = "5 Nov 2026";
+/** Weekly Drewry WCI pull (scripts/refresh/freight.mjs). */
+const IX = wci as { as_of: string; source: string; url: string; composite: number; base: { composite: number }; routes: Record<string, number> };
+const fmtDate = (iso: string) => new Date(iso + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+export const FREIGHT_AS_OF = fmtDate(IX.as_of);
+export const FREIGHT_SOURCE_URL = IX.url;
+export const FREIGHT_AS_OF_ISO = IX.as_of;
+/** How far the market has moved since the week the matrix and the other anchors were set (clamped). */
+const MOVE = Math.min(2.5, Math.max(0.4, IX.composite / IX.base.composite));
+const daysOld = (iso: string) => (Date.parse(IX.as_of) - Date.parse(iso)) / 86400000;
+
 export const REGION_NAME: Record<Region, string> = {
   EAS: "East Asia", SEA: "Southeast Asia", SAS: "South Asia", MEG: "Middle East / Gulf", MED: "Mediterranean & Black Sea", NEU: "North Europe",
   NAM: "North America", CAR: "Caribbean & Central America", SAE: "South America east coast", SAW: "South America west coast",
@@ -43,22 +53,36 @@ const SEA_FEU: number[][] = [
 ];
 
 interface Anchor { low: number; high: number; src: string }
-/** Lanes with a published number behind them (USD per 40'). */
-const SEA_INDEX: Record<string, Anchor> = {
-  "EAS>NEU": { low: 3550, high: 3720, src: "Drewry WCI Shanghai–Rotterdam $3,615 (5 Nov 2026); FBX $3,551, Xeneta $3,712 (28 Oct)" },
-  "EAS>MED": { low: 4150, high: 4450, src: "Drewry WCI Shanghai–Genoa $4,166 (5 Nov 2026); Xeneta $4,442" },
-  "EAS>NAM": { low: 7500, high: 10600, src: "Drewry WCI Shanghai–Los Angeles $7,539, –New York $9,303 (5 Nov 2026); FBX US East Coast $10,565" },
-  "NEU>EAS": { low: 600, high: 900, src: "Drewry WCI Rotterdam–Shanghai $654 (5 Nov 2026)" },
-  "NAM>EAS": { low: 750, high: 1000, src: "Drewry WCI Los Angeles–Shanghai $817 (5 Nov 2026)" },
-  "NEU>NAM": { low: 2900, high: 3150, src: "Drewry WCI Rotterdam–New York $3,062 (5 Nov 2026); Xeneta $2,955" },
-  "NAM>NEU": { low: 1100, high: 1300, src: "Drewry WCI New York–Rotterdam $1,172 (5 Nov 2026)" },
-  "EAS>SAE": { low: 5050, high: 5250, src: "Xeneta Far East–South America east coast $5,211 (28 Oct 2026)" },
-  "NEU>SAE": { low: 850, high: 1000, src: "Xeneta North Europe–South America east coast $921 (28 Oct 2026)" },
-  "EAS>SEA": { low: 1200, high: 1800, src: "Drewry Intra-Asia Container Index $1,504 (29 Oct 2026)" },
-  "EAS>MEG": { low: 7500, high: 8600, src: "Shanghai–Jebel Ali $8,584 (Oct 2026, Bertling market report)" },
-  "EAS>OCE": { low: 4500, high: 5700, src: "China–Australia published carrier tariffs ~$5,500–5,700 per 40' HC (Sep 2026), spot easing" },
-  "SAS>NEU": { low: 4650, high: 4950, src: "MSC FAK India/Pakistan–Antwerp $4,650–4,950 per 40'" },
-  "SAS>MED": { low: 4750, high: 5050, src: "MSC FAK India/Pakistan–Valencia $4,750–5,050 per 40'" },
+const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
+const W = IX.routes;
+const wciSrc = (t: string) => `Drewry WCI ${t} (${FREIGHT_AS_OF})`;
+/** Other published lanes, set by hand with their date; scaled with the WCI composite once they are older than the WCI week. */
+const MANUAL: Record<string, Anchor & { date: string }> = {
+  "EAS>SAE": { low: 5050, high: 5250, date: "2026-10-28", src: "Xeneta Far East–South America east coast $5,211 (28 Oct 2026)" },
+  "NEU>SAE": { low: 850, high: 1000, date: "2026-10-28", src: "Xeneta North Europe–South America east coast $921 (28 Oct 2026)" },
+  "EAS>SEA": { low: 1200, high: 1800, date: "2026-10-29", src: "Drewry Intra-Asia Container Index $1,504 (29 Oct 2026)" },
+  "EAS>MEG": { low: 7500, high: 8600, date: "2026-10-15", src: "Shanghai–Jebel Ali $8,584 (Oct 2026, Bertling market report)" },
+  "EAS>OCE": { low: 4500, high: 5700, date: "2026-09-30", src: "China–Australia carrier tariffs ~$5,500–5,700 per 40' HC (Sep 2026)" },
+  "SAS>NEU": { low: 4650, high: 4950, date: "2026-08-01", src: "MSC FAK India/Pakistan–Antwerp $4,650–4,950 per 40' (2026)" },
+  "SAS>MED": { low: 4750, high: 5050, date: "2026-08-01", src: "MSC FAK India/Pakistan–Valencia $4,750–5,050 per 40' (2026)" },
+};
+/** Lanes with a published number behind them (USD per 40'). WCI lanes move every week with the refresh. */
+const SEA_INDEX: Record<string, Anchor & { tier: "index" | "rough" }> = {
+  "EAS>NEU": { low: W["SHA-RTM"] * 0.97, high: W["SHA-RTM"] * 1.04, tier: "index", src: wciSrc(`Shanghai–Rotterdam ${usd(W["SHA-RTM"])}`) },
+  "EAS>MED": { low: W["SHA-GOA"] * 0.97, high: W["SHA-GOA"] * 1.06, tier: "index", src: wciSrc(`Shanghai–Genoa ${usd(W["SHA-GOA"])}`) },
+  "EAS>NAM": { low: Math.min(W["SHA-LAX"], W["SHA-NYC"]) * 0.98, high: Math.max(W["SHA-LAX"], W["SHA-NYC"]) * 1.06, tier: "index", src: wciSrc(`Shanghai–Los Angeles ${usd(W["SHA-LAX"])}, Shanghai–New York ${usd(W["SHA-NYC"])}`) },
+  "NEU>EAS": { low: W["RTM-SHA"] * 0.92, high: W["RTM-SHA"] * 1.35, tier: "index", src: wciSrc(`Rotterdam–Shanghai ${usd(W["RTM-SHA"])}`) },
+  "NAM>EAS": { low: W["LAX-SHA"] * 0.92, high: W["LAX-SHA"] * 1.25, tier: "index", src: wciSrc(`Los Angeles–Shanghai ${usd(W["LAX-SHA"])}`) },
+  "NEU>NAM": { low: W["RTM-NYC"] * 0.95, high: W["RTM-NYC"] * 1.05, tier: "index", src: wciSrc(`Rotterdam–New York ${usd(W["RTM-NYC"])}`) },
+  "NAM>NEU": { low: W["NYC-RTM"] * 0.94, high: W["NYC-RTM"] * 1.12, tier: "index", src: wciSrc(`New York–Rotterdam ${usd(W["NYC-RTM"])}`) },
+  ...Object.fromEntries(
+    Object.entries(MANUAL).map(([k, m]) => {
+      const age = daysOld(m.date);
+      if (age <= 45) return [k, { ...m, tier: "index" as const }];
+      // older than the WCI week by more than ~6 weeks: move it with the market and call it rough
+      return [k, { low: m.low * MOVE, high: m.high * MOVE * 1.1, tier: "rough" as const, src: `${m.src}, moved with the WCI composite since` }];
+    }),
+  ),
 };
 
 /** Container size and type relative to a 40' dry. */
@@ -109,10 +133,10 @@ export function seaFeu(from: string, to: string): { low: number; high: number; t
   const ix = SEA_INDEX[`${ra}>${rb}`];
   let lo: number, hi: number, tier: "index" | "rough", basis: string;
   if (ix) {
-    [lo, hi, tier, basis] = [ix.low, ix.high, "index", ix.src];
+    [lo, hi, tier, basis] = [ix.low, ix.high, ix.tier, ix.src];
   } else {
-    const mid = SEA_FEU[R.indexOf(ra)][R.indexOf(rb)];
-    [lo, hi, tier, basis] = [mid * 0.75, mid * 1.35, "rough", `Rough estimate for ${REGION_NAME[ra]} → ${REGION_NAME[rb]}, derived from the published lanes of ${FREIGHT_AS_OF}`];
+    const mid = SEA_FEU[R.indexOf(ra)][R.indexOf(rb)] * MOVE;
+    [lo, hi, tier, basis] = [mid * 0.75, mid * 1.35, "rough", `Rough estimate for ${REGION_NAME[ra]} → ${REGION_NAME[rb]}, set from the published lanes and moved with the Drewry WCI composite (${usd(IX.composite)}, ${FREIGHT_AS_OF})`];
   }
   if (inland) {
     // Landlocked end: add inland haulage or rail from the nearest seaport.
