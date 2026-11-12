@@ -1,17 +1,17 @@
 "use client";
 import type { AppState } from "@/lib/state";
-import { BENCHMARK_AS_OF, MODES, benchmarkFor } from "@/lib/lanes";
-import { modeCount } from "@/lib/shipment";
+import { MODES } from "@/lib/lanes";
+import { FREIGHT_AS_OF, freightFor } from "@/lib/freight";
+import { freightIsAuto } from "@/lib/useFreightAuto";
 import { DEST_PORTS } from "@/lib/ports";
 import { useT } from "@/lib/i18n";
 import { Card, Footer, PrimaryButton, Progress, Title, cs, rm, smallInputCls } from "./ui";
 
 export function LogisticsStep({ state, update }: { state: AppState; update: (p: Partial<AppState>) => void }) {
   const t = useT();
-  const bench = benchmarkFor(state.origin_port, state.equipment);
   const mode = MODES[state.equipment] ?? MODES.pallet;
-  const units = mode.measure === "pallets" || mode.measure === "containers" ? modeCount(state) : 1;
-  const benchMid = bench ? Math.round(((bench.low + bench.high) / 2) * units) : 0;
+  const est = freightFor(state);
+  const auto = freightIsAuto(state);
   const destLabel = DEST_PORTS.find((p) => p.code === state.dest_port)?.label.split(" (")[0];
   const localTotal = Object.values(state.local_charges).reduce((a, b) => a + b, 0);
   const cif = state.incoterm === "CIF";
@@ -21,16 +21,16 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
   return (
     <>
       <Progress step={3} />
-      <Title step={3} title="Freight and charges" sub="Got a forwarder quote? Enter it. If not, use our lane benchmark." />
+      <Title step={3} title="Freight and charges" sub="We fill in a typical freight price for your route and mode. Got a forwarder quote? Type it over ours." />
       <div className="flex flex-1 flex-col gap-2.5 px-5 pt-4">
         <Card>
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">
               {mode.freight}, {state.origin_label.split(",")[0]} → {destLabel}
             </div>
-            {!cif && bench && (
-              <button type="button" onClick={() => update({ freight: benchMid })} className="text-xs font-semibold text-teal">
-                {t("Use benchmark")}
+            {!cif && est.ok && !auto && (
+              <button type="button" onClick={() => update({ freight_auto: true })} className="text-xs font-semibold text-teal">
+                Use our estimate
               </button>
             )}
           </div>
@@ -41,7 +41,7 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
               <div className="mt-2.5 grid grid-cols-2 gap-2">
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted">Freight ({state.currency})</span>
-                  <input type="number" className={smallInputCls} value={state.freight || ""} placeholder={bench ? String(benchMid) : "your quote"} onChange={(e) => update({ freight: Number(e.target.value) || 0 })} />
+                  <input type="number" className={smallInputCls} value={state.freight || ""} placeholder={est.ok ? String(est.mid) : "your quote"} onChange={(e) => update({ freight: Number(e.target.value) || 0, freight_auto: false })} />
                 </label>
                 <label className="flex flex-col gap-1">
                   <span className="text-[11px] text-muted">Insurance (% of goods)</span>
@@ -52,11 +52,18 @@ export function LogisticsStep({ state, update }: { state: AppState; update: (p: 
                 <span className="text-[11px] text-muted">Did a forwarder quote you? Enter it to compare ({state.currency}, optional)</span>
                 <input type="number" className={smallInputCls} value={state.forwarder_quote || ""} placeholder="e.g. 520" onChange={(e) => update({ forwarder_quote: Number(e.target.value) || 0 })} />
               </label>
-              <div className="mt-2 text-[11px] text-muted">
-                {bench
-                  ? `Benchmark: ${bench.currency} ${bench.low.toLocaleString()}–${bench.high.toLocaleString()} per ${mode.measure === "pallets" ? "pallet" : mode.label.toLowerCase()}${units > 1 ? ` × ${units}` : ""} · ${BENCHMARK_AS_OF}`
-                  : `No ${mode.label.toLowerCase()} benchmark for this lane yet — enter your forwarder's quote. Leaving it at 0 gives a duty-paid price without freight.`}
-              </div>
+              {est.ok ? (
+                <div className={`mt-2.5 rounded-lg px-3 py-2 text-[11.5px] leading-snug ${est.tier === "index" ? "bg-teal-tint text-teal" : "bg-amber-tint text-amber"}`}>
+                  <div className="font-semibold">
+                    {auto ? "Using our estimate: " : "Our estimate: "}
+                    {est.currency} {est.low.toLocaleString()}–{est.high.toLocaleString()}
+                    {est.tier === "index" ? " · from published freight indices" : " · rough estimate, get a quote"}
+                  </div>
+                  <div className="mt-0.5 opacity-90">{est.basis}. {est.note ?? ""} Market week of {FREIGHT_AS_OF}; excludes destination charges (below).</div>
+                </div>
+              ) : (
+                <div className="mt-2.5 rounded-lg bg-amber-tint px-3 py-2 text-[11.5px] leading-snug text-amber">{est.reason} Leaving freight at 0 gives a duty-paid price without freight.</div>
+              )}
             </>
           )}
         </Card>

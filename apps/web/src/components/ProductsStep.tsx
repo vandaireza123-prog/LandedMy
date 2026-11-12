@@ -40,6 +40,35 @@ function blankRow(): ProductRow {
   };
 }
 
+/** A drink row from what the user typed and/or its HS code: the right category, so excise applies. */
+const DRINK_DEFAULTS: Record<Exclude<Category, "general">, { volume_ml: number; abv: number; units_per_case: number }> = {
+  beer: { volume_ml: 330, abv: 5, units_per_case: 24 },
+  still_wine: { volume_ml: 750, abv: 13, units_per_case: 6 },
+  sparkling: { volume_ml: 750, abv: 12, units_per_case: 6 },
+  cider: { volume_ml: 330, abv: 4.5, units_per_case: 24 },
+  spirits: { volume_ml: 700, abv: 40, units_per_case: 6 },
+  other: { volume_ml: 750, abv: 16, units_per_case: 6 },
+};
+function drinkCategory(name: string, hs6?: string): Exclude<Category, "general"> | null {
+  const n = name.toLowerCase();
+  if (/\b(cider|perry)\b/.test(n)) return "cider";
+  if (/\b(beer|lager|ale|stout|porter|ipa|pilsner)\b/.test(n)) return "beer";
+  if (/\b(champagne|prosecco|cava|sparkling|cremant|crémant)\b/.test(n)) return "sparkling";
+  if (/\b(whisky|whiskey|gin|vodka|rum|brandy|cognac|tequila|mezcal|liqueur|soju|spirit|spirits)\b/.test(n)) return "spirits";
+  if (/\b(sake|mead|vermouth)\b/.test(n)) return null; // own tariff lines; the user picks the type
+  if (/\bwine\b/.test(n)) return "still_wine";
+  const h = hs6 ?? "";
+  if (h.startsWith("2203")) return "beer";
+  if (h === "220410") return "sparkling";
+  if (h.startsWith("2204")) return "still_wine";
+  if (h.startsWith("2206")) return "cider";
+  if (h.startsWith("2208")) return "spirits";
+  return null;
+}
+function drinkRow(name: string, cat: Exclude<Category, "general">, hs6?: string): ProductRow {
+  return { ...blankRow(), name, category: cat, hs_code: CATEGORY_HS[cat][0].hs_code, ...DRINK_DEFAULTS[cat], hs6 };
+}
+
 /** Chapter → our general-goods group, for the default compliance list and tariff shortlist. */
 function groupForChapter(ch: string): string {
   const n = Number(ch);
@@ -53,6 +82,9 @@ function groupForChapter(ch: string): string {
 }
 
 function fromHs(h: HsHit, name: string, indicative = false, hint?: Uom): ProductRow {
+  // Alcoholic drinks (2203–2206, 2208) are not "general goods": excise and per-litre duty apply.
+  const drink = /^220[3468]/.test(h.code6) ? drinkCategory(name, h.code6) : null;
+  if (drink) return drinkRow(name || h.description.split(";")[0], drink, h.code6);
   const dotted = `${h.code6.slice(0, 4)}.${h.code6.slice(4)}`;
   void indicative; // the destination is chosen after products; Malaysian lines only apply when it is Malaysia
   const line = GENERAL_LINES.find((g) => g.hs_code.startsWith(dotted));
@@ -204,12 +236,14 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
 
   const add = (p?: LibraryProduct) => {
     const name = q.trim();
-    setRows([...rows, p ? fromLibrary(p) : DRINK_WORDS.test(name) ? { ...blankRow(), name } : blankGoods(name)]);
+    const cat = p ? null : drinkCategory(name);
+    setRows([...rows, p ? fromLibrary(p) : cat ? drinkRow(name, cat) : blankGoods(name)]);
     setQ("");
   };
   /** Enter in the search box: best drink match, else best part, else best HS line, else a new named product. */
   const addBest = () => {
     if (hits[0]) return add(hits[0]);
+    if (DRINK_WORDS.test(q)) return add();
     if (partHits[0]) return addPart(partHits[0]);
     if (hsHits[0]) return addHs(hsHits[0]);
     if (q.trim()) add();

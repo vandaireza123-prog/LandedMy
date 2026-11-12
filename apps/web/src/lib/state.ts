@@ -37,6 +37,8 @@ export interface AppState {
   /** The freight your forwarder actually quoted, in shipment currency (0 = none). */
   forwarder_quote: number;
   freight: number;
+  /** true: freight follows our estimate; false: the user typed it. Undefined on older saves (= auto if 0). */
+  freight_auto?: boolean;
   insurance_pct: number;
   local_charges: Record<string, number>;
   local_touched: boolean;

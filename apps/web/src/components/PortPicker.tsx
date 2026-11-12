@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { BENCHMARKS } from "@/lib/lanes";
 import { searchPorts, type Port } from "@/lib/ports";
 import { inputCls } from "./ui";
 
@@ -70,7 +69,7 @@ export function PortPicker({
                   <span>
                     {p.name}, {p.country}
                   </span>
-                  <span className="text-[11px] text-muted">{BENCHMARKS[p.code] ? "benchmark" : p.code}</span>
+                  <span className="text-[11px] text-muted">{p.code}</span>
                 </button>
               </li>
             ))}

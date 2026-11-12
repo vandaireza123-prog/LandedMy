@@ -1,5 +1,6 @@
 "use client";
 import { useAppState } from "@/lib/state";
+import { useFreightAuto } from "@/lib/useFreightAuto";
 import { Shell, setCurrencySymbol } from "@/components/ui";
 import { COUNTRIES } from "@/lib/country";
 import { SetupStep } from "@/components/SetupStep";
@@ -16,6 +17,7 @@ import { useDutyPrefill } from "@/lib/useDutyPrefill";
 export default function Page() {
   const { state, update, patchProducts, reset, hydrated, shareUrl, shipment, manualRateLines } = useAppState();
   useDutyPrefill(state, patchProducts);
+  useFreightAuto(state, update);
   const dest = DEST_PORTS.find((p) => p.code === state.dest_port);
   setCurrencySymbol(COUNTRIES[state.dest_country].symbol);
   const right = state.step <= 2 ? undefined : `${state.origin_label.split(",")[0]} → ${dest?.label.split(" (")[0] ?? ""}`;

@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { fetchFx, type FxResponse } from "@/lib/api";
 import type { AppState } from "@/lib/state";
-import { FX_AS_OF, FX_DEFAULT, MODES, MODE_GROUPS, benchmarkFor, type Equipment } from "@/lib/lanes";
+import { FX_AS_OF, FX_DEFAULT, MODES, MODE_GROUPS, type Equipment } from "@/lib/lanes";
+import { freightFor } from "@/lib/freight";
 import { modeCount, shipmentKg } from "@/lib/shipment";
 import { suggestModes } from "@/lib/modes";
 import type { Port } from "@/lib/ports";
@@ -95,8 +96,8 @@ export function SetupStep({ state, update }: { state: AppState; update: (p: Part
                     {MODES[sg.mode].label}
                   </button>
                   {(() => {
-                    const b = benchmarkFor(state.origin_port, sg.mode);
-                    return b ? ` (≈ ${b.currency} ${b.low.toLocaleString()}–${b.high.toLocaleString()}${MODES[sg.mode].measure === "containers" ? " per container" : MODES[sg.mode].measure === "pallets" ? " per pallet" : ""})` : "";
+                    const b = freightFor(state, sg.mode);
+                    return b.ok ? ` (freight ≈ ${b.currency} ${b.low.toLocaleString()}–${b.high.toLocaleString()})` : "";
                   })()}
                 </span>
               ))}

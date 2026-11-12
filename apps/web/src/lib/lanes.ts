@@ -55,30 +55,6 @@ export const MODE_GROUPS: ModeGroup[] = ["Air", "Sea · shared", "Sea · full co
 export const EQUIPMENT_LABEL: Record<Equipment, string> = Object.fromEntries(Object.entries(MODES).map(([k, v]) => [k, v.label])) as Record<Equipment, string>;
 export const isEquipment = (x: unknown): x is Equipment => typeof x === "string" && x in MODES;
 
-export interface FreightRange { low: number; high: number; currency: string }
-
-/** Freight benchmarks keyed by origin port code (UN/LOCODE). Only lanes with numbers we trust. */
-export const BENCHMARKS: Record<string, Partial<Record<Equipment, FreightRange>>> = {
-  BEANR: { pallet: { low: 420, high: 520, currency: "EUR" }, "20dc": { low: 2100, high: 2700, currency: "EUR" }, "40hc": { low: 2900, high: 3600, currency: "EUR" }, "20rf": { low: 4200, high: 5200, currency: "EUR" } },
-  NLRTM: { pallet: { low: 420, high: 520, currency: "EUR" }, "20dc": { low: 2100, high: 2700, currency: "EUR" }, "40hc": { low: 2900, high: 3600, currency: "EUR" }, "20rf": { low: 4200, high: 5200, currency: "EUR" } },
-  DEHAM: { pallet: { low: 430, high: 540, currency: "EUR" }, "20dc": { low: 2200, high: 2800, currency: "EUR" }, "40hc": { low: 3000, high: 3700, currency: "EUR" }, "20rf": { low: 4300, high: 5300, currency: "EUR" } },
-  FRLEH: { pallet: { low: 440, high: 560, currency: "EUR" }, "20dc": { low: 2200, high: 2900, currency: "EUR" }, "40hc": { low: 3000, high: 3800, currency: "EUR" }, "20rf": { low: 4300, high: 5400, currency: "EUR" } },
-  FRMRS: { pallet: { low: 440, high: 560, currency: "EUR" }, "20dc": { low: 2200, high: 2900, currency: "EUR" }, "40hc": { low: 3000, high: 3800, currency: "EUR" }, "20rf": { low: 4300, high: 5400, currency: "EUR" } },
-  ESBCN: { pallet: { low: 440, high: 560, currency: "EUR" }, "20dc": { low: 2200, high: 2900, currency: "EUR" }, "40hc": { low: 3000, high: 3800, currency: "EUR" }, "20rf": { low: 4300, high: 5400, currency: "EUR" } },
-  ITGOA: { pallet: { low: 440, high: 560, currency: "EUR" }, "20dc": { low: 2200, high: 2900, currency: "EUR" }, "40hc": { low: 3000, high: 3800, currency: "EUR" }, "20rf": { low: 4300, high: 5400, currency: "EUR" } },
-  GBFXT: { pallet: { low: 400, high: 500, currency: "GBP" }, "20dc": { low: 1900, high: 2500, currency: "GBP" }, "40hc": { low: 2600, high: 3300, currency: "GBP" }, "20rf": { low: 3800, high: 4800, currency: "GBP" } },
-  AUMEL: { pallet: { low: 500, high: 650, currency: "AUD" }, "20dc": { low: 1600, high: 2200, currency: "AUD" }, "40hc": { low: 2200, high: 2900, currency: "AUD" }, "20rf": { low: 3400, high: 4300, currency: "AUD" } },
-  AUADL: { pallet: { low: 520, high: 680, currency: "AUD" }, "20dc": { low: 1700, high: 2300, currency: "AUD" }, "40hc": { low: 2300, high: 3000, currency: "AUD" }, "20rf": { low: 3500, high: 4400, currency: "AUD" } },
-  NZAKL: { pallet: { low: 650, high: 850, currency: "NZD" }, "20dc": { low: 2200, high: 2900, currency: "NZD" }, "40hc": { low: 3000, high: 3800, currency: "NZD" }, "20rf": { low: 4200, high: 5300, currency: "NZD" } },
-  CNSHA: { pallet: { low: 180, high: 260, currency: "USD" }, "20dc": { low: 500, high: 900, currency: "USD" }, "40hc": { low: 800, high: 1300, currency: "USD" }, "20rf": { low: 1800, high: 2500, currency: "USD" } },
-};
-
-export function benchmarkFor(portCode: string, equipment: Equipment): FreightRange | undefined {
-  return BENCHMARKS[portCode]?.[equipment];
-}
-
-export const BENCHMARK_AS_OF = "Oct 2026 · indicative, replace with your forwarder's quote";
-
 /**
  * Default destination charges in RM (Malaysian level), by how the goods arrive. `n` is the count the mode is
  * measured in (pallets, containers, trucks, units, m³ or kg). Labels are generic; the caller renames the customs line.

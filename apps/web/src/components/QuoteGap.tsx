@@ -1,7 +1,9 @@
 "use client";
 import { useState } from "react";
 import type { AppState } from "@/lib/state";
-import { benchmarkFor, EQUIPMENT_LABEL } from "@/lib/lanes";
+import { EQUIPMENT_LABEL } from "@/lib/lanes";
+import { freightFor } from "@/lib/freight";
+import { modeCount } from "@/lib/shipment";
 import { DEST_PORTS } from "@/lib/ports";
 import { submitLead } from "@/lib/api";
 import { Card, rm, smallInputCls } from "./ui";
@@ -13,11 +15,11 @@ export function QuoteGap({ state, shareUrl, landedTotal }: { state: AppState; sh
   const [sent, setSent] = useState<"idle" | "sending" | "ok" | "fail">("idle");
   const [f, setF] = useState({ name: "", company: "", email: "", phone: "" });
 
-  const bench = benchmarkFor(state.origin_port, state.equipment);
-  const units = state.equipment === "pallet" ? state.pallets : 1;
-  const mid = bench ? ((bench.low + bench.high) / 2) * units : 0;
+  const est = freightFor(state);
+  const bench = est.ok ? est : null;
+  const units = modeCount(state);
   const quote = state.forwarder_quote;
-  const gapPct = bench && quote > 0 ? ((quote - mid) / mid) * 100 : 0;
+  const gapPct = bench && quote > 0 ? (quote > bench.high ? ((quote - bench.high) / bench.high) * 100 : quote < bench.low ? ((quote - bench.low) / bench.low) * 100 : 0) : 0;
   const dest = DEST_PORTS.find((p) => p.code === state.dest_port)?.label.split(" (")[0];
 
   const send = async () => {
@@ -48,22 +50,22 @@ export function QuoteGap({ state, shareUrl, landedTotal }: { state: AppState; sh
             </span>
           </div>
           <div className="flex justify-between text-[13px]">
-            <span className="text-muted">Lane benchmark (mid)</span>
+            <span className="text-muted">Our estimate{bench.tier === "rough" ? " (rough)" : ""}</span>
             <span>
-              {bench.currency} {rm(mid, 0)}
+              {bench.currency} {rm(bench.low, 0)}–{rm(bench.high, 0)}
             </span>
           </div>
           <div className={`mt-2 rounded-lg px-3 py-2 text-[13px] font-semibold ${gapPct > 15 ? "bg-amber-tint text-amber" : "bg-teal-tint text-teal"}`}>
-            {gapPct > 15
-              ? `${Math.round(gapPct)}% above benchmark — worth getting a second quote.`
+            {gapPct > 10
+              ? `${Math.round(gapPct)}% above the top of our range — worth getting a second quote.`
               : gapPct < -10
-                ? `${Math.round(-gapPct)}% below benchmark — good price, check what's excluded.`
-                : "Within the normal range for this lane."}
+                ? `${Math.round(-gapPct)}% below the bottom of our range — good price, check what's excluded.`
+                : "Within the normal range for this route."}
           </div>
         </div>
       ) : (
         <p className="mt-1 text-[13px] text-muted">
-          {bench ? "Enter your forwarder's quote on the previous step and we'll tell you if it's fair." : "No benchmark for this lane yet. Request quotes and we'll build one."}
+          {bench ? "Enter your forwarder's quote on the previous step and we'll tell you if it's fair." : "No freight estimate for this mode. Request quotes and compare them here."}
         </p>
       )}
 

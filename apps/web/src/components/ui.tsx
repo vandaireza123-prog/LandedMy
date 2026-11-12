@@ -9,10 +9,10 @@ export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { 
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground" dir={lang && isRtl(lang) ? "rtl" : "ltr"} lang={lang ?? "en"}>
       <header className="flex items-center justify-between px-5 pb-3 pt-12">
         <a href="/" className="no-underline" aria-label="Costavora home">
-          <Wordmark size={20} />
+          <Wordmark size={17} />
         </a>
         <div className="flex items-center gap-2 text-xs font-medium text-muted">
-          <span>{right ?? t("Free · no login")}</span>
+          <span className="max-w-[120px] truncate text-right leading-tight">{right ?? t("Free · no login")}</span>
           {onAccount && (
             <button type="button" onClick={onAccount} aria-label="Account" className={`flex h-6 w-6 items-center justify-center rounded-full border ${signedIn ? "border-teal bg-teal-tint text-teal" : "border-line bg-white text-muted"}`}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 4-6 8-6s8 2 8 6" /></svg>
