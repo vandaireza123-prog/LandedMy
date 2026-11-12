@@ -5,7 +5,7 @@ import { CATEGORY_HS, CATEGORY_LABEL, hsForCategory, searchLibrary, type Categor
 import { Card, Footer, PrimaryButton, Progress, Title, smallInputCls } from "./ui";
 import { ScanSheet } from "./ScanSheet";
 import { FX_DEFAULT } from "@/lib/lanes";
-import { GENERAL_GROUPS, GENERAL_LINES, GENERAL_VERIFY_URL } from "@landedmy/engine";
+import { GENERAL_LINES } from "@landedmy/engine";
 import { SENSITIVE_CHAPTERS, describeHs, searchHs, type HsHit } from "@/lib/hs/search";
 import { searchCatalogs, type CatalogHit } from "@/lib/hs/catalogs";
 import { useEffect } from "react";
@@ -63,6 +63,58 @@ function fromHs(h: HsHit, name: string, indicative = false): ProductRow {
     manual_duty_pct: line ? line.duty_pct : undefined,
     manual_sst_pct: line ? line.sst_pct : 10,
   };
+}
+
+function codeFields(p: CatalogHit): Pick<ProductRow, "code_source" | "code_note" | "code_check"> {
+  return { code_source: `${p.catalog} catalogue · ${p.group}`, code_note: p.item.note, code_check: p.item.c === "check" };
+}
+
+/** In-card customs-code picker: part catalogues first, then the full HS 2022 list. */
+function CodePicker({ onPick, onCancel }: { onPick: (p: { hs: HsHit } | { part: CatalogHit }) => void; onCancel: () => void }) {
+  const [q, setQ] = useState("");
+  const [hs, setHs] = useState<HsHit[]>([]);
+  const [parts, setParts] = useState<CatalogHit[]>([]);
+  useEffect(() => {
+    if (q.trim().length < 2) {
+      setHs([]);
+      setParts([]);
+      return;
+    }
+    let live = true;
+    const t = setTimeout(() => {
+      searchHs(q, 5).then((r) => live && setHs(r));
+      searchCatalogs(q, 4).then((r) => live && setParts(r));
+    }, 120);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [q]);
+  const Row = ({ code, title, sub, onClick }: { code: string; title: string; sub: string; onClick: () => void }) => (
+    <button type="button" onClick={onClick} className="flex w-full items-start justify-between gap-3 border-t border-line-2 px-3 py-2 text-left hover:bg-teal-tint">
+      <span className="min-w-0">
+        <span className="block truncate text-[13px] font-medium">{title}</span>
+        <span className="block truncate text-[11px] text-muted">{sub}</span>
+      </span>
+      <span className="shrink-0 font-mono text-[12px] text-teal">{code.slice(0, 4)}.{code.slice(4)}</span>
+    </button>
+  );
+  return (
+    <div className="overflow-hidden rounded-lg border border-teal bg-white">
+      <div className="flex items-center gap-2 px-3 py-2">
+        <input autoFocus className="h-8 min-w-0 flex-1 text-[13px] outline-none" placeholder="Part name, product or HS code" value={q} onChange={(e) => setQ(e.target.value)} />
+        <button type="button" onClick={onCancel} className="text-[12px] font-semibold text-muted">
+          Cancel
+        </button>
+      </div>
+      {parts.map((p) => (
+        <Row key={"p" + p.group + p.item.n} code={p.item.hs} title={p.item.n} sub={`${p.group}${p.item.c === "check" ? " · rulings vary" : ""}`} onClick={() => onPick({ part: p })} />
+      ))}
+      {hs.map((h) => (
+        <Row key={"h" + h.code6} code={h.code6} title={h.description} sub={h.heading} onClick={() => onPick({ hs: h })} />
+      ))}
+    </div>
+  );
 }
 
 function fromLibrary(p: LibraryProduct): ProductRow {
@@ -188,11 +240,22 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   const addPart = async (p: CatalogHit) => {
     const h = await describeHs(p.item.hs);
     if (!h) return;
-    const row = fromHs(h, p.item.n, indicative);
-    const why = `${p.catalog} · ${p.group}${p.item.c === "check" ? " · classification varies by country — confirm" : ""}${p.item.note ? ` · ${p.item.note}` : ""}`;
-    setRows([...rows, { ...row, duty_notes: [why, ...(row.duty_notes ?? [])] }]);
+    setRows([...rows, { ...fromHs(h, p.item.n, indicative), ...codeFields(p) }]);
     setQ("");
   };
+  /** Replace a row's customs code (from the in-card picker); the duty pre-fill runs again for the new code. */
+  const setCode = async (id: string, pick: { hs: HsHit } | { part: CatalogHit }) => {
+    const h = "hs" in pick ? pick.hs : await describeHs(pick.part.item.hs);
+    if (!h) return;
+    const base = fromHs(h, "", indicative);
+    patchRow(id, {
+      hs6: base.hs6, hs6_desc: base.hs6_desc, hs_code: base.hs_code, hs_confirmed: base.hs_confirmed, general_group: base.general_group,
+      manual_duty_pct: base.manual_duty_pct, manual_sst_pct: base.manual_sst_pct ?? 10, duty_source: undefined, duty_notes: undefined,
+      ...("part" in pick ? codeFields(pick.part) : { code_source: undefined, code_note: undefined, code_check: undefined }),
+    });
+    setPicking(null);
+  };
+  const [picking, setPicking] = useState<string | null>(null);
 
   const units = rows.reduce((a, r) => a + r.units_per_case * r.cases, 0);
   const goods = rows.reduce((a, r) => a + r.units_per_case * r.cases * r.unit_cost, 0);
@@ -304,6 +367,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
               </button>
             </div>
 
+            {r.category !== "general" && (
             <div className="mt-2 grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] text-muted">{t("Type")}</span>
@@ -315,51 +379,53 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                   ))}
                 </select>
               </label>
-              {r.category !== "general" ? (
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] text-muted">{t("Customs code")}</span>
-                  <select className={smallInputCls} value={r.hs_code} onChange={(e) => patchRow(r.id, { hs_code: e.target.value, hs_confirmed: true })}>
-                    {CATEGORY_HS[r.category].map((h) => (
-                      <option key={h.hs_code} value={h.hs_code}>
-                        {h.hs_code} · {h.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : (
-                <label className="flex flex-col gap-1">
-                  <span className="text-[11px] text-muted">{t("Group")}</span>
-                  <select className={smallInputCls} value={r.general_group ?? "other"} onChange={(e) => patchRow(r.id, { general_group: e.target.value, hs_code: "MANUAL", hs_confirmed: false })}>
-                    {GENERAL_GROUPS.map((g) => (
-                      <option key={g.key} value={g.key}>
-                        {g.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] text-muted">{t("Customs code")}</span>
+                <select className={smallInputCls} value={r.hs_code} onChange={(e) => patchRow(r.id, { hs_code: e.target.value, hs_confirmed: true })}>
+                  {CATEGORY_HS[r.category].map((h) => (
+                    <option key={h.hs_code} value={h.hs_code}>
+                      {h.hs_code} · {h.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
+            )}
 
             {r.category === "general" && (
               <div className="mt-2 flex flex-col gap-2">
-                {r.hs6 && (
-                  <div className="flex items-start justify-between gap-2 rounded-lg bg-ground px-2.5 py-2 text-[11px]">
-                    <span className="min-w-0">
-                      <span className="font-mono font-semibold text-teal">HS {r.hs6.slice(0, 4)}.{r.hs6.slice(4)}</span> <span className="text-muted">{r.hs6_desc}</span>
-                      {SENSITIVE_CHAPTERS[r.hs6.slice(0, 2)] && <span className="mt-0.5 block text-amber">{SENSITIVE_CHAPTERS[r.hs6.slice(0, 2)]}</span>}
-                    </span>
-                    <a href={`${GENERAL_VERIFY_URL}`} target="_blank" rel="noopener" className="shrink-0 font-semibold text-teal">
-                      {state.dest_country === "SG" ? "SG rate" : "MY rate"} →
-                    </a>
-                  </div>
-                )}
+                <div className="flex flex-col gap-1">
+                  <span className="text-[11px] text-muted">{t("Customs code")}</span>
+                  {picking === r.id ? (
+                    <CodePicker onPick={(p) => setCode(r.id, p)} onCancel={() => setPicking(null)} />
+                  ) : r.hs6 ? (
+                    <div className="rounded-lg bg-ground px-2.5 py-2 text-[12px]">
+                      <span className="font-mono font-semibold text-teal">{r.hs6.slice(0, 4)}.{r.hs6.slice(4)}</span> <span className="text-muted">{r.hs6_desc}</span>
+                      <div className="mt-1 flex items-start justify-between gap-2 text-[11px]">
+                        <span className="min-w-0 leading-snug text-muted">
+                          {r.code_source ? `From the ${r.code_source.charAt(0).toLowerCase()}${r.code_source.slice(1)}` : "From the HS 2022 list"}
+                          {r.code_check ? " · customs administrations classify this differently, confirm before you ship" : ""}
+                          {r.code_note ? <span className="mt-0.5 block">{r.code_note}</span> : null}
+                          {SENSITIVE_CHAPTERS[r.hs6.slice(0, 2)] && <span className="mt-0.5 block text-amber">{SENSITIVE_CHAPTERS[r.hs6.slice(0, 2)]}</span>}
+                        </span>
+                        <button type="button" onClick={() => setPicking(r.id)} className="shrink-0 font-semibold text-teal">
+                          Change
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => setPicking(r.id)} className="flex h-10 items-center justify-between rounded-lg border border-dashed border-teal px-3 text-[13px] font-semibold text-teal">
+                      Find the customs code <span aria-hidden="true">→</span>
+                    </button>
+                  )}
+                </div>
                 {indicative ? (
                   <div className="grid grid-cols-2 gap-2">
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">Import duty % into {country.name}</span>
                       <input type="number" step="0.5" className={`${smallInputCls} border-teal`} value={r.manual_duty_pct ?? country.duty_default_pct ?? ""} placeholder={country.duty_default_pct != null ? String(country.duty_default_pct) : "e.g. 20"} onChange={(e) => patchRow(r.id, { manual_duty_pct: e.target.value === "" ? undefined : Number(e.target.value) || 0, duty_source: "you" })} />
                       {r.duty_source && r.duty_source !== "none" && r.duty_source !== "you" && <span className="text-[10px] leading-snug text-muted">Pre-filled: {r.duty_source}</span>}
-                      {r.duty_source === "none" && <span className="text-[10px] leading-snug text-muted">No rate loaded yet for this code — enter it from the tariff tool.</span>}
+                      {r.duty_source === "none" && <span className="text-[10px] leading-snug text-muted">No rate loaded for {country.name} yet — type it from the official tariff below.</span>}
                     </label>
                     <label className="flex flex-col gap-1">
                       <span className="text-[11px] text-muted">{country.tax_name}</span>
@@ -410,7 +476,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                   </div>
                 )}
                 <a href={country.lookup} target="_blank" rel="noreferrer" className="text-[11px] font-semibold text-teal">
-                  {indicative ? `Look up ${r.hs6 ? `${r.hs6.slice(0, 4)}.${r.hs6.slice(4)}` : "the code"} on ${country.customs_name}'s tariff tool →` : "Look up the official rate on JKDM's tariff tool →"}
+                  {`Look up ${r.hs6 ? `${r.hs6.slice(0, 4)}.${r.hs6.slice(4)}` : "the code"} on ${country.customs_name}'s tariff tool →`}
                 </a>
               </div>
             )}
@@ -449,10 +515,24 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted">
               <span>
                 {r.units_per_case * r.cases} units{r.category !== "general" ? ` · ${((r.volume_ml / 1000) * r.units_per_case * r.cases).toFixed(1)} L` : ""}
+                {r.category === "general" && (
+                  <>
+                    {" · "}
+                    <button type="button" onClick={() => patchRow(r.id, { category: "still_wine", hs6: undefined, hs6_desc: undefined, code_source: undefined, code_note: undefined, code_check: undefined, duty_source: undefined, duty_notes: undefined })} className="font-semibold text-teal">
+                      It&apos;s an alcoholic drink
+                    </button>
+                  </>
+                )}
               </span>
-              <span className={`rounded-md px-2 py-0.5 font-semibold ${r.hs_confirmed ? "bg-teal-tint text-teal" : "bg-amber-tint text-amber"}`}>
-                {r.hs_confirmed ? t("Code confirmed") : r.hs_code === "MANUAL" ? t("Your rates, verify") : t("Check customs code")}
-              </span>
+              {r.category === "general" ? (
+                <span className={`rounded-md px-2 py-0.5 font-semibold ${!r.hs6 ? "bg-amber-tint text-amber" : r.code_check ? "bg-amber-tint text-amber" : "bg-teal-tint text-teal"}`}>
+                  {!r.hs6 ? t("No code yet") : r.code_source ? (r.code_check ? t("Catalogue · confirm") : t("Code from catalogue")) : t("Code you chose")}
+                </span>
+              ) : (
+                <span className={`rounded-md px-2 py-0.5 font-semibold ${r.hs_confirmed ? "bg-teal-tint text-teal" : "bg-amber-tint text-amber"}`}>
+                  {r.hs_confirmed ? t("Code confirmed") : t("Check customs code")}
+                </span>
+              )}
             </div>
           </Card>
         ))}

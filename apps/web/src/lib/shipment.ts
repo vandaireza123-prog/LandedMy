@@ -21,6 +21,12 @@ export interface ProductRow extends ShipmentLine {
   duty_source?: string;
   /** Extra duties flagged by the rates API (e.g. US chapter 99 for this origin) — shown, not priced. */
   duty_notes?: string[];
+  /** Where the customs code came from when picked from a part catalogue ("Aircraft and helicopter parts · Landing gear"). */
+  code_source?: string;
+  /** Classification note from the catalogue (why this heading, exceptions). */
+  code_note?: string;
+  /** True when customs administrations classify this item differently — the user should confirm. */
+  code_check?: boolean;
 }
 
 /** Everything the engine needs, without UI-only fields. */

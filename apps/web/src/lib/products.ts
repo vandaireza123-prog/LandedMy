@@ -18,7 +18,7 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   cider: "Cider / perry",
   spirits: "Spirits",
   other: "Other alcohol",
-  general: "Non-alcohol goods",
+  general: "Not a drink (any other product)",
 };
 
 /** Default HS line per category; the engine's rate tables key off these. */
