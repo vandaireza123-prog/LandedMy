@@ -62,7 +62,7 @@ export default async (req: Request, _ctx: Context) => {
           const r = await fetch("https://api.resend.com/emails", {
             method: "POST",
             headers: { authorization: `Bearer ${process.env.RESEND_API_KEY}`, "content-type": "application/json" },
-            body: JSON.stringify({ from: process.env.ALERT_FROM ?? "LandedMY <alerts@landedmy.netlify.app>", to, subject: title, text: `${body}\n\nhttps://landedmy.netlify.app/` }),
+            body: JSON.stringify({ from: process.env.ALERT_FROM ?? "Costavora <alerts@costavora.com>", to, subject: title, text: `${body}\n\nhttps://costavora.com/` }),
           });
           if (r.ok) emailed++;
         }

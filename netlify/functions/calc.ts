@@ -51,7 +51,7 @@ const CORS = { "access-control-allow-origin": "*", "access-control-allow-headers
 const json = (status: number, body: unknown) => new Response(JSON.stringify(body, null, 2), { status, headers: { "content-type": "application/json", ...CORS } });
 
 const DOCS = {
-  name: "LandedMY calculation API",
+  name: "Costavora calculation API",
   version: "0.1",
   status: "beta, free, 60 req/min per IP",
   endpoint: "POST /api/calc",
@@ -77,7 +77,7 @@ const DOCS = {
   auth: "optional x-api-key header (create one under Account → API keys in the app): 300 req/min per key instead of 60 per IP, and usage is counted against your account",
   errors: { 400: "invalid body", 401: "unknown or revoked API key", 422: "no rate in force for an HS code on that date (RateNotFoundError)", 429: "rate limited" },
   rates: "MY: Customs Duties Order 2022 (MFN); Excise Duties Order 2025 (P.U.(A) 389/2025) from 1 Nov 2025; SST 10% on CIF + duty + excise; verified against RMCD K1 assessments for chapter 22. SG: customs and excise per litre of alcohol from Singapore Customs List of Dutiable Goods; GST 9% on CIF + duties.",
-  contact: "https://landedmy.netlify.app/",
+  contact: "https://costavora.com/",
 };
 
 export default async (req: Request, ctx: Context) => {

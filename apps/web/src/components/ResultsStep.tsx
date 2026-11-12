@@ -217,7 +217,7 @@ export function ResultsStep({
     const csv = [head, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
-    a.download = `landedmy-${result.date}.csv`;
+    a.download = `costavora-${result.date}.csv`;
     a.click();
   };
 

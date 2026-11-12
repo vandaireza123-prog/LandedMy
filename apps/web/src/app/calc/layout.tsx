@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Calculator — LandedMY",
-  description: "Calculate the exact landed cost of a shipment into Malaysia: import duty, excise, SST, freight and port charges per bottle, case and pallet.",
-  alternates: { canonical: "https://landedmy.netlify.app/calc/" },
+  title: "Landed cost calculator — Costavora",
+  description: "Calculate the landed cost of a shipment into any of 213 countries: import duty, excise, VAT or sales tax, freight and port charges, per unit and per shipment.",
+  alternates: { canonical: "https://costavora.com/calc/" },
 };
 
 export default function CalcLayout({ children }: { children: React.ReactNode }) {

@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Article, CtaCard, Figure, H2, Note, Table, shareOf } from "@/components/site/Site";
 import { BEER_BASE, BEER_VARIANTS, EXAMPLE_DATE, priceExampleOn, rm2 } from "@/lib/examples";
 
-const URL = "https://landedmy.netlify.app/guides/beer-import-duty-excise-malaysia/";
+const URL = "https://costavora.com/guides/beer-import-duty-excise-malaysia/";
 
 export const metadata: Metadata = {
-  title: "Beer import duty and excise in Malaysia: a worked example (2026) — LandedMY",
+  title: "Beer import duty and excise in Malaysia: a worked example (2026) — Costavora",
   description:
     "Malaysia charges RM5 per litre import duty on beer and RM192.50 per litre of pure alcohol in excise, plus 10% SST on top. A €1 can of lager lands at about RM12. Step-by-step arithmetic, with the 5.8% ABV split, strong ales, kegs and cider.",
   alternates: { canonical: URL },
-  openGraph: { title: "Beer import duty and excise in Malaysia: a worked example", description: "Why a €1 can of lager lands at about RM12, line by line, with 2026 rates.", url: URL, type: "article" },
+  openGraph: { title: "Beer import duty and excise in Malaysia: a worked example", description: "Why a €1 can of lager lands at about RM12, line by line, with 2026 rates.", url: URL, type: "article", images: ["/og.png"] },
 };
 
 export default function BeerGuide() {
@@ -31,7 +31,7 @@ export default function BeerGuide() {
     headline: "Beer import duty and excise in Malaysia: a worked example",
     datePublished: "2026-11-02",
     dateModified: "2026-11-02",
-    author: { "@type": "Organization", name: "LandedMY" },
+    author: { "@type": "Organization", name: "Costavora" },
     mainEntityOfPage: URL,
   };
 

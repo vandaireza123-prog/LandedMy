@@ -169,7 +169,7 @@ export function QuoteSheet({ state, result, user, onClose }: { state: AppState; 
 
         <div style={{ marginTop: 22, fontSize: 10, color: "#5B6664", lineHeight: 1.5 }}>
           Rates: {COUNTRIES[state.dest_country].rates_note} Estimate only; final assessment by {COUNTRIES[state.dest_country].customs_name}. Tax share of landed cost: {Math.round(t.tax_share_pct)}%.
-          <div style={{ marginTop: 6, fontWeight: 600, color: "#0B5E5A" }}>Made with LandedMY · landedmy.netlify.app</div>
+          <div style={{ marginTop: 6, fontWeight: 600, color: "#0B5E5A" }}>Made with Costavora · costavora.com</div>
         </div>
       </div>
     </>

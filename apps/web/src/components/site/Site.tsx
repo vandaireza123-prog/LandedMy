@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Wordmark } from "./Brand";
 
 export const CALC = "/calc/";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <Link href="/" className={`font-display text-xl font-bold tracking-tight text-ink no-underline ${className}`}>
-      Landed<span className="text-teal">MY</span>
+    <Link href="/" aria-label="Costavora home" className={`no-underline ${className}`}>
+      <Wordmark size={24} />
     </Link>
   );
 }
@@ -17,8 +18,8 @@ export function SiteNav() {
       <div className="mx-auto flex h-[68px] max-w-[1120px] items-center justify-between gap-4 px-6">
         <Logo />
         <nav className="hidden gap-7 text-sm font-medium text-muted md:flex">
-          <Link href="/#how">How it works</Link>
-          <Link href="/#verified">Verified</Link>
+          <Link href={CALC}>Calculator</Link>
+          <Link href="/#coverage">Coverage</Link>
           <Link href="/guides/import-wine-malaysia-cost/">Guides</Link>
           <Link href="/#api">API</Link>
         </nav>
@@ -34,7 +35,7 @@ export function SiteFooter({ next }: { next?: { href: string; label: string } })
   return (
     <footer className="border-t border-line-2">
       <div className="mx-auto flex max-w-[1120px] flex-wrap justify-between gap-4 px-6 py-7 text-[13px] text-muted">
-        <span>LandedMY · Estimates for planning. Final assessment is by the Royal Malaysian Customs Department.</span>
+        <span>Costavora · Estimates for planning. Final assessment is by the customs authority of the importing country.</span>
         {next ? (
           <Link href={next.href} className="text-teal">{next.label} →</Link>
         ) : (

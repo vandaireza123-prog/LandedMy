@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Article, CtaCard, Figure, H2, Note, Table, shareOf } from "@/components/site/Site";
 import { SPIRITS_BASE, SPIRITS_VARIANTS, priceExample, rm2 } from "@/lib/examples";
 
-const URL = "https://landedmy.netlify.app/guides/spirits-import-duty-malaysia/";
+const URL = "https://costavora.com/guides/spirits-import-duty-malaysia/";
 
 export const metadata: Metadata = {
-  title: "Whisky, gin and spirits import duty in Malaysia: what a bottle really costs (2026) — LandedMY",
+  title: "Whisky, gin and spirits import duty in Malaysia: what a bottle really costs (2026) — Costavora",
   description:
     "Malaysia charges RM58 per litre import duty on whisky and brandy, RM55 on gin, rum and vodka, plus RM165 excise per litre of pure alcohol and 10% SST on top. A €12 bottle of Scotch lands at about RM169. The full arithmetic, with 2026 rates.",
   alternates: { canonical: URL },
-  openGraph: { title: "Spirits import duty in Malaysia: what a bottle of whisky really costs", description: "Duty, excise and SST on a €12 Scotch, line by line, with 2026 rates.", url: URL, type: "article" },
+  openGraph: { title: "Spirits import duty in Malaysia: what a bottle of whisky really costs", description: "Duty, excise and SST on a €12 Scotch, line by line, with 2026 rates.", url: URL, type: "article", images: ["/og.png"] },
 };
 
 export default function SpiritsGuide() {
@@ -29,7 +29,7 @@ export default function SpiritsGuide() {
     headline: "Whisky, gin and spirits import duty in Malaysia: what a bottle really costs",
     datePublished: "2026-11-02",
     dateModified: "2026-11-02",
-    author: { "@type": "Organization", name: "LandedMY" },
+    author: { "@type": "Organization", name: "Costavora" },
     mainEntityOfPage: URL,
   };
 

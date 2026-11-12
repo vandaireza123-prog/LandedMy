@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Article, CtaCard, Figure, H2, Note, Table, shareOf } from "@/components/site/Site";
 import { WINE_BASE, WINE_VARIANTS, priceExample, rm2 } from "@/lib/examples";
 
-const URL = "https://landedmy.netlify.app/guides/import-wine-malaysia-cost/";
+const URL = "https://costavora.com/guides/import-wine-malaysia-cost/";
 
 export const metadata: Metadata = {
-  title: "How much does it cost to import wine into Malaysia? (2026 rates) — LandedMY",
+  title: "How much does it cost to import wine into Malaysia? (2026 rates) — Costavora",
   description:
     "A €5 bottle of wine lands in Port Klang at about RM58. Import duty RM7/L, excise RM165 per litre of alcohol, SST 10% on top, port charges: every line of the landed cost, with the rates in force since 1 November 2025.",
   alternates: { canonical: URL },
-  openGraph: { title: "How much does it cost to import wine into Malaysia?", description: "Every line of the landed cost of a €5 bottle, with 2026 duty, excise and SST rates.", url: URL, type: "article" },
+  openGraph: { title: "How much does it cost to import wine into Malaysia?", description: "Every line of the landed cost of a €5 bottle, with 2026 duty, excise and SST rates.", url: URL, type: "article", images: ["/og.png"] },
 };
 
 export default function WineGuide() {
@@ -26,7 +26,7 @@ export default function WineGuide() {
     headline: "How much does it cost to import wine into Malaysia?",
     datePublished: "2026-11-02",
     dateModified: "2026-11-02",
-    author: { "@type": "Organization", name: "LandedMY" },
+    author: { "@type": "Organization", name: "Costavora" },
     mainEntityOfPage: URL,
   };
 

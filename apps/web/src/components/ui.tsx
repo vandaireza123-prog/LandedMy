@@ -1,5 +1,6 @@
 "use client";
 import type { ReactNode } from "react";
+import { Wordmark } from "./site/Brand";
 import { LANGS, isRtl, useT, type Lang } from "@/lib/i18n";
 
 export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { children: ReactNode; right?: ReactNode; onLang?: (l: Lang) => void; lang?: Lang; onAccount?: () => void; signedIn?: boolean }) {
@@ -7,8 +8,8 @@ export function Shell({ children, right, onLang, lang, onAccount, signedIn }: { 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-ground" dir={lang && isRtl(lang) ? "rtl" : "ltr"} lang={lang ?? "en"}>
       <header className="flex items-center justify-between px-5 pb-3 pt-12">
-        <a href="/" className="font-display text-lg font-bold tracking-tight text-ink no-underline" aria-label="LandedMY home">
-          Landed<span className="text-teal">MY</span>
+        <a href="/" className="no-underline" aria-label="Costavora home">
+          <Wordmark size={20} />
         </a>
         <div className="flex items-center gap-2 text-xs font-medium text-muted">
           <span>{right ?? t("Free · no login")}</span>

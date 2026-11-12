@@ -6,7 +6,9 @@ import type { Category } from "./products";
 import type { Lang } from "./i18n";
 import type { Equipment } from "./lanes";
 import { FX_DEFAULT } from "./lanes";
-import { countryOfPort, localChargesFor, type DestCountry } from "./country";
+import { COUNTRIES, countryOfPort, fxDefault, localChargesFor, type DestCountry } from "./country";
+import { PORTS } from "./ports";
+import { modeCount } from "./shipment";
 
 export type { ProductRow } from "./shipment";
 export { buildShipment, manualLinesOf } from "./shipment";
@@ -48,6 +50,8 @@ export interface AppState {
   /** Id/name of the account-saved shipment this state was loaded from, if any. */
   saved_id?: string;
   saved_name?: string;
+  /** Product typed on the homepage search, consumed once by step 1. */
+  search_q?: string;
 }
 
 export interface Scenario {
@@ -102,6 +106,35 @@ function decodeShare(h: string): AppState | null {
   }
 }
 
+/** Homepage hand-off: /calc/?q=…&from=BE&to=MY sets the route and pre-fills the product search. */
+function applyHandoff(s: AppState, qs: URLSearchParams): AppState {
+  const next: AppState = { ...s, step: 1 };
+  const from = (qs.get("from") ?? "").toUpperCase();
+  if (from) {
+    const port = PORTS.find((p) => p.iso === from);
+    if (port) {
+      Object.assign(next, { origin_port: port.code, origin_iso: port.iso, origin_label: `${port.name}, ${port.country}` });
+      if (!s.products.length) next.currency = port.currency;
+    } else if (COUNTRIES[from]) {
+      Object.assign(next, { origin_port: "CUSTOM", origin_iso: from, origin_label: COUNTRIES[from].name });
+    }
+  }
+  const to = (qs.get("to") ?? "").toUpperCase();
+  if (to && COUNTRIES[to]) {
+    Object.assign(next, {
+      dest_country: to,
+      dest_port: COUNTRIES[to].ports[0].code,
+      local_charges: localChargesFor(to, next.equipment, modeCount(next)),
+      local_touched: false,
+    });
+  }
+  next.fx_rate = fxDefault(next.dest_country, next.currency, FX_DEFAULT);
+  next.fx_source = "";
+  const q = qs.get("q")?.trim();
+  if (q) next.search_q = q.slice(0, 120);
+  return next;
+}
+
 export function useAppState() {
   const [state, setState] = useState<AppState>(initialState);
   const [hydrated, setHydrated] = useState(false);
@@ -121,6 +154,15 @@ export function useAppState() {
       }
     } catch {
       /* storage unavailable: run in memory */
+    }
+    try {
+      const qs = new URLSearchParams(window.location.search);
+      if (qs.has("q") || qs.has("from") || qs.has("to")) {
+        setState((s) => applyHandoff(s, qs));
+        window.history.replaceState(null, "", window.location.pathname + window.location.hash);
+      }
+    } catch {
+      /* ignore malformed links */
     }
     setHydrated(true);
   }, []);

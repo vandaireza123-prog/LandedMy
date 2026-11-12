@@ -1,5 +1,5 @@
 /**
- * computeShipment — the one pure function LandedMY is built around.
+ * computeShipment — the one pure function Costavora is built around.
  *
  * Order of operations (Malaysian customs practice):
  *   1. goods value → RM at the customs FX rate

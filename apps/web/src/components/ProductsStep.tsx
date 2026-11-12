@@ -215,6 +215,13 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
     if (q.trim()) add();
   };
   const searchRef = useRef<HTMLInputElement>(null);
+  // Product typed on the homepage: put it in the search box once.
+  useEffect(() => {
+    if (!state.search_q) return;
+    setQ(state.search_q);
+    update({ search_q: undefined });
+    searchRef.current?.focus();
+  }, [state.search_q, update]);
   const focusSearch = () => {
     searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     searchRef.current?.focus({ preventScroll: true });

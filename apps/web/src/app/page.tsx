@@ -2,20 +2,25 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Btn, CALC, Card, SiteFooter, SiteNav } from "@/components/site/Site";
 import { ShareRedirect } from "@/components/site/ShareRedirect";
+import { HeroSearch } from "@/components/site/HeroSearch";
 import { WINE_BASE, priceExample, rm2 } from "@/lib/examples";
+import { DEST_COUNTRIES, dutyCoverage } from "@/lib/country";
+import { MODES } from "@/lib/lanes";
+
+const N_DEST = DEST_COUNTRIES.length;
+const N_DUTY = DEST_COUNTRIES.filter((c) => dutyCoverage(c).kind !== "none").length;
+const N_MODES = Object.keys(MODES).length;
 
 export const metadata: Metadata = {
-  title: "LandedMY — free landed cost calculator for importing into Malaysia",
-  description:
-    "Import duty, excise, SST and port charges for wine, beer, cider, spirits and general goods coming into Malaysia, to the sen. Per bottle, per case, per pallet. Verified against real customs K1 declarations.",
-  alternates: { canonical: "https://landedmy.netlify.app/" },
-  openGraph: { title: "LandedMY — know your landed cost before you order", description: "Free Malaysian import duty, excise and SST calculator. Exact to the sen, every rate linked to its gazette.", url: "https://landedmy.netlify.app/", type: "website" },
+  title: "Costavora — free landed cost calculator: duty, tax and freight for any product, any country",
+  description: `Import duty, tax, excise, freight and port charges for any product shipped into ${N_DEST} countries. Free, no login, and every rate shows its source and whether it is exact or an estimate.`,
+  alternates: { canonical: "https://costavora.com/" },
+  openGraph: { title: "Costavora — the landed cost of anything, anywhere", description: `Duty, tax, freight and port charges for any product into ${N_DEST} countries. Free.`, url: "https://costavora.com/", type: "website", siteName: "Costavora", images: [{ url: "/og.png", width: 1200, height: 630 }] },
 };
 
 export default function Landing() {
   const w = priceExample(WINE_BASE);
   const pu = w.per_unit;
-  const share = (n: number) => `${Math.round((n / pu.landed) * 100)}%`;
 
   return (
     <div className="flex min-h-dvh flex-col bg-ground">
@@ -23,80 +28,35 @@ export default function Landing() {
       <SiteNav />
       <main className="flex-1">
         {/* Hero */}
-        <section id="top" className="mx-auto max-w-[1120px] px-6 pb-14 pt-14 md:pt-[72px]">
-          <div className="grid items-center gap-12 md:grid-cols-2">
-            <div className="flex flex-col gap-5">
-              <span className="inline-flex self-start rounded-full bg-teal-tint px-3 py-1.5 text-xs font-semibold uppercase tracking-wider text-teal">Free · Malaysia · Rates in force 1 Nov 2025</span>
-              <h1 className="font-display text-[42px] font-bold leading-[1.02] tracking-tight md:text-[56px]">Know your landed cost before you order.</h1>
-              <p className="max-w-[520px] text-lg leading-relaxed text-muted">
-                Import duty, excise, SST and port charges for goods coming into Malaysia, to the sen. Wine, beer, cider, spirits and general goods. Enter the product, cost and quantity; get the exact cost per bottle, per case, per pallet.
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <Btn href={CALC}>Calculate a shipment</Btn>
-                <Btn href="#install" ghost>Add to home screen</Btn>
-              </div>
-              <div className="flex flex-wrap gap-6 text-[13px] text-muted">
-                <span>No login needed</span>
-                <span>9 languages, Arabic right-to-left</span>
-                <span>Every rate links to its gazette</span>
-              </div>
-            </div>
-
-            {/* Phone mock, real numbers from the engine */}
-            <div className="flex justify-center">
-              <div className="flex w-[340px] max-w-full flex-col gap-3.5 rounded-[28px] border border-line-2 bg-white p-5 shadow-[0_30px_60px_-30px_rgba(21,32,31,0.25)]">
-                <div className="flex justify-between text-xs text-muted">
-                  <span className="font-display text-[15px] font-bold text-ink">
-                    Landed<span className="text-teal">MY</span>
-                  </span>
-                  <span>Antwerp → Port Klang</span>
-                </div>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-teal">Landed cost</div>
-                <div className="flex items-baseline gap-2">
-                  <span className="font-display text-[44px] font-bold leading-none tabular-nums">{rm2(pu.landed)}</span>
-                  <span className="text-[13px] text-muted">per bottle</span>
-                </div>
-                <div className="text-[13px] text-muted">Still wine 13% · €5.00 · 60 cases · 1 pallet</div>
-                <div className="flex h-2 overflow-hidden rounded-full bg-line-2" aria-hidden="true">
-                  <div style={{ width: share(pu.cif + pu.local_charges), background: "#B7D5D1" }} />
-                  <div style={{ width: share(pu.duty), background: "#5FA39D" }} />
-                  <div style={{ width: share(pu.excise), background: "#0B5E5A" }} />
-                  <div style={{ width: share(pu.sst), background: "#15201F" }} />
-                </div>
-                <dl className="flex flex-col text-sm">
-                  {[
-                    ["Goods (CIF)", pu.cif],
-                    ["Import duty RM7/L", pu.duty],
-                    ["Excise RM165/L alc.", pu.excise],
-                    ["SST 10%", pu.sst],
-                    ["Port, agent, haulage", pu.local_charges],
-                  ].map(([k, v]) => (
-                    <div key={k as string} className="flex justify-between border-b border-line-2 py-2.5 last:border-b-0">
-                      <dt>{k}</dt>
-                      <dd className="font-mono tabular-nums">{rm2(v as number)}</dd>
-                    </div>
-                  ))}
-                </dl>
-                <div className="flex gap-2 text-[13px] font-semibold">
-                  <span className="flex-1 rounded-[10px] bg-teal py-2.5 text-center text-white">PDF quote</span>
-                  <span className="flex-1 rounded-[10px] border border-line py-2.5 text-center">Share</span>
-                </div>
-              </div>
-            </div>
+        <section id="top" className="mx-auto max-w-[1120px] px-6 pb-10 pt-12 text-center md:pt-16">
+          <span className="inline-flex rounded-full bg-teal-tint px-3.5 py-1.5 text-xs font-bold uppercase tracking-wider text-teal">Free · {N_DEST} countries · every product</span>
+          <h1 className="mx-auto mb-4 mt-5 max-w-[860px] font-display text-[44px] font-bold leading-[1.02] tracking-[-0.04em] md:text-[68px]">
+            The landed cost of <span className="text-teal">anything</span>, anywhere.
+          </h1>
+          <p className="mx-auto max-w-[700px] text-lg leading-relaxed text-muted md:text-[19px]">
+            Duty, tax, excise, freight and port charges for any product shipped into any country. Every rate shows its source, and says plainly when it is only an estimate.
+          </p>
+          <HeroSearch />
+          <div className="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-1 text-[13.5px] text-muted">
+            <span>No login</span>
+            <span>9 languages</span>
+            <span>Official tariffs updated weekly</span>
+            <span>Free API</span>
           </div>
         </section>
 
-        {/* Proof strip */}
-        <section id="verified" className="bg-ink text-ground">
-          <div className="mx-auto grid max-w-[1120px] gap-8 px-6 py-11 md:grid-cols-3">
+        {/* Coverage */}
+        <section id="coverage" className="mx-auto max-w-[1120px] px-6">
+          <div className="grid gap-6 border-t border-line py-8 sm:grid-cols-2 md:grid-cols-4">
             {[
-              ["50 / 50", "lines on real customs K1 declarations matched to the sen"],
-              ["RM0.00", "to use. No account for the calculator; one optional for saved shipments"],
-              ["4 steps", "route, products, logistics, result. Under two minutes on a phone"],
+              [String(N_DEST), "destination countries and territories"],
+              [String(N_DUTY), "with the duty rate filled in for you"],
+              [String(N_MODES), "ways to ship, from courier to ISO tank"],
+              ["Weekly", "official schedules: US, UK, EU, Brazil, China and more"],
             ].map(([n, t]) => (
-              <div key={n} className="flex flex-col gap-1.5">
-                <span className="font-display text-[40px] font-bold leading-none tabular-nums">{n}</span>
-                <span className="text-sm text-[#B9C1BE]">{t}</span>
+              <div key={t} className="flex flex-col gap-1">
+                <span className="font-display text-[34px] font-bold leading-none tracking-tight tabular-nums">{n}</span>
+                <span className="text-sm text-muted">{t}</span>
               </div>
             ))}
           </div>
@@ -105,16 +65,17 @@ export default function Landing() {
         {/* How it works */}
         <section id="how" className="mx-auto flex max-w-[1120px] flex-col gap-7 px-6 pb-6 pt-[72px]">
           <div className="flex max-w-[640px] flex-col gap-2">
-            <h2 className="font-display text-[32px] font-bold leading-tight tracking-tight md:text-[36px]">The tax stack, done the way Customs does it</h2>
+            <h2 className="font-display text-[32px] font-bold leading-tight tracking-tight md:text-[36px]">The tax stack, done the way customs does it</h2>
             <p className="leading-relaxed text-muted">
-              Most online calculators apply a flat percentage. Malaysian alcohol duty is per litre and excise is per litre of pure alcohol, and SST is charged on top of both. LandedMY follows that order exactly.
+              Most online calculators apply one flat percentage. Real tariffs are per litre, per kilo or per litre of alcohol, with excise and VAT or sales tax charged on top in a set order. Costavora follows that order for each country.
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 md:grid-cols-4">
             {[
-              ["01", "Pick the route", "Any origin port in the world to nine Malaysian ports. Pallet or container, reefer or dry. Live Bank Negara exchange rate."],
-              ["02", "Add products", "Search the library, or photograph the supplier invoice and let the reader fill the lines. Customs codes are suggested, you confirm."],
-              ["03", "See every ringgit", "Duty, excise, SST, freight, port and clearance per bottle, case, pallet and shipment. Check a forwarder quote. Reverse it to a maximum supplier price."],
+              ["01", "Add your products", "Type a product, part name or HS code, or photograph the supplier invoice. As many lines as the shipment has, each in its own unit."],
+              ["02", "Pick the route and mode", `Any origin to ${N_DEST} destinations, by any of ${N_MODES} modes: courier, air, LCL, every container type, truck, rail, ro-ro, ISO tank.`],
+              ["03", "Freight and charges", "Typical freight and port charges for the mode, or your forwarder's own quote."],
+              ["04", "See every cost", "Duty, excise, tax, freight and local charges per unit and per shipment, with the source of each rate. PDF quote, share link, margin check."],
             ].map(([n, h, t]) => (
               <Card key={n} className="flex flex-col gap-2.5 p-6">
                 <span className="font-mono text-xs font-semibold text-teal">{n}</span>
@@ -134,14 +95,14 @@ export default function Landing() {
                 <li>Margin check against your shelf price</li>
                 <li>Three saved scenarios side by side</li>
                 <li>Branded PDF quote for your customers</li>
-                <li>Compliance checklist with the right authority for each product</li>
+                <li>Aircraft and helicopter parts catalogue, down to the screw</li>
                 <li>Rate-change alerts on saved shipments</li>
               </ul>
             </Card>
             <div className="flex flex-col gap-3.5 rounded-2xl bg-teal p-7 text-white">
               <h3 className="font-display text-[22px] font-semibold">Where the numbers come from</h3>
               <p className="text-[15px] leading-relaxed text-[#D6E6E4]">
-                Customs Duties Order 2022, Excise Duties Order 2022 with the Budget 2026 increase from 1 November 2025, Sales Tax Act 2018. Every result shows the rate it used and links to the source. If a rate isn&apos;t in the database, the app says so instead of guessing.
+                Official national tariff schedules where they are published (US HTS, UK Trade Tariff, EU TARIC, Brazil TEC, China, Thailand, Vietnam, Malaysia), refreshed every week; WTO/UNCTAD MFN averages elsewhere, marked as indicative. Every result shows the rate it used and links to the source. If a rate isn&apos;t known, the app says so instead of guessing.
               </p>
               <Link href="/guides/import-wine-malaysia-cost/#sources" className="text-sm font-semibold text-white">See the sources →</Link>
             </div>
@@ -152,7 +113,12 @@ export default function Landing() {
         <section id="guides" className="border-y border-line-2 bg-white">
           <div className="mx-auto flex max-w-[1120px] flex-col gap-6 px-6 py-16">
             <h2 className="font-display text-[32px] font-bold tracking-tight">Guides</h2>
-            <div className="grid gap-5 md:grid-cols-3">
+            <div className="grid gap-5 md:grid-cols-2">
+              <Link href="/guides/aircraft-helicopter-parts-hs-codes/" className="flex flex-col gap-2 rounded-2xl border border-line-2 bg-ground p-6 text-ink no-underline hover:border-teal">
+                <span className="text-xs font-semibold uppercase tracking-wider text-teal">Aerospace · 2026</span>
+                <span className="font-display text-xl font-semibold leading-tight">HS codes for aircraft and helicopter parts, down to the screw</span>
+                <span className="text-sm text-muted">Every part by aircraft system, and why a screw is 7318 and not an aircraft part.</span>
+              </Link>
               <Link href="/guides/import-wine-malaysia-cost/" className="flex flex-col gap-2 rounded-2xl border border-line-2 bg-ground p-6 text-ink no-underline hover:border-teal">
                 <span className="text-xs font-semibold uppercase tracking-wider text-teal">Wine · 2026</span>
                 <span className="font-display text-xl font-semibold leading-tight">How much does it cost to import wine into Malaysia?</span>

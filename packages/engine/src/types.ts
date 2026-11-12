@@ -1,5 +1,5 @@
 /**
- * LandedMY engine types.
+ * Costavora engine types.
  * Every rate row is effective-dated and carries its source so the UI can show
  * "where did this number come from" on tap.
  */

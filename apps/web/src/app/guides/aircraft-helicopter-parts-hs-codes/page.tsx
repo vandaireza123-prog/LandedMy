@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import { Article, CtaCard, H2, Note, Table } from "@/components/site/Site";
 import catalog from "@/lib/hs/catalogs/aviation.json";
 
-const URL = "https://landedmy.netlify.app/guides/aircraft-helicopter-parts-hs-codes/";
+const URL = "https://costavora.com/guides/aircraft-helicopter-parts-hs-codes/";
 type Cat = { _meta: { as_of: string; rule: string; duty_note: string; basis: string }; groups: { id: string; name: string; items: { n: string; hs: string; c: string; note?: string }[] }[] };
 const cat = catalog as unknown as Cat;
 const count = cat.groups.reduce((a, g) => a + g.items.length, 0);
 const dot = (hs: string) => `${hs.slice(0, 4)}.${hs.slice(4)}`;
 
 export const metadata: Metadata = {
-  title: `HS codes for aircraft and helicopter parts: ${count} parts classified, from rotor blades to screws (2026) — LandedMY`,
+  title: `HS codes for aircraft and helicopter parts: ${count} parts classified, from rotor blades to screws (2026) — Costavora`,
   description:
     "Every aircraft and helicopter part with its HS code and the customs rule behind it: airframe, rotors, engines, landing gear, hydraulics, avionics, cabin, fasteners, seals and consumables. Why a screw is 7318 and not 8807, and where civil-aircraft parts are duty-free.",
   alternates: { canonical: URL },
-  openGraph: { title: "HS codes for aircraft and helicopter parts, down to the screw", description: `${count} parts by aircraft system, with the classification rule for each.`, url: URL, type: "article" },
+  openGraph: { title: "HS codes for aircraft and helicopter parts, down to the screw", description: `${count} parts by aircraft system, with the classification rule for each.`, url: URL, type: "article", images: ["/og.png"] },
 };
 
 export default function AviationGuide() {
@@ -23,7 +23,7 @@ export default function AviationGuide() {
     headline: "HS codes for aircraft and helicopter parts, down to the screw",
     datePublished: "2026-11-12",
     dateModified: cat._meta.as_of,
-    author: { "@type": "Organization", name: "LandedMY" },
+    author: { "@type": "Organization", name: "Costavora" },
     mainEntityOfPage: URL,
   };
   return (

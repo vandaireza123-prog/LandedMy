@@ -2,10 +2,14 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "LandedMY — Malaysia landed cost calculator",
-  description: "Exact landed cost of importing wine, beer, cider and spirits into Malaysia: import duty, excise, SST, freight and port charges, per bottle and per shipment.",
+  metadataBase: new URL("https://costavora.com"),
+  title: "Costavora — the landed cost of anything, anywhere",
+  description: "Free landed cost calculator: import duty, tax, excise, freight and port charges for any product into 213 countries, with the source of every rate.",
+  applicationName: "Costavora",
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/icons/icon.svg", apple: "/icons/icon.svg" },
+  icons: { icon: [{ url: "/icons/favicon.svg", type: "image/svg+xml" }, { url: "/icons/icon-192.png", sizes: "192x192" }], apple: "/icons/icon-180.png" },
+  openGraph: { siteName: "Costavora", images: [{ url: "/og.png", width: 1200, height: 630, alt: "Costavora — the landed cost of anything, anywhere" }] },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 export const viewport: Viewport = {
