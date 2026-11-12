@@ -1,4 +1,6 @@
 "use client";
+import { engineQuantity } from "@/lib/quantity";
+import type { ProductRow } from "@/lib/shipment";
 import { useMemo, useState } from "react";
 import { computeShipment, preferenceNote, type LineResult, type Shipment, type ShipmentResult } from "@landedmy/engine";
 import { tablesFor } from "@/lib/shipment";
@@ -43,7 +45,15 @@ function rateFormula(r: { type: string; value: number; cap_per_litre?: number; f
   }
 }
 
-function LineCard({ l, currency, fx, unitCost, originIso }: { l: LineResult; currency: string; fx: number; unitCost: number; originIso: string }) {
+/** Retail-unit cost and labels for a product row (non-drink goods count in their own unit). */
+function lineLabels(p?: ProductRow): { unitCost: number; unitLabel?: string; packLabel?: string } {
+  if (!p) return { unitCost: 0 };
+  if (p.category !== "general") return { unitCost: p.unit_cost };
+  const q = engineQuantity(p);
+  return { unitCost: q.unit_cost, unitLabel: q.unit_label, packLabel: q.pack_label };
+}
+
+function LineCard({ l, currency, fx, unitCost, originIso, unitLabel, packLabel }: { l: LineResult; currency: string; fx: number; unitCost: number; originIso: string; unitLabel?: string; packLabel?: string }) {
   const t = useT();
   const prefNote = preferenceNote(originIso, l.hs_code);
   const [open, setOpen] = useState(false);
@@ -54,11 +64,11 @@ function LineCard({ l, currency, fx, unitCost, originIso }: { l: LineResult; cur
         <div className="min-w-0 truncate text-[15px] font-semibold">{l.name}</div>
         <div className="shrink-0 font-display text-[22px] font-bold text-teal">
           {cs()} {rm(l.per_unit.landed)}
-          <span className="text-xs font-medium text-muted"> {t("/ unit")}</span>
+          <span className="text-xs font-medium text-muted"> {unitLabel ? `/ ${unitLabel}` : t("/ unit")}</span>
         </div>
       </div>
       <div className="mt-2.5 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
-        <Row k={`Goods ${currency}${unitCost} × ${fx}`} v={l.per_unit.goods} />
+        <Row k={`Goods ${currency}${Math.round(unitCost * 10000) / 10000} × ${fx}`} v={l.per_unit.goods} />
         <Row k="Freight + insurance" v={l.per_unit.freight_insurance} />
         <Row k={l.rates_used.duty.value === 0 ? "Import duty · nil" : "Import duty"} v={l.per_unit.duty} />
         <Row k="Excise" v={l.per_unit.excise} />
@@ -67,8 +77,9 @@ function LineCard({ l, currency, fx, unitCost, originIso }: { l: LineResult; cur
       </div>
       <div className="mt-2.5 flex justify-between border-t border-line-2 pt-2.5 text-xs text-muted">
         <span>
-          Case {cs()} {rm(l.per_case)}
-          {l.per_pallet ? ` · Pallet ${cs()} ${rm(l.per_pallet, 0)}` : ""} · line {cs()} {rm(l.landed, 0)}
+          {unitLabel ? (packLabel ? `${packLabel.charAt(0).toUpperCase()}${packLabel.slice(1)} ${cs()} ${rm(l.per_case)} · ` : "") : `Case ${cs()} ${rm(l.per_case)} · `}
+          {!unitLabel && l.per_pallet ? `Pallet ${cs()} ${rm(l.per_pallet, 0)} · ` : ""}
+          {l.units.toLocaleString()} {unitLabel ? (l.units === 1 ? unitLabel : unitLabel === "piece" ? "pieces" : unitLabel === "kg" ? "kg" : `${unitLabel}s`) : "units"} · line {cs()} {rm(l.landed, 0)}
         </span>
         <button type="button" onClick={() => setOpen(!open)} className="font-semibold text-teal">
           {open ? t("Hide formula") : t("Show formula")}
@@ -215,7 +226,8 @@ export function ResultsStep({
         <div className="text-xs font-semibold uppercase tracking-wider opacity-85">{t("Shipment landed at your warehouse")} · {COUNTRIES[state.dest_country].name}</div>
         <div className="mt-1.5 font-display text-[40px] font-bold leading-[1.05] tracking-tight">{cs()} {rm(tot.landed, 0)}</div>
         <div className="mt-1 text-[13px] opacity-85">
-          {result.lines.length} product{result.lines.length === 1 ? "" : "s"} · {units.toLocaleString()} units · {t("tax is {n}% of it", { n: Math.round(tot.tax_share_pct) })}
+          {result.lines.length} product{result.lines.length === 1 ? "" : "s"}
+          {state.products.every((p) => p.category !== "general") ? ` · ${units.toLocaleString()} units` : ""} · {t("tax is {n}% of it", { n: Math.round(tot.tax_share_pct) })}
         </div>
         <div className="mt-3.5 flex h-2.5 overflow-hidden rounded-full bg-white/20">
           {segs.map((s) => (
@@ -238,7 +250,7 @@ export function ResultsStep({
 
       <div className="flex flex-col gap-2.5 px-5 pt-4">
         {result.lines.map((l) => (
-          <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} unitCost={state.products.find((p) => p.id === l.id)?.unit_cost ?? 0} originIso={state.origin_iso} />
+          <LineCard key={l.id} l={l} currency={state.currency} fx={state.fx_rate} originIso={state.origin_iso} {...lineLabels(state.products.find((p) => p.id === l.id))} />
         ))}
 
         <CompareDest
@@ -276,7 +288,7 @@ export function ResultsStep({
           )}
         </Card>
 
-        {first && <ReverseCalc line={first} currency={state.currency} fx={state.fx_rate} unitCost={state.products.find((p) => p.id === first.id)?.unit_cost ?? 0} />}
+        {first && <ReverseCalc line={first} currency={state.currency} fx={state.fx_rate} unitCost={lineLabels(state.products.find((p) => p.id === first.id)).unitCost} />}
 
         <Scenarios state={state} update={update} current={result} />
 

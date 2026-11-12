@@ -87,7 +87,7 @@ export interface RateTables {
 }
 
 export type Incoterm = "EXW" | "FOB" | "CIF";
-export type AllocationBasis = "volume" | "value" | "units";
+export type AllocationBasis = "volume" | "value" | "units" | "weight";
 
 export interface ShipmentLine {
   id: string;
@@ -111,6 +111,12 @@ export interface ShipmentLine {
   cases_per_pallet?: number;
   /** For indicative destinations: ad valorem duty % the user entered (or loaded from WITS). */
   duty_pct?: number;
+  /** Optional gross weight of one retail unit in kg; when every line has a weight, freight is split by weight. */
+  weight_kg?: number;
+  /** What one retail unit is ("piece", "kg", "litre", "metre", "set", "pair"); output labels only. */
+  unit_label?: string;
+  /** What one "case" is for non-drink goods ("box of 100"); output labels only. */
+  pack_label?: string;
 }
 
 export interface Shipment {

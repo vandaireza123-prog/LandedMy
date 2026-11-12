@@ -13,6 +13,7 @@ import { COUNTRIES } from "@/lib/country";
 import { fetchWorldRate } from "@/lib/api";
 import { isManualLine } from "@/lib/shipment";
 import { useT } from "@/lib/i18n";
+import { UOMS, defaultQuantity, quantitySummary, uomName, uomOf, type Uom } from "@/lib/quantity";
 
 const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -20,7 +21,7 @@ const DRINK_WORDS = /\b(beer|lager|ale|stout|porter|ipa|pilsner|wine|champagne|p
 
 /** A non-drink product with no customs code yet: the card asks for one. */
 function blankGoods(name: string): ProductRow {
-  return { id: uid(), name, category: "general", general_group: "other", hs_code: "MANUAL", volume_ml: 0, abv: 0, units_per_case: 1, cases: 100, unit_cost: 0, hs_confirmed: false, manual_sst_pct: 10 };
+  return { id: uid(), name, category: "general", general_group: "other", hs_code: "MANUAL", volume_ml: 0, abv: 0, unit_cost: 0, hs_confirmed: false, manual_sst_pct: 10, ...defaultQuantity() };
 }
 
 function blankRow(): ProductRow {
@@ -50,7 +51,7 @@ function groupForChapter(ch: string): string {
   return "other";
 }
 
-function fromHs(h: HsHit, name: string, indicative = false): ProductRow {
+function fromHs(h: HsHit, name: string, indicative = false, hint?: Uom): ProductRow {
   const dotted = `${h.code6.slice(0, 4)}.${h.code6.slice(4)}`;
   const line = indicative ? undefined : GENERAL_LINES.find((g) => g.hs_code.startsWith(dotted));
   return {
@@ -63,8 +64,7 @@ function fromHs(h: HsHit, name: string, indicative = false): ProductRow {
     hs_code: line ? line.hs_code : indicative ? dotted : "MANUAL",
     volume_ml: 0,
     abv: 0,
-    units_per_case: 1,
-    cases: 100,
+    ...defaultQuantity(h.code6, hint),
     unit_cost: 0,
     hs_confirmed: !!line,
     manual_duty_pct: line ? line.duty_pct : undefined,
@@ -260,15 +260,19 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   const addPart = async (p: CatalogHit) => {
     const h = await describeHs(p.item.hs);
     if (!h) return;
-    setRows([...rows, { ...fromHs(h, p.item.n, indicative), ...codeFields(p) }]);
+    setRows([...rows, { ...fromHs(h, p.item.n, indicative, p.item.u), ...codeFields(p) }]);
     setQ("");
   };
   /** Replace a row's customs code (from the in-card picker); the duty pre-fill runs again for the new code. */
   const setCode = async (id: string, pick: { hs: HsHit } | { part: CatalogHit }) => {
     const h = "hs" in pick ? pick.hs : await describeHs(pick.part.item.hs);
     if (!h) return;
-    const base = fromHs(h, "", indicative);
+    const base = fromHs(h, "", indicative, "part" in pick ? pick.part.item.u : undefined);
+    const cur = rows.find((x) => x.id === id);
+    // keep the quantity when the unit stays the same; otherwise start from the new item's usual unit
+    const qty = cur && uomOf(cur) === base.uom ? {} : { uom: base.uom, units_per_case: base.units_per_case, cases: base.cases, weight_per_uom: undefined };
     patchRow(id, {
+      ...qty,
       name: "part" in pick ? pick.part.item.n : base.name,
       hs6: base.hs6, hs6_desc: base.hs6_desc, hs_code: base.hs_code, hs_confirmed: base.hs_confirmed, general_group: base.general_group,
       manual_duty_pct: base.manual_duty_pct, manual_sst_pct: base.manual_sst_pct ?? 10, duty_source: undefined, duty_notes: undefined,
@@ -278,8 +282,8 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
   };
   const [picking, setPicking] = useState<string | null>(null);
 
-  const units = rows.reduce((a, r) => a + r.units_per_case * r.cases, 0);
-  const goods = rows.reduce((a, r) => a + r.units_per_case * r.cases * r.unit_cost, 0);
+  const units = rows.reduce((a, r) => a + (r.category === "general" ? (uomOf(r) === "box" ? r.units_per_case * r.cases : r.cases) : r.units_per_case * r.cases), 0);
+  const goods = rows.reduce((a, r) => a + (r.category === "general" ? r.cases * r.unit_cost : r.units_per_case * r.cases * r.unit_cost), 0);
   const ready = rows.length > 0 && rows.every((r) => r.name && r.unit_cost > 0 && r.cases > 0 && (r.category === "general" || r.volume_ml > 0));
 
   return (
@@ -508,19 +512,67 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                 Alcohol into {country.name} isn&apos;t priced yet (excise not loaded). Set the destination to Malaysia or Singapore, or change the type to non-alcohol goods.
               </div>
             )}
-            <div className={`mt-2 grid gap-2 ${r.category === "general" ? "grid-cols-3" : "grid-cols-5"}`}>
-              {r.category !== "general" && (
-                <>
+            {r.category === "general" ? (
+              <>
+                <div className="mt-2 grid grid-cols-3 gap-2">
                   <label className="flex flex-col gap-1">
-                    <span className="text-[11px] text-muted">ml</span>
-                    <input type="number" className={smallInputCls} value={r.volume_ml} onChange={(e) => patchRow(r.id, { volume_ml: Number(e.target.value) || 0 })} />
+                    <span className="text-[11px] text-muted">{t("Quantity")}</span>
+                    <input type="number" className={smallInputCls} value={r.cases || ""} onChange={(e) => patchRow(r.id, { cases: Number(e.target.value) || 0 })} />
                   </label>
                   <label className="flex flex-col gap-1">
-                    <span className="text-[11px] text-muted">ABV %</span>
-                    <input type="number" step="0.1" className={smallInputCls} value={r.abv} onChange={(e) => patchRow(r.id, { abv: Number(e.target.value) || 0 })} />
+                    <span className="text-[11px] text-muted">{t("Unit")}</span>
+                    <select
+                      className={smallInputCls}
+                      value={uomOf(r)}
+                      onChange={(e) => {
+                        const u = e.target.value as Uom;
+                        patchRow(r.id, { uom: u, units_per_case: u === "box" ? (r.units_per_case > 1 ? r.units_per_case : 100) : 1 });
+                      }}
+                    >
+                      {UOMS.map((u) => (
+                        <option key={u.key} value={u.key}>
+                          {u.many}
+                        </option>
+                      ))}
+                    </select>
                   </label>
-                </>
-              )}
+                  <label className="flex flex-col gap-1">
+                    <span className="text-[11px] text-muted">
+                      {t("Cost per")} {uomName(uomOf(r))}
+                    </span>
+                    <input type="number" step="0.01" className={smallInputCls} placeholder={state.currency} value={r.unit_cost || ""} onChange={(e) => patchRow(r.id, { unit_cost: Number(e.target.value) || 0 })} />
+                  </label>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {uomOf(r) === "box" && (
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted">{t("Pieces per box")}</span>
+                      <input type="number" className={smallInputCls} value={r.units_per_case || ""} onChange={(e) => patchRow(r.id, { units_per_case: Math.max(1, Number(e.target.value) || 1) })} />
+                    </label>
+                  )}
+                  {uomOf(r) !== "kg" && (
+                    <label className="flex flex-col gap-1">
+                      <span className="text-[11px] text-muted">
+                        {t("Weight per")} {uomName(uomOf(r))} ({t("optional")})
+                      </span>
+                      <div className={`${smallInputCls} flex items-center gap-1`}>
+                        <input type="number" step="0.01" className="min-w-0 flex-1 bg-transparent outline-none" value={r.weight_per_uom ?? ""} placeholder="—" onChange={(e) => patchRow(r.id, { weight_per_uom: e.target.value === "" ? undefined : Number(e.target.value) || 0 })} />
+                        <span className="text-muted">kg</span>
+                      </div>
+                    </label>
+                  )}
+                </div>
+              </>
+            ) : (
+            <div className="mt-2 grid grid-cols-5 gap-2">
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] text-muted">ml</span>
+                <input type="number" className={smallInputCls} value={r.volume_ml} onChange={(e) => patchRow(r.id, { volume_ml: Number(e.target.value) || 0 })} />
+              </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-[11px] text-muted">ABV %</span>
+                <input type="number" step="0.1" className={smallInputCls} value={r.abv} onChange={(e) => patchRow(r.id, { abv: Number(e.target.value) || 0 })} />
+              </label>
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] text-muted">{t("Cost / unit")}</span>
                 <input type="number" step="0.01" className={smallInputCls} placeholder={state.currency} value={r.unit_cost || ""} onChange={(e) => patchRow(r.id, { unit_cost: Number(e.target.value) || 0 })} />
@@ -534,9 +586,10 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
                 <input type="number" className={smallInputCls} value={r.cases} onChange={(e) => patchRow(r.id, { cases: Number(e.target.value) || 0 })} />
               </label>
             </div>
+            )}
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted">
               <span>
-                {r.units_per_case * r.cases} units{r.category !== "general" ? ` · ${((r.volume_ml / 1000) * r.units_per_case * r.cases).toFixed(1)} L` : ""}
+                {r.category === "general" ? quantitySummary(r) : `${r.units_per_case * r.cases} units · ${((r.volume_ml / 1000) * r.units_per_case * r.cases).toFixed(1)} L`}
                 {r.category === "general" && (
                   <>
                     {" · "}
@@ -566,7 +619,7 @@ export function ProductsStep({ state, update }: { state: AppState; update: (p: P
       <Footer>
         <div className="flex justify-between text-[13px] text-muted">
           <span>
-            {rows.length} product{rows.length === 1 ? "" : "s"} · {units.toLocaleString()} units
+            {rows.length} product{rows.length === 1 ? "" : "s"}{rows.every((r) => r.category !== "general") ? ` · ${units.toLocaleString()} units` : ""}
           </span>
           <span className="font-semibold text-ink">
             {state.currency} {goods.toLocaleString(undefined, { maximumFractionDigits: 0 })} goods

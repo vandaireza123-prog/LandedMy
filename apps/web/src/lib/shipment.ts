@@ -5,6 +5,7 @@ export function isManualLine(p: ProductRow): boolean {
   return p.category === "general" && (!p.hs_code || p.hs_code === "MANUAL" || !GENERAL_LINES.some((g) => g.hs_code === p.hs_code));
 }
 import type { Category } from "./products";
+import { engineQuantity } from "./quantity";
 import type { Equipment } from "./lanes";
 import type { DestCountry } from "./country";
 
@@ -27,6 +28,10 @@ export interface ProductRow extends ShipmentLine {
   code_note?: string;
   /** True when customs administrations classify this item differently — the user should confirm. */
   code_check?: boolean;
+  /** Non-drink goods: what the quantity counts (cases = quantity; units_per_case = pieces per box when "box"). unit_cost is per this unit. */
+  uom?: import("./quantity").Uom;
+  /** Optional gross weight of one unit of `uom` in kg (ignored for kg). */
+  weight_per_uom?: number;
 }
 
 /** Everything the engine needs, without UI-only fields. */
@@ -77,6 +82,7 @@ export function buildShipment(state: ShipmentSnapshot): Shipment {
       unit_cost: p.unit_cost,
       cases_per_pallet: p.cases_per_pallet,
       duty_pct: p.manual_duty_pct,
+      ...(p.category === "general" ? engineQuantity(p) : {}),
     })),
   };
 }

@@ -181,6 +181,31 @@ describe("general goods", () => {
   });
 });
 
+describe("weight allocation", () => {
+  it("splits freight by gross weight when every line has one, estimating drinks at 1.5 kg/L", () => {
+    const wine = fixtures[0].shipment.lines[0];
+    const s: Shipment = {
+      ...fixtures[0].shipment,
+      lines: [
+        { id: "a", name: "Landing gear", hs_code: "9403.60.00", volume_ml: 0, abv: 0, units_per_case: 1, cases: 2, unit_cost: 40000, weight_kg: 180, unit_label: "piece" },
+        { id: "b", name: "Bolts", hs_code: "9403.60.00", volume_ml: 0, abv: 0, units_per_case: 100, cases: 20, unit_cost: 1, weight_kg: 0.02, unit_label: "piece", pack_label: "box of 100" },
+        wine,
+      ],
+    };
+    const r = computeShipment(s, rates);
+    const kg = [360, 40, (wine.volume_ml / 1000) * wine.units_per_case * wine.cases * 1.5];
+    const total = kg.reduce((a, b) => a + b, 0);
+    expect(r.warnings.some((w) => w.includes("split by weight"))).toBe(true);
+    r.lines.forEach((l, i) => expect(Math.abs(l.freight - r.totals.freight * (kg[i] / total))).toBeLessThan(0.05));
+    // a heavy cheap line pays more freight than a light dear one
+    expect(r.lines[0].freight).toBeGreaterThan(r.lines[1].freight);
+
+    // one line without a weight → value split, with a hint
+    const v = computeShipment({ ...s, lines: [s.lines[0], { ...s.lines[1], weight_kg: undefined }] }, rates);
+    expect(v.warnings.some((w) => w.includes("split by value"))).toBe(true);
+  });
+});
+
 describe("FTA preferences", () => {
   it("ATIGA 0% applies to general goods from ASEAN with a warning; alcohol from AU/NZ/ASEAN stays MFN with a note", async () => {
     const { preferenceNote, withoutFta } = await import("../src/index.js");

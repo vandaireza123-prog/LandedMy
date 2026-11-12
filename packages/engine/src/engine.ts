@@ -71,9 +71,17 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
   const totalGoods = goodsRm.reduce((a, b) => a + b, 0);
 
   let allocation = shipment.allocation;
+  // Mixed or non-drink shipments: split by gross weight when every line has one (drinks without a weight are
+  // estimated at 1.5 kg per litre, bottle and carton included); otherwise by value.
+  const lineKg = (l: ShipmentLine) => (l.weight_kg && l.weight_kg > 0 ? l.weight_kg * lineUnits(l) : l.abv > 0 || (l.volume_ml > 0 && !l.unit_label) ? lineLitres(l) * 1.5 : 0);
   if (allocation === "volume" && shipment.lines.some((l) => lineLitres(l) <= 0)) {
-    allocation = "value";
-    warnings.push("Some lines have no volume (non-beverage goods), so freight and local charges were split by value instead of volume.");
+    if (shipment.lines.every((l) => lineKg(l) > 0)) {
+      allocation = "weight";
+      if (shipment.lines.some((l) => !(l.weight_kg && l.weight_kg > 0))) warnings.push("Freight and local charges were split by weight; drinks without a weight were estimated at 1.5 kg per litre.");
+    } else {
+      allocation = "value";
+      warnings.push("Not every product has a weight, so freight and local charges were split by value. Add a weight per item for a fairer split.");
+    }
   }
   const weights = shipment.lines.map((l, i) => {
     switch (allocation) {
@@ -81,6 +89,8 @@ export function computeShipment(shipment: Shipment, rates: RateTables): Shipment
         return goodsRm[i];
       case "units":
         return lineUnits(l);
+      case "weight":
+        return lineKg(l);
       case "volume":
       default:
         return lineLitres(l);

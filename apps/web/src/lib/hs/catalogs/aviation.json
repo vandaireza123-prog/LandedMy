@@ -934,7 +934,8 @@
             "cable assembly"
           ],
           "c": "high",
-          "note": "Turnbuckles are parts of general use: 7318.19 / 7326.90."
+          "note": "Turnbuckles are parts of general use: 7318.19 / 7326.90.",
+          "u": "metre"
         },
         {
           "n": "Pulley, bellcrank, pushrod, control rod end",
@@ -1008,7 +1009,8 @@
             "Aeroquip hose"
           ],
           "c": "high",
-          "note": "PTFE-lined hose with steel braid: 3917.39 or 8307.10 depending on construction."
+          "note": "PTFE-lined hose with steel braid: 3917.39 or 8307.10 depending on construction.",
+          "u": "piece"
         },
         {
           "n": "Rigid hydraulic / fuel tube with fittings (aluminium, titanium, stainless)",
@@ -1055,7 +1057,8 @@
             "5606",
             "83282"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "litre"
         },
         {
           "n": "Flight control computer / fly-by-wire computer",
@@ -1165,7 +1168,8 @@
             "aviation turbine fuel"
           ],
           "c": "high",
-          "note": "Excise and specific duty apply; 2710.19 'kerosene-type jet fuel' national lines."
+          "note": "Excise and specific duty apply; 2710.19 'kerosene-type jet fuel' national lines.",
+          "u": "litre"
         },
         {
           "n": "Aviation gasoline (Avgas 100LL)",
@@ -1175,7 +1179,8 @@
             "100LL",
             "aviation gasoline"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "litre"
         }
       ]
     },
@@ -1270,7 +1275,8 @@
             "wiring set"
           ],
           "c": "high",
-          "note": "8544.30 covers wiring sets for vehicles, aircraft and ships."
+          "note": "8544.30 covers wiring sets for vehicles, aircraft and ships.",
+          "u": "piece"
         },
         {
           "n": "Aircraft wire (single conductor, e.g. M22759, Tefzel)",
@@ -1282,7 +1288,8 @@
             "hook-up wire"
           ],
           "c": "high",
-          "note": "Up to 1,000 V, not fitted with connectors: 8544.49; with connectors 8544.42."
+          "note": "Up to 1,000 V, not fitted with connectors: 8544.49; with connectors 8544.42.",
+          "u": "metre"
         },
         {
           "n": "Coaxial cable",
@@ -1292,7 +1299,8 @@
             "coaxial cable",
             "RG-400"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "metre"
         },
         {
           "n": "Circuit breaker",
@@ -1347,7 +1355,8 @@
             "terminal",
             "ring terminal"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Static inverter (DC to AC)",
@@ -1950,7 +1959,8 @@
             "cabin carpet"
           ],
           "c": "high",
-          "note": "Tufted carpet of synthetic fibre; wool 5703.10."
+          "note": "Tufted carpet of synthetic fibre; wool 5703.10.",
+          "u": "metre"
         },
         {
           "n": "Curtain, divider curtain",
@@ -2132,7 +2142,8 @@
             "titanium fastener",
             "titanium Hi-Lok"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Screw, bolt or rivet, aluminium",
@@ -2160,7 +2171,8 @@
             "MS21042",
             "AN365"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Nut, titanium or aluminium",
@@ -2170,7 +2182,8 @@
             "aluminium nut"
           ],
           "c": "high",
-          "note": "Aluminium nuts 7616.10."
+          "note": "Aluminium nuts 7616.10.",
+          "u": "box"
         },
         {
           "n": "Washer, steel (flat, spring, lock)",
@@ -2183,7 +2196,8 @@
             "spring washer"
           ],
           "c": "high",
-          "note": "Spring washers and lock washers 7318.21; other washers 7318.22."
+          "note": "Spring washers and lock washers 7318.21; other washers 7318.22.",
+          "u": "box"
         },
         {
           "n": "Rivet, steel or Monel (blind rivet, Cherry rivet, Cherrymax)",
@@ -2196,7 +2210,8 @@
             "pop rivet",
             "Monel rivet"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Cotter pin / split pin, clevis pin, roll pin",
@@ -2208,7 +2223,8 @@
             "roll pin",
             "spring pin"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Quick-release fastener (Camloc, Dzus, quarter-turn)",
@@ -2219,7 +2235,8 @@
             "quarter-turn fastener",
             "quick release fastener"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Threaded insert (Helicoil, Keensert)",
@@ -2230,7 +2247,8 @@
             "threaded insert",
             "wire thread insert"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Safety wire / lockwire",
@@ -2241,7 +2259,8 @@
             "MS20995"
           ],
           "c": "high",
-          "note": "Stainless steel wire 7223.00."
+          "note": "Stainless steel wire 7223.00.",
+          "u": "kg"
         },
         {
           "n": "Clamp: hose clamp, Adel / cushion clamp, loop clamp",
@@ -2285,7 +2304,8 @@
             "AS3209"
           ],
           "c": "high",
-          "note": "Note 2(a): seals and gaskets of any material are parts of general use."
+          "note": "Note 2(a): seals and gaskets of any material are parts of general use.",
+          "u": "box"
         },
         {
           "n": "Gasket of other material (metal, PTFE, composite, cork)",
@@ -2350,7 +2370,8 @@
             "peelable shim"
           ],
           "c": "high",
-          "note": "Aluminium shims 7616.99; brass 7419.80."
+          "note": "Aluminium shims 7616.99; brass 7419.80.",
+          "u": "piece"
         },
         {
           "n": "Standoff, spacer, grommet (metal)",
@@ -2361,7 +2382,8 @@
             "grommet"
           ],
           "c": "high",
-          "note": "Rubber grommets 4016.99; plastic 3926.90."
+          "note": "Rubber grommets 4016.99; plastic 3926.90.",
+          "u": "box"
         },
         {
           "n": "Cable tie, lacing tape, spiral wrap",
@@ -2374,7 +2396,8 @@
             "spiral wrap"
           ],
           "c": "high",
-          "note": "Lacing tape of textile 5607/5806."
+          "note": "Lacing tape of textile 5607/5806.",
+          "u": "box"
         },
         {
           "n": "Hose (rubber, fuel/oil, SAE / MIL)",
@@ -2385,7 +2408,8 @@
             "oil hose",
             "MIL-DTL-6000"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "metre"
         },
         {
           "n": "Hose (PTFE / plastic)",
@@ -2395,7 +2419,8 @@
             "plastic tubing",
             "Tygon tubing"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "metre"
         },
         {
           "n": "Flexible metal hose / bellows",
@@ -2462,7 +2487,8 @@
             "E-clip",
             "dowel pin"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Electrical bonding jumper / bonding strap",
@@ -2538,7 +2564,8 @@
             "titanium forging"
           ],
           "c": "high",
-          "note": "Unwrought titanium 8108.20; waste 8108.30."
+          "note": "Unwrought titanium 8108.20; waste 8108.30.",
+          "u": "kg"
         },
         {
           "n": "Steel: 4130 chromoly tube / sheet, 15-5PH, 300M bar",
@@ -2552,7 +2579,8 @@
             "alloy steel bar"
           ],
           "c": "high",
-          "note": "Cold-drawn seamless alloy tube 7304.51; sheet 7225/7226; stainless bar 7222."
+          "note": "Cold-drawn seamless alloy tube 7304.51; sheet 7225/7226; stainless bar 7222.",
+          "u": "kg"
         },
         {
           "n": "Nickel superalloy (Inconel 718, Waspaloy) bar / sheet",
@@ -2565,7 +2593,8 @@
             "nickel alloy"
           ],
           "c": "high",
-          "note": "Nickel alloy bars 7505.12; plates/sheets 7506.20."
+          "note": "Nickel alloy bars 7505.12; plates/sheets 7506.20.",
+          "u": "kg"
         },
         {
           "n": "Carbon fibre prepreg (epoxy-impregnated fabric or tape)",
@@ -2578,7 +2607,8 @@
             "carbon fiber tape"
           ],
           "c": "check",
-          "note": "HS 2022: carbon fibre fabrics 6815.13; uncured prepreg tape is also classified 3921.90 — rulings differ."
+          "note": "HS 2022: carbon fibre fabrics 6815.13; uncured prepreg tape is also classified 3921.90 — rulings differ.",
+          "u": "metre"
         },
         {
           "n": "Glass fibre fabric (E-glass, S-glass)",
@@ -2591,7 +2621,8 @@
             "glass fibre"
           ],
           "c": "high",
-          "note": "HS 2022 7019.6x–7019.7x for mechanically bonded / closed fabrics; woven of rovings 7019.6x."
+          "note": "HS 2022 7019.6x–7019.7x for mechanically bonded / closed fabrics; woven of rovings 7019.6x.",
+          "u": "metre"
         },
         {
           "n": "Aramid (Kevlar / Nomex) fabric",
@@ -2602,7 +2633,8 @@
             "aramid"
           ],
           "c": "high",
-          "note": "High-tenacity aramid yarn 5402.11; woven aramid fabric 5407.10; Nomex paper honeycomb is 4823.90."
+          "note": "High-tenacity aramid yarn 5402.11; woven aramid fabric 5407.10; Nomex paper honeycomb is 4823.90.",
+          "u": "kg"
         },
         {
           "n": "Honeycomb core (Nomex / aluminium)",
@@ -2614,7 +2646,8 @@
             "core"
           ],
           "c": "check",
-          "note": "Aluminium honeycomb in sheets: 7616.99; Nomex honeycomb: 3921.19 / 4823.90 — classified as a material, not a part, until shaped for one aircraft."
+          "note": "Aluminium honeycomb in sheets: 7616.99; Nomex honeycomb: 3921.19 / 4823.90 — classified as a material, not a part, until shaped for one aircraft.",
+          "u": "piece"
         },
         {
           "n": "Epoxy resin / adhesive (film adhesive, EA9394, Hysol)",
@@ -2628,7 +2661,8 @@
             "structural adhesive"
           ],
           "c": "high",
-          "note": "Epoxy resins in primary form 3907.30."
+          "note": "Epoxy resins in primary form 3907.30.",
+          "u": "piece"
         },
         {
           "n": "Sealant (polysulfide PR-1422, PR-1776, fuel tank sealant)",
@@ -2641,7 +2675,8 @@
             "fuel tank sealant",
             "ProSeal"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "piece"
         },
         {
           "n": "Primer / topcoat paint (aerospace polyurethane, chromate primer)",
@@ -2655,7 +2690,8 @@
             "Alodine"
           ],
           "c": "high",
-          "note": "Polyester-based 3208.10; acrylic/vinyl 3208.20; other 3208.90. Alodine (chromate conversion) 3824.99."
+          "note": "Polyester-based 3208.10; acrylic/vinyl 3208.20; other 3208.90. Alodine (chromate conversion) 3824.99.",
+          "u": "litre"
         },
         {
           "n": "Lubricant / grease (Aeroshell 7, 22, 33; MIL-PRF-23827)",
@@ -2668,7 +2704,8 @@
             "Mobilgrease 28"
           ],
           "c": "high",
-          "note": "Petroleum-based preparations 3403.19; synthetic 3403.99."
+          "note": "Petroleum-based preparations 3403.19; synthetic 3403.99.",
+          "u": "kg"
         },
         {
           "n": "Turbine engine oil (Mobil Jet Oil II, Aeroshell 500)",
@@ -2681,7 +2718,8 @@
             "MIL-PRF-23699"
           ],
           "c": "check",
-          "note": "Synthetic ester turbine oils with no petroleum base are 3403.99 / 3811.21 depending on composition; mineral-based 2710.19."
+          "note": "Synthetic ester turbine oils with no petroleum base are 3403.99 / 3811.21 depending on composition; mineral-based 2710.19.",
+          "u": "litre"
         },
         {
           "n": "Piston engine oil (Aeroshell W100)",
@@ -2691,7 +2729,8 @@
             "aviation oil",
             "piston engine oil"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "litre"
         },
         {
           "n": "De-icing / anti-icing fluid (Type I–IV)",
@@ -2703,7 +2742,8 @@
             "Type IV fluid",
             "anti-icing fluid"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "litre"
         },
         {
           "n": "Corrosion inhibiting compound (ACF-50, Dinitrol, LPS-3)",
@@ -2715,7 +2755,8 @@
             "LPS"
           ],
           "c": "check",
-          "note": "Anti-corrosion preparations without petroleum oil 3403.99 / 3824.99."
+          "note": "Anti-corrosion preparations without petroleum oil 3403.99 / 3824.99.",
+          "u": "litre"
         },
         {
           "n": "Cleaning solvent (MEK, IPA, aviation degreaser)",
@@ -2728,7 +2769,8 @@
             "degreaser"
           ],
           "c": "high",
-          "note": "MEK 2914.12; IPA 2905.12; mixed degreasers 3402.90 / 3814.00."
+          "note": "MEK 2914.12; IPA 2905.12; mixed degreasers 3402.90 / 3814.00.",
+          "u": "litre"
         },
         {
           "n": "Speed tape / aluminium foil tape",
@@ -2739,7 +2781,8 @@
             "foil tape"
           ],
           "c": "high",
-          "note": "Backed foil tape 7607.20."
+          "note": "Backed foil tape 7607.20.",
+          "u": "piece"
         },
         {
           "n": "Abrasive: Scotch-Brite, sandpaper",
@@ -2749,7 +2792,8 @@
             "sandpaper",
             "abrasive pad"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "box"
         },
         {
           "n": "Aircraft cable (stainless steel wire rope, 7x7, 7x19)",
@@ -2760,7 +2804,8 @@
             "7x19 cable",
             "stainless cable"
           ],
-          "c": "high"
+          "c": "high",
+          "u": "metre"
         }
       ]
     },

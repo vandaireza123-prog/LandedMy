@@ -28,9 +28,11 @@ export function toRows(lines: ExtractedLine[]): ProductRow[] {
         hs_code: line ? line.hs_code : "MANUAL",
         volume_ml: 0,
         abv: 0,
+        // invoices give a price per piece and pieces × cartons; the card counts boxes and a price per box
+        uom: (l.units_per_case ?? 1) > 1 ? "box" : "piece",
         units_per_case: l.units_per_case ?? 1,
         cases: l.cases ?? 1,
-        unit_cost: l.unit_cost ?? 0,
+        unit_cost: (l.unit_cost ?? 0) * Math.max(1, l.units_per_case ?? 1),
         hs_confirmed: !!line && (l.hs_confidence ?? 0) >= 0.85,
         manual_duty_pct: line ? line.duty_pct : 0,
         manual_sst_pct: line ? line.sst_pct : 10,

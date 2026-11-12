@@ -12,6 +12,8 @@ export interface CatalogItem {
   /** high = settled; check = defensible but rulings vary */
   c: "high" | "check";
   note?: string;
+  /** How it is usually bought, when not by the piece. */
+  u?: "piece" | "set" | "pair" | "box" | "kg" | "litre" | "metre";
 }
 export interface CatalogGroup {
   id: string;
