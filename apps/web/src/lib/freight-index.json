@@ -1,18 +1,31 @@
 {
-  "as_of": "2026-11-05",
+  "as_of": "2026-11-12",
   "source": "Drewry World Container Index (via Shipping Telegraph)",
-  "url": "https://shippingtelegraph.com/freight-news/drewry-the-world-container-index-decreased-1-this-week-45-2026/",
-  "composite": 4389,
-  "base": { "as_of": "2026-11-05", "composite": 4389, "note": "Week the region matrix and the other anchors in freight.ts were calibrated on." },
-  "routes": {
-    "SHA-RTM": 3615,
-    "RTM-SHA": 654,
-    "SHA-GOA": 4166,
-    "SHA-LAX": 7539,
-    "LAX-SHA": 817,
-    "SHA-NYC": 9303,
-    "NYC-RTM": 1172,
-    "RTM-NYC": 3062
+  "url": "https://shippingtelegraph.com/freight-news/drewry-the-world-container-index-decreased-2-this-week-46-2026/",
+  "composite": 4305,
+  "base": {
+    "as_of": "2026-11-05",
+    "composite": 4389,
+    "note": "Week the region matrix and the other anchors in freight.ts were calibrated on."
   },
-  "history": [{ "as_of": "2026-11-05", "composite": 4389 }]
+  "routes": {
+    "SHA-RTM": 3504,
+    "RTM-SHA": 633,
+    "SHA-GOA": 4168,
+    "SHA-LAX": 7416,
+    "LAX-SHA": 807,
+    "SHA-NYC": 9020,
+    "NYC-RTM": 1188,
+    "RTM-NYC": 3083
+  },
+  "history": [
+    {
+      "as_of": "2026-11-05",
+      "composite": 4389
+    },
+    {
+      "as_of": "2026-11-12",
+      "composite": 4305
+    }
+  ]
 }
